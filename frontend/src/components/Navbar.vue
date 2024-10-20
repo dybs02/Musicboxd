@@ -45,7 +45,7 @@ const suggest_search = (event: any) => {
 }
 
 const login = () => {
-  console.log('Login');
+  window.location.href = 'http://localhost:8080/v1/api/auth/login'
 }
 
 </script>
