@@ -2,13 +2,18 @@ package auth
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
+	"musicboxd/database"
+	"musicboxd/graph/model"
 	"musicboxd/hlp"
 	"net/http"
 	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/spotify"
 )
@@ -160,8 +165,62 @@ func requestUserData(tokens *tokenResponse) (*userData, error) {
 	return &user, nil
 }
 
-func saveToDB(tokens *tokenResponse, user *userData) error {
-	// TODO check if user exists in database
-	// if not, create user
-	return nil
+func saveToDB(tokensData *tokenResponse, userData *userData) error {
+	explicitContent := &model.ExplicitContent{
+		FilterEnabled: userData.ExplicitContent["filter_enabled"],
+		FilterLocked:  userData.ExplicitContent["filter_locked"],
+	}
+
+	externalUrls := &model.ExternalUrls{
+		Spotify: userData.ExternalURLs["spotify"],
+	}
+
+	followers := &model.Followers{
+		Href:  &userData.FollowerCount.Href,
+		Total: userData.FollowerCount.Total,
+	}
+
+	images := make([]*model.Image, len(userData.Images))
+	for i, img := range userData.Images {
+		images[i] = &model.Image{
+			URL:    img.URL,
+			Height: &img.Height,
+			Width:  &img.Width,
+		}
+	}
+
+	tokens := &model.Tokens{
+		AccessToken:  &tokensData.AccessToken,
+		TokenType:    &tokensData.TokenType,
+		Scope:        &tokensData.Scope,
+		ExpiresIn:    &tokensData.ExpiresIn,
+		RefreshToken: &tokensData.RefreshToken,
+	}
+
+	user := &model.User{
+		ID:              primitive.NewObjectID().Hex(),
+		Country:         userData.Country,
+		DisplayName:     userData.DisplayName,
+		Email:           userData.Email,
+		ExplicitContent: explicitContent,
+		ExternalUrls:    externalUrls,
+		Followers:       followers,
+		Href:            userData.Href,
+		SpotifyID:       userData.Id,
+		Images:          images,
+		Product:         userData.Product,
+		Type:            userData.Type,
+		URI:             userData.Uri,
+		Tokens:          tokens,
+	}
+
+	db := database.GetDB()
+	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
+	if res.Err() == nil {
+		_, err := db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyid": userData.Id}, bson.M{"$set": user})
+		return err
+	}
+
+	_, err := db.GetCollection("users").InsertOne(context.TODO(), user)
+	return err
 }

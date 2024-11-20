@@ -6,13 +6,27 @@ package resolver
 
 import (
 	"context"
-	"fmt"
+	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
+
+	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.User, error) {
-	panic(fmt.Errorf("not implemented: UserByID - userById"))
+func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName string) (*model.UserResponse, error) {
+	// TODO check jwt and permissions
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(ctx, bson.M{"displayname": displayName})
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err := user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }

@@ -2,14 +2,65 @@
 
 package model
 
+type ExplicitContent struct {
+	FilterEnabled bool `json:"filterEnabled"`
+	FilterLocked  bool `json:"filterLocked"`
+}
+
+type ExternalUrls struct {
+	Spotify string `json:"spotify"`
+}
+
+type Followers struct {
+	Href  *string `json:"href,omitempty"`
+	Total int     `json:"total"`
+}
+
+type Image struct {
+	URL    string `json:"url"`
+	Height *int   `json:"height,omitempty"`
+	Width  *int   `json:"width,omitempty"`
+}
+
 type Query struct {
 }
 
+type Tokens struct {
+	AccessToken  *string `json:"AccessToken,omitempty"`
+	TokenType    *string `json:"TokenType,omitempty"`
+	Scope        *string `json:"Scope,omitempty"`
+	ExpiresIn    *int    `json:"ExpiresIn,omitempty"`
+	RefreshToken *string `json:"RefreshToken,omitempty"`
+}
+
 type User struct {
-	ID          *string `json:"_id,omitempty"`
-	DisplayName *string `json:"display_name,omitempty"`
-	AvatarURL   *string `json:"avatar_url,omitempty"`
-	SpotifyID   *string `json:"spotify_id,omitempty"`
-	Email       *string `json:"email,omitempty"`
-	Country     *string `json:"country,omitempty"`
+	ID              string           `json:"_id"`
+	Country         string           `json:"country"`
+	DisplayName     string           `json:"displayName"`
+	Email           string           `json:"email"`
+	ExplicitContent *ExplicitContent `json:"explicitContent"`
+	ExternalUrls    *ExternalUrls    `json:"externalUrls"`
+	Followers       *Followers       `json:"followers"`
+	Href            string           `json:"href"`
+	SpotifyID       string           `json:"spotifyId"`
+	Images          []*Image         `json:"images"`
+	Product         string           `json:"product"`
+	Type            string           `json:"type"`
+	URI             string           `json:"uri"`
+	Tokens          *Tokens          `json:"tokens,omitempty"`
+}
+
+type UserResponse struct {
+	Country         string           `json:"country"`
+	DisplayName     string           `json:"displayName"`
+	Email           string           `json:"email"`
+	ExplicitContent *ExplicitContent `json:"explicitContent"`
+	ExternalUrls    *ExternalUrls    `json:"externalUrls"`
+	Followers       *Followers       `json:"followers"`
+	Href            string           `json:"href"`
+	SpotifyID       string           `json:"spotifyId"`
+	Images          []*Image         `json:"images"`
+	Product         string           `json:"product"`
+	Type            string           `json:"type"`
+	URI             string           `json:"uri"`
 }

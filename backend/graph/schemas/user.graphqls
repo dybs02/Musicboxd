@@ -1,12 +1,64 @@
 type User {
-  _id: ID
-  display_name: String
-  avatar_url: String
-  spotify_id: String
-  email: String
-  country: String
+  _id: ID!
+  country: String!
+  displayName: String!
+  email: String!
+  explicitContent: ExplicitContent!
+  externalUrls: ExternalUrls!
+  followers: Followers!
+  href: String!
+  spotifyId: String!
+  images: [Image!]!
+  product: String!
+  type: String!
+  uri: String!
+  tokens: Tokens
+}
+
+type ExplicitContent {
+  filterEnabled: Boolean!
+  filterLocked: Boolean!
+}
+
+type ExternalUrls {
+  spotify: String!
+}
+
+type Followers {
+  href: String
+  total: Int!
+}
+
+type Image {
+  url: String!
+  height: Int
+  width: Int
+}
+
+type Tokens {
+  AccessToken: String
+  TokenType: String
+  Scope: String
+  ExpiresIn: Int
+  RefreshToken: String
+}
+
+
+type UserResponse {
+  country: String!
+  displayName: String!
+  email: String!
+  explicitContent: ExplicitContent!
+  externalUrls: ExternalUrls!
+  followers: Followers!
+  href: String!
+  spotifyId: String!
+  images: [Image!]!
+  product: String!
+  type: String!
+  uri: String!
 }
 
 type Query {
-  userById(id: ID!): User
+  userByDisplayName(displayName: String!): UserResponse
 }
