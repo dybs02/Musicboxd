@@ -1,4 +1,6 @@
 import './assets/main.css'
+import 'primeicons/primeicons.css'
+
 
 import { createApp, provide, h } from 'vue'
 import { createPinia } from 'pinia'
