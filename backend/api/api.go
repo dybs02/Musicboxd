@@ -14,6 +14,7 @@ type Api struct {
 
 func NewApi() *Api {
 	r := &Api{gin.Default()}
+	r.Use(middleware.CORSMiddleware())
 
 	api := r.RouterGroup.Group("/v1/api")
 
