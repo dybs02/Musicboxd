@@ -225,12 +225,13 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 
 	db := database.GetDB()
 	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
+	var err error
 	if res.Err() == nil {
-		_, err := db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyid": userData.Id}, bson.M{"$set": user})
-		return nil, err
+		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyid": userData.Id}, bson.M{"$set": user})
+	} else {
+		_, err = db.GetCollection("users").InsertOne(context.TODO(), user)
 	}
 
-	_, err := db.GetCollection("users").InsertOne(context.TODO(), user)
 	if err != nil {
 		return nil, err
 	}
