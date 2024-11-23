@@ -3,6 +3,7 @@ package auth
 const STATE_KEY string = "spotify_auth_state"
 const CODE_VERIFIER_KEY string = "pkce_code_verifier"
 const AUTHORIZATION_CODE string = "authorization_code"
+const JWT_KEY string = "jwt"
 
 type (
 	tokenResponse struct {

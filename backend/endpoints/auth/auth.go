@@ -82,14 +82,23 @@ func CallbackEndpoint(c *gin.Context) {
 		return
 	}
 
-	err = saveToDB(tokens, user)
+	dbUser, err := saveToDB(tokens, user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not save to db"})
 		return
 	}
 
-	// TODO set JWT cookie
+	ui := hlp.UserInfo{
+		ID:    dbUser.ID,
+		Email: dbUser.Email,
+	}
+	token, err := hlp.GenerateJWT(ui)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate jwt"})
+		return
+	}
 
+	c.SetCookie(JWT_KEY, token, 0, "/", hlp.Envs["BACKEND_DOMAIN"], true, true)
 	c.Redirect(http.StatusFound, hlp.Envs["FRONTEND_URL"])
 }
 
@@ -165,7 +174,7 @@ func requestUserData(tokens *tokenResponse) (*userData, error) {
 	return &user, nil
 }
 
-func saveToDB(tokensData *tokenResponse, userData *userData) error {
+func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error) {
 	explicitContent := &model.ExplicitContent{
 		FilterEnabled: userData.ExplicitContent["filter_enabled"],
 		FilterLocked:  userData.ExplicitContent["filter_locked"],
@@ -218,9 +227,24 @@ func saveToDB(tokensData *tokenResponse, userData *userData) error {
 	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
 	if res.Err() == nil {
 		_, err := db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyid": userData.Id}, bson.M{"$set": user})
-		return err
+		return nil, err
 	}
 
 	_, err := db.GetCollection("users").InsertOne(context.TODO(), user)
-	return err
+	if err != nil {
+		return nil, err
+	}
+
+	res = db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
+	if res.Err() != nil {
+		return nil, res.Err()
+	}
+
+	dbUser := model.User{}
+	err = res.Decode(&dbUser)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dbUser, nil
 }
