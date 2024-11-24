@@ -3,6 +3,9 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"musicboxd/api/middleware"
+	"musicboxd/endpoints/auth"
+	"musicboxd/hlp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -14,7 +17,7 @@ import (
 type Resolver struct{}
 
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
-	ginContext := ctx.Value("GinContextKey")
+	ginContext := ctx.Value(middleware.GinContextKey)
 	if ginContext == nil {
 		err := fmt.Errorf("could not retrieve gin.Context")
 		return nil, err
@@ -26,4 +29,23 @@ func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
 		return nil, err
 	}
 	return gc, nil
+}
+
+func ValidateJWT(ctx context.Context) (*hlp.CustomClaims, error) {
+	ginCtx, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	jwt, err := ginCtx.Cookie(auth.JWT_KEY)
+	if err != nil {
+		return nil, err
+	}
+
+	cc, err := hlp.ValidateJWT(jwt)
+	if err != nil {
+		return nil, err
+	}
+
+	return &cc, nil
 }

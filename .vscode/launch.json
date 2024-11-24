@@ -11,6 +11,7 @@
           "mode": "auto",
           "program": "${workspaceFolder}/backend/main.go",
           "envFile": "${workspaceFolder}/backend/.env",
+          "preLaunchTask": "Run gen.sh",
       }
   ]
 }

@@ -1,5 +1,5 @@
 type User {
-  _id: ID!
+  _id: ID
   country: String!
   displayName: String!
   email: String!
@@ -45,6 +45,7 @@ type Tokens {
 
 
 type UserResponse {
+  _id: ID!
   country: String!
   displayName: String!
   email: String!
@@ -61,4 +62,8 @@ type UserResponse {
 
 type Query {
   userByDisplayName(displayName: String!): UserResponse
+}
+
+type Mutation {
+  updateCurrentUser(displayName: String): UserResponse
 }

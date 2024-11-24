@@ -13,7 +13,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/spotify"
 )
@@ -89,7 +88,7 @@ func CallbackEndpoint(c *gin.Context) {
 	}
 
 	ui := hlp.UserInfo{
-		ID:    dbUser.ID,
+		ID:    *dbUser.ID,
 		Email: dbUser.Email,
 	}
 	token, err := hlp.GenerateJWT(ui)
@@ -207,7 +206,6 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 	}
 
 	user := &model.User{
-		ID:              primitive.NewObjectID().Hex(),
 		Country:         userData.Country,
 		DisplayName:     userData.DisplayName,
 		Email:           userData.Email,
@@ -224,10 +222,10 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 	}
 
 	db := database.GetDB()
-	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
+	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyId": userData.Id})
 	var err error
 	if res.Err() == nil {
-		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyid": userData.Id}, bson.M{"$set": user})
+		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyId": userData.Id}, bson.M{"$set": user})
 	} else {
 		_, err = db.GetCollection("users").InsertOne(context.TODO(), user)
 	}
@@ -236,7 +234,7 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 		return nil, err
 	}
 
-	res = db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyid": userData.Id})
+	res = db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyId": userData.Id})
 	if res.Err() != nil {
 		return nil, res.Err()
 	}

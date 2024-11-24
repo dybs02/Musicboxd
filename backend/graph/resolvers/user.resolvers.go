@@ -13,10 +13,35 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName string) (*model.UserResponse, error) {
-	// TODO check jwt and permissions
+func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *string) (*model.UserResponse, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	coll := database.GetDB().GetCollection("users")
-	user := coll.FindOne(ctx, bson.M{"displayname": displayName})
+	_, err = coll.UpdateOne(ctx, bson.M{"_id": cc.UserID}, bson.M{"$set": bson.M{"displayName": displayName}})
+	if err != nil {
+		return nil, err
+	}
+
+	user := coll.FindOne(ctx, bson.M{"_id": cc.UserID})
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err = user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName string) (*model.UserResponse, error) {
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(ctx, bson.M{"displayName": displayName})
 	if user.Err() != nil {
 		return nil, user.Err()
 	}
@@ -29,6 +54,9 @@ func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName strin
 	return &res, nil
 }
 
+func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
+
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
+type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }

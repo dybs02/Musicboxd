@@ -3,64 +3,68 @@
 package model
 
 type ExplicitContent struct {
-	FilterEnabled bool `json:"filterEnabled"`
-	FilterLocked  bool `json:"filterLocked"`
+	FilterEnabled bool `json:"filterEnabled" bson:"filterEnabled"`
+	FilterLocked  bool `json:"filterLocked" bson:"filterLocked"`
 }
 
 type ExternalUrls struct {
-	Spotify string `json:"spotify"`
+	Spotify string `json:"spotify" bson:"spotify"`
 }
 
 type Followers struct {
-	Href  *string `json:"href,omitempty"`
-	Total int     `json:"total"`
+	Href  *string `json:"href,omitempty" bson:"href,omitempty"`
+	Total int     `json:"total" bson:"total"`
 }
 
 type Image struct {
-	URL    string `json:"url"`
-	Height *int   `json:"height,omitempty"`
-	Width  *int   `json:"width,omitempty"`
+	URL    string `json:"url" bson:"url"`
+	Height *int   `json:"height,omitempty" bson:"height,omitempty"`
+	Width  *int   `json:"width,omitempty" bson:"width,omitempty"`
+}
+
+type Mutation struct {
 }
 
 type Query struct {
 }
 
 type Tokens struct {
-	AccessToken  *string `json:"AccessToken,omitempty"`
-	TokenType    *string `json:"TokenType,omitempty"`
-	Scope        *string `json:"Scope,omitempty"`
-	ExpiresIn    *int    `json:"ExpiresIn,omitempty"`
-	RefreshToken *string `json:"RefreshToken,omitempty"`
+	AccessToken  *string `json:"AccessToken,omitempty" bson:"AccessToken,omitempty"`
+	TokenType    *string `json:"TokenType,omitempty" bson:"TokenType,omitempty"`
+	Scope        *string `json:"Scope,omitempty" bson:"Scope,omitempty"`
+	ExpiresIn    *int    `json:"ExpiresIn,omitempty" bson:"ExpiresIn,omitempty"`
+	RefreshToken *string `json:"RefreshToken,omitempty" bson:"RefreshToken,omitempty"`
 }
 
 type User struct {
-	ID              string           `json:"_id"`
-	Country         string           `json:"country"`
-	DisplayName     string           `json:"displayName"`
-	Email           string           `json:"email"`
-	ExplicitContent *ExplicitContent `json:"explicitContent"`
-	ExternalUrls    *ExternalUrls    `json:"externalUrls"`
-	Followers       *Followers       `json:"followers"`
-	Href            string           `json:"href"`
-	SpotifyID       string           `json:"spotifyId"`
-	Images          []*Image         `json:"images"`
-	Product         string           `json:"product"`
-	Type            string           `json:"type"`
-	URI             string           `json:"uri"`
-	Tokens          *Tokens          `json:"tokens,omitempty"`
+	ID              *string          `json:"_id,omitempty" bson:"_id,omitempty"`
+	Country         string           `json:"country" bson:"country"`
+	DisplayName     string           `json:"displayName" bson:"displayName"`
+	Email           string           `json:"email" bson:"email"`
+	ExplicitContent *ExplicitContent `json:"explicitContent" bson:"explicitContent"`
+	ExternalUrls    *ExternalUrls    `json:"externalUrls" bson:"externalUrls"`
+	Followers       *Followers       `json:"followers" bson:"followers"`
+	Href            string           `json:"href" bson:"href"`
+	SpotifyID       string           `json:"spotifyId" bson:"spotifyId"`
+	Images          []*Image         `json:"images" bson:"images"`
+	Product         string           `json:"product" bson:"product"`
+	Type            string           `json:"type" bson:"type"`
+	URI             string           `json:"uri" bson:"uri"`
+	Tokens          *Tokens          `json:"tokens,omitempty" bson:"tokens,omitempty"`
 }
 
 type UserResponse struct {
-	Country         string           `json:"country"`
-	DisplayName     string           `json:"displayName"`
-	Email           string           `json:"email"`
-	ExplicitContent *ExplicitContent `json:"explicitContent"`
-	ExternalUrls    *ExternalUrls    `json:"externalUrls"`
-	Followers       *Followers       `json:"followers"`
-	Href            string           `json:"href"`
-	SpotifyID       string           `json:"spotifyId"`
-	Images          []*Image         `json:"images"`
-	Product         string           `json:"product"`
-	Type            string           `json:"type"`
-	URI             string           `json:"uri"`
+	ID              string           `json:"_id" bson:"_id"`
+	Country         string           `json:"country" bson:"country"`
+	DisplayName     string           `json:"displayName" bson:"displayName"`
+	Email           string           `json:"email" bson:"email"`
+	ExplicitContent *ExplicitContent `json:"explicitContent" bson:"explicitContent"`
+	ExternalUrls    *ExternalUrls    `json:"externalUrls" bson:"externalUrls"`
+	Followers       *Followers       `json:"followers" bson:"followers"`
+	Href            string           `json:"href" bson:"href"`
+	SpotifyID       string           `json:"spotifyId" bson:"spotifyId"`
+	Images          []*Image         `json:"images" bson:"images"`
+	Product         string           `json:"product" bson:"product"`
+	Type            string           `json:"type" bson:"type"`
+	URI             string           `json:"uri" bson:"uri"`
 }
