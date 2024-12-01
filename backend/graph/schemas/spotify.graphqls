@@ -1,0 +1,40 @@
+type Tracks {
+  href: String
+  limit: Int
+  next: String
+  offset: Int!
+  previous: String!
+  total: Int!
+  items: [Track!]!
+}
+
+type Track {
+  # album: Album!
+  # artists: [SimplifiedArtist!]!
+  availableMarkets: [String!]!
+  discNumber: Int!
+  durationMs: Int!
+  explicit: Boolean!
+  # externalIds: ExternalIds!
+  # externalUrls: ExternalUrls!
+  href: String!
+  id: String!
+  isPlayable: Boolean!
+  # linkedFrom: LinkedFrom
+  # restrictions: Restrictions
+  name: String!
+  popularity: Int!
+  previewUrl: String # deprecated ?
+  trackNumber: Int!
+  type: String!
+  uri: String!
+  isLocal: Boolean!
+}
+
+type SearchResponse {
+  tracks: Tracks!
+}
+
+extend type Query {
+  search(type: String, query: String!): SearchResponse!
+}

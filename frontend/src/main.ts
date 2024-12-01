@@ -4,7 +4,7 @@ import 'primeicons/primeicons.css'
 
 import { createApp, provide, h } from 'vue'
 import { createPinia } from 'pinia'
-import { DefaultApolloClient } from '@vue/apollo-composable'
+import { DefaultApolloClient, provideApolloClient } from '@vue/apollo-composable'
 import apolloClient from './services/apollo'
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
@@ -19,6 +19,7 @@ const app = createApp({
 
   render: () => h(App),
 })
+provideApolloClient(apolloClient);
 
 
 app.use(PrimeVue, {

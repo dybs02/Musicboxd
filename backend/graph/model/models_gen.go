@@ -28,12 +28,43 @@ type Mutation struct {
 type Query struct {
 }
 
+type SearchResponse struct {
+	Tracks *Tracks `json:"tracks" bson:"tracks"`
+}
+
 type Tokens struct {
 	AccessToken  *string `json:"AccessToken,omitempty" bson:"AccessToken,omitempty"`
 	TokenType    *string `json:"TokenType,omitempty" bson:"TokenType,omitempty"`
 	Scope        *string `json:"Scope,omitempty" bson:"Scope,omitempty"`
 	ExpiresIn    *int    `json:"ExpiresIn,omitempty" bson:"ExpiresIn,omitempty"`
 	RefreshToken *string `json:"RefreshToken,omitempty" bson:"RefreshToken,omitempty"`
+}
+
+type Track struct {
+	AvailableMarkets []string `json:"availableMarkets" bson:"availableMarkets"`
+	DiscNumber       int      `json:"discNumber" bson:"discNumber"`
+	DurationMs       int      `json:"durationMs" bson:"durationMs"`
+	Explicit         bool     `json:"explicit" bson:"explicit"`
+	Href             string   `json:"href" bson:"href"`
+	ID               string   `json:"id" bson:"_id"`
+	IsPlayable       bool     `json:"isPlayable" bson:"isPlayable"`
+	Name             string   `json:"name" bson:"name"`
+	Popularity       int      `json:"popularity" bson:"popularity"`
+	PreviewURL       *string  `json:"previewUrl,omitempty" bson:"previewUrl,omitempty"`
+	TrackNumber      int      `json:"trackNumber" bson:"trackNumber"`
+	Type             string   `json:"type" bson:"type"`
+	URI              string   `json:"uri" bson:"uri"`
+	IsLocal          bool     `json:"isLocal" bson:"isLocal"`
+}
+
+type Tracks struct {
+	Href     *string  `json:"href,omitempty" bson:"href,omitempty"`
+	Limit    *int     `json:"limit,omitempty" bson:"limit,omitempty"`
+	Next     *string  `json:"next,omitempty" bson:"next,omitempty"`
+	Offset   int      `json:"offset" bson:"offset"`
+	Previous string   `json:"previous" bson:"previous"`
+	Total    int      `json:"total" bson:"total"`
+	Items    []*Track `json:"items" bson:"items"`
 }
 
 type User struct {

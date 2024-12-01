@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { gql } from "@apollo/client/core";
+import { useQuery } from '@vue/apollo-composable';
 import AutoComplete from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 
 
@@ -32,16 +34,33 @@ const nav_items = ref([
       }
   }
 ]);
-const suggest_items = ref(['']);
+const suggest_items = ref([]);
 
+const suggest_search = async (event: any) => {
+  // TODO query more fields and pass selected item to View so as not to make another query?
+  const { loading, result } = useQuery(gql`
+    query Search($_query: String!, $_type: String) {
+      search(query: $_query, type: $_type) {
+        tracks {
+          items {
+            id
+            name
+          }
+        }
+      }
+    }
+    `, {
+      _query: search_value.value,
+      _type: 'track'
+    }
+  )
 
-const suggest_search = (event: any) => {
-  console.log(event.query);
-  suggest_items.value = [
-    'Apple',
-    'Banana',
-    'Orange'
-  ];
+  while (loading.value) {
+    await new Promise(resolve => setTimeout(resolve, 100))
+  }
+
+  const search_res = computed(() => result.value?.search.tracks.items ?? [])
+  suggest_items.value = search_res.value
 }
 
 const login = () => {
@@ -63,7 +82,14 @@ const login = () => {
                       v-model="search_value"
                       :suggestions="suggest_items"
                       @complete="suggest_search"
-                      />
+        >
+          <template #option="slotProps">
+            <div class="flex items-center">
+                <img :alt="slotProps.option.name" src="https://picsum.photos/640" class="w-6 mr-2" />
+                <div>{{ slotProps.option.name }}</div>
+            </div>
+          </template>
+        </AutoComplete>
         <Button label="Login" severity="secondary" @click="login" />
       </div>
     </template>

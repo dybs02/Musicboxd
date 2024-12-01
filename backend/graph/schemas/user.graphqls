@@ -60,10 +60,10 @@ type UserResponse {
   uri: String!
 }
 
-type Query {
+extend type Query {
   userByDisplayName(displayName: String!): UserResponse
 }
 
-type Mutation {
+extend type Mutation {
   updateCurrentUser(displayName: String): UserResponse
 }

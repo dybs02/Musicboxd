@@ -4,10 +4,13 @@ import (
 	"context"
 	"fmt"
 	"musicboxd/api/middleware"
+	"musicboxd/database"
 	"musicboxd/endpoints/auth"
+	"musicboxd/graph/model"
 	"musicboxd/hlp"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -48,4 +51,28 @@ func ValidateJWT(ctx context.Context) (*hlp.CustomClaims, error) {
 	}
 
 	return &cc, nil
+}
+
+func GetUserAccessToken(ctx context.Context) (string, error) {
+	// TODO
+	// cache access tokens for a certain amount of time, based on the username
+	// also add limit to number of cached tokens - should not be a problem for now tho
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(ctx, bson.M{"_id": cc.UserID})
+	if user.Err() != nil {
+		return "", user.Err()
+	}
+
+	res := model.User{}
+	err = user.Decode(&res)
+	if err != nil {
+		return "", err
+	}
+
+	return *res.Tokens.AccessToken, nil
 }
