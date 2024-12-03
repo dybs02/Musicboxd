@@ -9,26 +9,42 @@ type Tracks {
 }
 
 type Track {
-  # album: Album!
+  album: Album!
   # artists: [SimplifiedArtist!]!
-  availableMarkets: [String!]!
-  discNumber: Int!
-  durationMs: Int!
+  available_markets: [String!]!
+  disc_number: Int!
+  duration_ms: Int!
   explicit: Boolean!
-  # externalIds: ExternalIds!
-  # externalUrls: ExternalUrls!
+  # external_ids: ExternalIds!
+  # external_urls: ExternalUrls!
   href: String!
   id: String!
-  isPlayable: Boolean!
-  # linkedFrom: LinkedFrom
+  is_playable: Boolean!
+  # linked_from: LinkedFrom
   # restrictions: Restrictions
   name: String!
   popularity: Int!
-  previewUrl: String # deprecated ?
-  trackNumber: Int!
+  preview_url: String # deprecated ?
+  track_number: Int!
   type: String!
   uri: String!
-  isLocal: Boolean!
+  is_local: Boolean!
+}
+
+type Album {
+  album_type: String!
+  total_tracks: Int!
+  available_markets: [String!]!
+  # external_urls: ExternalUrls!
+  href: String!
+  id: String!
+  images: [Image!]!
+  name: String!
+  release_date: String!
+  release_date_precision: String!
+  type: String!
+  uri: String!
+  # artists: [SimplifiedArtist!]!
 }
 
 type SearchResponse {
@@ -37,4 +53,5 @@ type SearchResponse {
 
 extend type Query {
   search(type: String, query: String!): SearchResponse!
+  track(id: String!): Track!
 }

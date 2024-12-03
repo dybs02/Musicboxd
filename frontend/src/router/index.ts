@@ -15,6 +15,11 @@ const router = createRouter({
       component: AlbumView
     },
     {
+      path: '/track/:id',
+      name: 'track',
+      component: AlbumView // TODO separete view for track or one for both ?
+    },
+    {
       path: '/',
       name: 'home',
       component: HomeView

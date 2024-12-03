@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
-import AutoComplete from 'primevue/autocomplete';
+import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
 import { computed, ref } from 'vue';
@@ -39,20 +39,23 @@ const suggest_items = ref([]);
 const suggest_search = async (event: any) => {
   // TODO query more fields and pass selected item to View so as not to make another query?
   const { loading, result } = useQuery(gql`
-    query Search($_query: String!, $_type: String) {
-      search(query: $_query, type: $_type) {
+    query Search {
+      search(query: "${search_value.value}", type: "track") {
         tracks {
           items {
+            album {
+              images {
+                url
+                height
+                width
+              }
+            }
             id
             name
           }
         }
       }
-    }
-    `, {
-      _query: search_value.value,
-      _type: 'track'
-    }
+    }`
   )
 
   while (loading.value) {
@@ -65,6 +68,11 @@ const suggest_search = async (event: any) => {
 
 const login = () => {
   window.location.href = 'http://localhost:8080/v1/api/auth/login'
+}
+
+const select_track = (event: AutoCompleteOptionSelectEvent) => {
+  router.push({ name: 'track', params: { id: event.value.id } })
+  search_value.value = ''
 }
 
 </script>
@@ -82,10 +90,11 @@ const login = () => {
                       v-model="search_value"
                       :suggestions="suggest_items"
                       @complete="suggest_search"
+                      @option-select="select_track"
         >
           <template #option="slotProps">
             <div class="flex items-center">
-                <img :alt="slotProps.option.name" src="https://picsum.photos/640" class="w-6 mr-2" />
+                <img :alt="slotProps.option.name" :src="slotProps.option.album.images[0].url" class="w-6 mr-2" />
                 <div>{{ slotProps.option.name }}</div>
             </div>
           </template>

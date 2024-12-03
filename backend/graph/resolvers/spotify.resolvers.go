@@ -28,6 +28,19 @@ func (r *queryResolver) Search(ctx context.Context, typeArg *string, query strin
 	return res, nil
 }
 
+func (r *queryResolver) Track(ctx context.Context, id string) (*model.Track, error) {
+	accessToken, err := GetUserAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := hlp.SpotifyGetTrack(id, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

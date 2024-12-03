@@ -64,3 +64,24 @@ func SpotifySearch(query string, searchType string, accessToken string) (*model.
 
 	return &res, nil
 }
+
+func SpotifyGetTrack(id string, accessToken string) (*model.Track, error) {
+	url := fmt.Sprintf("https://api.spotify.com/v1/tracks/%s", id)
+
+	reqBody, code, err := makeSpotifyRequest(url, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	if code == 401 {
+		// TODO refresh token
+		return nil, fmt.Errorf("unauthorized spotify request - bad token")
+	}
+
+	res := model.Track{}
+	err = json.Unmarshal(reqBody, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
