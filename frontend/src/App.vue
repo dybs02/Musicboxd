@@ -4,8 +4,14 @@ import Navbar from './components/Navbar.vue'
 </script>
 
 <template>
-  <Navbar />
-  <RouterView/>
+  <div class="flex sm:justify-center">
+    <div class="max-w-6xl sm:w-full inline-block">
+      <Navbar />
+      <div class="pt-4 px-4">
+        <RouterView/>
+      </div>
+    </div>
+  </div>
 </template>
 
 <style scoped>
