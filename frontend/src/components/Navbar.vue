@@ -67,7 +67,8 @@ const suggest_search = async (event: any) => {
 }
 
 const login = () => {
-  window.location.href = 'http://localhost:8080/v1/api/auth/login'
+  // @ts-ignore
+  window.location.href = import.meta.env.VITE_BACKEND_URL+'/v1/api/auth/login'
 }
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
