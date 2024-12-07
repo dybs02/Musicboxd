@@ -3,17 +3,19 @@
 package model
 
 type Album struct {
-	AlbumType            string   `json:"album_type" bson:"album_type"`
-	TotalTracks          int      `json:"total_tracks" bson:"total_tracks"`
-	AvailableMarkets     []string `json:"available_markets" bson:"available_markets"`
-	Href                 string   `json:"href" bson:"href"`
-	ID                   string   `json:"id" bson:"_id"`
-	Images               []*Image `json:"images" bson:"images"`
-	Name                 string   `json:"name" bson:"name"`
-	ReleaseDate          string   `json:"release_date" bson:"release_date"`
-	ReleaseDatePrecision string   `json:"release_date_precision" bson:"release_date_precision"`
-	Type                 string   `json:"type" bson:"type"`
-	URI                  string   `json:"uri" bson:"uri"`
+	AlbumType            string              `json:"album_type" bson:"album_type"`
+	TotalTracks          int                 `json:"total_tracks" bson:"total_tracks"`
+	AvailableMarkets     []string            `json:"available_markets" bson:"available_markets"`
+	ExternalUrls         *ExternalUrls       `json:"external_urls" bson:"external_urls"`
+	Href                 string              `json:"href" bson:"href"`
+	ID                   string              `json:"id" bson:"_id"`
+	Images               []*Image            `json:"images" bson:"images"`
+	Name                 string              `json:"name" bson:"name"`
+	ReleaseDate          string              `json:"release_date" bson:"release_date"`
+	ReleaseDatePrecision string              `json:"release_date_precision" bson:"release_date_precision"`
+	Type                 string              `json:"type" bson:"type"`
+	URI                  string              `json:"uri" bson:"uri"`
+	Artists              []*SimplifiedArtist `json:"artists" bson:"artists"`
 }
 
 type ExplicitContent struct {
@@ -46,6 +48,15 @@ type SearchResponse struct {
 	Tracks *Tracks `json:"tracks" bson:"tracks"`
 }
 
+type SimplifiedArtist struct {
+	ExternalUrls *ExternalUrls `json:"external_urls" bson:"external_urls"`
+	Href         string        `json:"href" bson:"href"`
+	ID           string        `json:"id" bson:"_id"`
+	Name         string        `json:"name" bson:"name"`
+	Type         string        `json:"type" bson:"type"`
+	URI          string        `json:"uri" bson:"uri"`
+}
+
 type Tokens struct {
 	AccessToken  *string `json:"AccessToken,omitempty" bson:"AccessToken,omitempty"`
 	TokenType    *string `json:"TokenType,omitempty" bson:"TokenType,omitempty"`
@@ -55,21 +66,23 @@ type Tokens struct {
 }
 
 type Track struct {
-	Album            *Album   `json:"album" bson:"album"`
-	AvailableMarkets []string `json:"available_markets" bson:"available_markets"`
-	DiscNumber       int      `json:"disc_number" bson:"disc_number"`
-	DurationMs       int      `json:"duration_ms" bson:"duration_ms"`
-	Explicit         bool     `json:"explicit" bson:"explicit"`
-	Href             string   `json:"href" bson:"href"`
-	ID               string   `json:"id" bson:"_id"`
-	IsPlayable       bool     `json:"is_playable" bson:"is_playable"`
-	Name             string   `json:"name" bson:"name"`
-	Popularity       int      `json:"popularity" bson:"popularity"`
-	PreviewURL       *string  `json:"preview_url,omitempty" bson:"preview_url,omitempty"`
-	TrackNumber      int      `json:"track_number" bson:"track_number"`
-	Type             string   `json:"type" bson:"type"`
-	URI              string   `json:"uri" bson:"uri"`
-	IsLocal          bool     `json:"is_local" bson:"is_local"`
+	Album            *Album              `json:"album" bson:"album"`
+	Artists          []*SimplifiedArtist `json:"artists" bson:"artists"`
+	AvailableMarkets []string            `json:"available_markets" bson:"available_markets"`
+	DiscNumber       int                 `json:"disc_number" bson:"disc_number"`
+	DurationMs       int                 `json:"duration_ms" bson:"duration_ms"`
+	Explicit         bool                `json:"explicit" bson:"explicit"`
+	ExternalUrls     *ExternalUrls       `json:"external_urls" bson:"external_urls"`
+	Href             string              `json:"href" bson:"href"`
+	ID               string              `json:"id" bson:"_id"`
+	IsPlayable       bool                `json:"is_playable" bson:"is_playable"`
+	Name             string              `json:"name" bson:"name"`
+	Popularity       int                 `json:"popularity" bson:"popularity"`
+	PreviewURL       *string             `json:"preview_url,omitempty" bson:"preview_url,omitempty"`
+	TrackNumber      int                 `json:"track_number" bson:"track_number"`
+	Type             string              `json:"type" bson:"type"`
+	URI              string              `json:"uri" bson:"uri"`
+	IsLocal          bool                `json:"is_local" bson:"is_local"`
 }
 
 type Tracks struct {

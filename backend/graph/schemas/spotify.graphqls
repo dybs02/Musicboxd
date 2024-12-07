@@ -10,13 +10,13 @@ type Tracks {
 
 type Track {
   album: Album!
-  # artists: [SimplifiedArtist!]!
+  artists: [SimplifiedArtist!]!
   available_markets: [String!]!
   disc_number: Int!
   duration_ms: Int!
   explicit: Boolean!
   # external_ids: ExternalIds!
-  # external_urls: ExternalUrls!
+  external_urls: ExternalUrls!
   href: String!
   id: String!
   is_playable: Boolean!
@@ -35,7 +35,7 @@ type Album {
   album_type: String!
   total_tracks: Int!
   available_markets: [String!]!
-  # external_urls: ExternalUrls!
+  external_urls: ExternalUrls!
   href: String!
   id: String!
   images: [Image!]!
@@ -44,8 +44,21 @@ type Album {
   release_date_precision: String!
   type: String!
   uri: String!
-  # artists: [SimplifiedArtist!]!
+  artists: [SimplifiedArtist!]!
 }
+
+type SimplifiedArtist {
+  external_urls: ExternalUrls!
+  href: String!
+  id: String!
+  name: String!
+  type: String!
+  uri: String!
+}
+
+# type ExternalUrls {
+#   spotify: String!
+# }
 
 type SearchResponse {
   tracks: Tracks!

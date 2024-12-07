@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
+import Divider from 'primevue/divider';
+import Image from 'primevue/image';
+import ProgressSpinner from 'primevue/progressspinner';
+import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -22,6 +26,18 @@ const fetch_track = async () => {
         track_number
         type
         uri
+        external_urls {
+          spotify
+        }
+        artists {
+            external_urls {
+              spotify
+            }
+            name
+            id
+            href
+            type
+        }
         album {
             images {
                 url
@@ -34,6 +50,9 @@ const fetch_track = async () => {
             id
             href
             total_tracks
+            external_urls {
+              spotify
+            }
         }
       }
     }`
@@ -50,13 +69,44 @@ watch(() => route.params.id, fetch_track, { immediate: true })
 
 <template>
   <!-- TODO v-if for error -->
-  <div v-if="_loading">
-    <!-- TODO loading animation -->
-    <p>Loading...</p>
+  <div v-if="_loading" class="flex justify-center pt-12">
+    <ProgressSpinner />
   </div>
-  <div v-else>
-    <img :src="track.value.album.images[0].url ?? ''" alt="Album Cover" />
-    <p>{{ track.value.name }}</p>
+
+  <div v-else class="flex">
+    <div class="w-1/2">
+      <Image
+        :src="track.value.album.images[0].url ?? ''"
+        alt="Album Cover"
+        class="sm:p-4 drop-shadow-xl"
+        preview
+        />
+    </div>
+    <div class="w-1/2 px-4 pt-4">
+      <!-- <Card>
+        <template #content> -->
+          <div class="text-3xl sm:text-5xl font-bold">
+            <a :href="track.value.external_urls.spotify" target="_blank">
+              {{ track.value.name }}
+            </a>
+          </div>
+          <Divider />
+          <div class="sm:text-2xl pb-1">
+            <a :href="track.value.artists[0].external_urls.spotify" target="_blank">
+              {{ track.value.artists[0].name }}
+            </a>
+          </div>
+          <div class="text-sm sm:text-xl">
+            <a :href="track.value.album.external_urls.spotify" target="_blank">
+              {{ track.value.album.name }}
+            </a>
+            <a class="text-slate-500">
+              ({{ track.value.album.release_date.split("-")[0] }})
+            </a>
+          </div>
+        <!-- </template>
+      </Card> -->
+    </div>
   </div>
 
 </template>
