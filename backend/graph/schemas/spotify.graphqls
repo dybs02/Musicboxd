@@ -31,6 +31,16 @@ type Track {
   is_local: Boolean!
 }
 
+type Albums {
+  href: String!
+  limit: Int!
+  next: String!
+  offset: Int!
+  previous: String!
+  total: Int!
+  items: [Album!]!
+}
+
 type Album {
   album_type: String!
   total_tracks: Int!
@@ -61,10 +71,12 @@ type SimplifiedArtist {
 # }
 
 type SearchResponse {
-  tracks: Tracks!
+  tracks: Tracks
+  albums: Albums
 }
 
 extend type Query {
   search(type: String, query: String!): SearchResponse!
   track(id: String!): Track!
+  album(id: String!): Album!
 }

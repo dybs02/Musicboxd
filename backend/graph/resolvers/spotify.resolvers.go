@@ -41,6 +41,19 @@ func (r *queryResolver) Track(ctx context.Context, id string) (*model.Track, err
 	return res, nil
 }
 
+func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, error) {
+	accessToken, err := GetUserAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := hlp.SpotifyGetAlbum(id, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
 func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
 
 type queryResolver struct{ *Resolver }

@@ -6,23 +6,27 @@ import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
 import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
-const album = ref<any>(null);
+const router = useRouter();
+const track = ref<any>(null);
 var _loading = ref(true);
 
 
-const fetch_album = async () => {
+const fetch_track = async () => {
   const { loading, result } = useQuery(gql`
     query Search {
-      album(id: "${route.params.id}") {
-        total_tracks
+      track(id: "${route.params.id}") {
+        duration_ms
+        explicit
+        href
+        id
         name
-        release_date
-        images {
-          url
-        }
+        popularity
+        track_number
+        type
+        uri
         external_urls {
           spotify
         }
@@ -35,16 +39,32 @@ const fetch_album = async () => {
             href
             type
         }
+        album {
+            images {
+                url
+                height
+                width
+            }
+            release_date
+            name
+            type
+            id
+            href
+            total_tracks
+            external_urls {
+              spotify
+            }
+        }
       }
     }`
   )
 
   _loading = loading;
-  album.value = computed(() => result.value.album ?? {});
+  track.value = computed(() => result.value.track ?? {});
 };
 
 
-watch(() => route.params.id, fetch_album, { immediate: true })
+watch(() => route.params.id, fetch_track, { immediate: true })
 
 </script>
 
@@ -57,7 +77,7 @@ watch(() => route.params.id, fetch_album, { immediate: true })
   <div v-else class="flex">
     <div class="w-1/2">
       <Image
-        :src="album.value.images[0].url ?? ''"
+        :src="track.value.album.images[0].url ?? ''"
         alt="Album Cover"
         class="sm:p-4 drop-shadow-xl"
         preview
@@ -67,23 +87,23 @@ watch(() => route.params.id, fetch_album, { immediate: true })
       <!-- <Card>
         <template #content> -->
           <div class="text-3xl sm:text-5xl font-bold">
-            <a :href="album.value.external_urls.spotify" target="_blank">
-              {{ album.value.name }}
-            </a>
-            <a class="text-slate-500">
-              ({{ album.value.release_date.split("-")[0] }})
+            <a :href="track.value.external_urls.spotify" target="_blank">
+              {{ track.value.name }}
             </a>
           </div>
           <Divider />
           <div class="sm:text-2xl pb-1">
-            <div v-for="(artist, index) in album.value.artists" class="inline">
-              <a :href="artist.external_urls.spotify" target="_blank">
-                {{ artist.name }}{{ index < album.value.artists.length - 1 ? ',  ' : '' }}
-              </a>
-            </div>
+            <a :href="track.value.artists[0].external_urls.spotify" target="_blank">
+              {{ track.value.artists[0].name }}
+            </a>
           </div>
           <div class="text-sm sm:text-xl">
-            <!-- TODO add track list (lazy load?) -->
+            <a @click="router.push({ name: 'album', params: { id: track.value.album.id } });" class="cursor-pointer" target="_blank">
+              {{ track.value.album.name }}
+            </a>
+            <a class="text-slate-500">
+              ({{ track.value.album.release_date.split("-")[0] }})
+            </a>
           </div>
         <!-- </template>
       </Card> -->

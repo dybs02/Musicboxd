@@ -1,13 +1,14 @@
-import './assets/main.css'
 import 'primeicons/primeicons.css'
+import './assets/main.css'
 
 
-import { createApp, provide, h } from 'vue'
-import { createPinia } from 'pinia'
+import Aura from '@primevue/themes/aura'
 import { DefaultApolloClient, provideApolloClient } from '@vue/apollo-composable'
+import { createPinia } from 'pinia'
+import PrimeVue from 'primevue/config'
+import Tooltip from 'primevue/tooltip'
+import { createApp, h, provide } from 'vue'
 import apolloClient from './services/apollo'
-import PrimeVue from 'primevue/config';
-import Aura from '@primevue/themes/aura';
 
 import App from './App.vue'
 import router from './router'
@@ -27,6 +28,8 @@ app.use(PrimeVue, {
       preset: Aura
   }
 });
+
+app.directive('tooltip', Tooltip);
 
 app.use(createPinia())
 app.use(router)

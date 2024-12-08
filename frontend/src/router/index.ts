@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import AlbumView from '@/views/AlbumView.vue'
 import HomeView from '@/views/HomeView.vue'
 import ReviewView from '@/views/ReviewView.vue'
 import UserProfile from '@/views/UserProfile.vue'
@@ -12,12 +11,12 @@ const router = createRouter({
     {
       path: '/album/:id',
       name: 'album',
-      component: AlbumView
+      component: () => import('@/views/AlbumView.vue')
     },
     {
       path: '/track/:id',
       name: 'track',
-      component: AlbumView // TODO separete view for track or one for both ?
+      component: () => import('@/views/TrackView.vue')
     },
     {
       path: '/',

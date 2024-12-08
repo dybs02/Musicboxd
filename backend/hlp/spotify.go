@@ -7,6 +7,7 @@ import (
 	"log"
 	"musicboxd/graph/model"
 	"net/http"
+	"net/url"
 )
 
 func makeSpotifyRequest(url string, token string) ([]byte, int, error) {
@@ -45,7 +46,7 @@ func makeSpotifyRequest(url string, token string) ([]byte, int, error) {
 
 // TODO implement searchType as enum
 func SpotifySearch(query string, searchType string, accessToken string) (*model.SearchResponse, error) {
-	url := fmt.Sprintf("https://api.spotify.com/v1/search?q=%s&type=%s&limit=10", query, searchType)
+	url := fmt.Sprintf("https://api.spotify.com/v1/search?q=%s&type=%s&limit=10", url.QueryEscape(query), url.QueryEscape(searchType))
 
 	reqBody, code, err := makeSpotifyRequest(url, accessToken)
 	if err != nil {
@@ -66,7 +67,7 @@ func SpotifySearch(query string, searchType string, accessToken string) (*model.
 }
 
 func SpotifyGetTrack(id string, accessToken string) (*model.Track, error) {
-	url := fmt.Sprintf("https://api.spotify.com/v1/tracks/%s", id)
+	url := fmt.Sprintf("https://api.spotify.com/v1/tracks/%s", url.QueryEscape(id))
 
 	reqBody, code, err := makeSpotifyRequest(url, accessToken)
 	if err != nil {
@@ -78,6 +79,27 @@ func SpotifyGetTrack(id string, accessToken string) (*model.Track, error) {
 	}
 
 	res := model.Track{}
+	err = json.Unmarshal(reqBody, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func SpotifyGetAlbum(id string, accessToken string) (*model.Album, error) {
+	url := fmt.Sprintf("https://api.spotify.com/v1/albums/%s", url.QueryEscape(id))
+
+	reqBody, code, err := makeSpotifyRequest(url, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	if code == 401 {
+		// TODO refresh token
+		return nil, fmt.Errorf("unauthorized spotify request - bad token")
+	}
+
+	res := model.Album{}
 	err = json.Unmarshal(reqBody, &res)
 	if err != nil {
 		return nil, err

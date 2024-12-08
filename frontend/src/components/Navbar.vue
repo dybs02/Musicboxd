@@ -4,6 +4,7 @@ import { useQuery } from '@vue/apollo-composable';
 import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
+import SelectButton from 'primevue/selectbutton';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -35,23 +36,38 @@ const nav_items = ref([
   }
 ]);
 const suggest_items = ref([]);
+const search_type = ref('Track');
+const search_options = ref(['Track', 'Album']);
 
 const suggest_search = async (event: any) => {
   // TODO query more fields and pass selected item to View so as not to make another query?
   const { loading, result } = useQuery(gql`
     query Search {
-      search(query: "${search_value.value}", type: "track") {
+      search(query: "${search_value.value}", type: "${search_type.value.toLowerCase()}") {
         tracks {
           items {
             album {
               images {
                 url
-                height
-                width
               }
             }
-            id
+            artists {
+              name
+            }
             name
+            id
+          }
+        }
+        albums {
+          items {
+            images {
+              url
+            }
+            artists {
+              name
+            }
+            name
+            id
           }
         }
       }
@@ -62,8 +78,22 @@ const suggest_search = async (event: any) => {
     await new Promise(resolve => setTimeout(resolve, 100))
   }
 
-  const search_res = computed(() => result.value?.search.tracks.items ?? [])
-  suggest_items.value = search_res.value
+  let search_res = []
+  if (search_type.value === 'Track') {
+    search_res = (result.value?.search.tracks?.items ?? []).map((track: any) => {
+      return {
+        name: track.name,
+        id: track.id,
+        artists: track.artists,
+        images: track.album.images
+      }
+    })
+  } else if (search_type.value === 'Album') {
+    search_res = result.value?.search.albums?.items ?? []
+  }
+
+  console.log(search_res)
+  suggest_items.value = search_res
 }
 
 const login = () => {
@@ -72,7 +102,11 @@ const login = () => {
 }
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
-  router.push({ name: 'track', params: { id: event.value.id } })
+  if (search_type.value === 'Track')
+    router.push({ name: 'track', params: { id: event.value.id } });
+  else if (search_type.value === 'Album')
+    router.push({ name: 'album', params: { id: event.value.id } });
+
   search_value.value = ''
 }
 
@@ -91,12 +125,30 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
                       v-model="search_value"
                       :suggestions="suggest_items"
                       @complete="suggest_search"
+                      @focus="suggest_search"
                       @option-select="select_track"
+                      class="w-96 block"
+                      fluid
+                      panelClass="w-96"
         >
+          <template #header>
+            <div class="rounded-md" style="background-color: #09090b;">
+              <SelectButton v-model="search_type"
+                            :options="search_options"
+                            @change="suggest_search"
+                            class="my-1 pl-2"
+              />
+            </div>
+          </template>
           <template #option="slotProps">
             <div class="flex items-center">
-                <img :alt="slotProps.option.name" :src="slotProps.option.album.images[0].url" class="w-6 mr-2" />
-                <div>{{ slotProps.option.name }}</div>
+                <img :alt="slotProps.option.name" :src="slotProps.option.images[0].url" class="w-6 mr-2" />
+                <div >
+                  {{ slotProps.option.name }}
+                  <a class="text-slate-500">
+                    - {{ slotProps.option.artists[0].name }}
+                  </a>
+                </div>
             </div>
           </template>
         </AutoComplete>

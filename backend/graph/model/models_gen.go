@@ -18,6 +18,16 @@ type Album struct {
 	Artists              []*SimplifiedArtist `json:"artists" bson:"artists"`
 }
 
+type Albums struct {
+	Href     string   `json:"href" bson:"href"`
+	Limit    int      `json:"limit" bson:"limit"`
+	Next     string   `json:"next" bson:"next"`
+	Offset   int      `json:"offset" bson:"offset"`
+	Previous string   `json:"previous" bson:"previous"`
+	Total    int      `json:"total" bson:"total"`
+	Items    []*Album `json:"items" bson:"items"`
+}
+
 type ExplicitContent struct {
 	FilterEnabled bool `json:"filterEnabled" bson:"filterEnabled"`
 	FilterLocked  bool `json:"filterLocked" bson:"filterLocked"`
@@ -45,7 +55,8 @@ type Query struct {
 }
 
 type SearchResponse struct {
-	Tracks *Tracks `json:"tracks" bson:"tracks"`
+	Tracks *Tracks `json:"tracks,omitempty" bson:"tracks,omitempty"`
+	Albums *Albums `json:"albums,omitempty" bson:"albums,omitempty"`
 }
 
 type SimplifiedArtist struct {
