@@ -9,6 +9,7 @@ import (
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
@@ -75,4 +76,14 @@ func GetUserAccessToken(ctx context.Context) (string, error) {
 	}
 
 	return *res.Tokens.AccessToken, nil
+}
+
+func isFieldRequested(ctx context.Context, fieldName string) bool {
+	fields := graphql.CollectFieldsCtx(ctx, nil)
+	for _, field := range fields {
+		if field.Name == fieldName {
+			return true
+		}
+	}
+	return false
 }

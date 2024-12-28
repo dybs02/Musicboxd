@@ -16,6 +16,8 @@ type Album struct {
 	Type                 string              `json:"type" bson:"type"`
 	URI                  string              `json:"uri" bson:"uri"`
 	Artists              []*SimplifiedArtist `json:"artists" bson:"artists"`
+	Tracks               *Tracks             `json:"tracks" bson:"tracks"`
+	TrackList            []*Track            `json:"track_list" bson:"track_list"`
 }
 
 type Albums struct {

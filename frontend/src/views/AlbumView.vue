@@ -4,11 +4,16 @@ import { useQuery } from '@vue/apollo-composable';
 import Divider from 'primevue/divider';
 import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
+import Accordion from 'primevue/accordion';
+import AccordionPanel from 'primevue/accordionpanel';
+import AccordionHeader from 'primevue/accordionheader';
+import AccordionContent from 'primevue/accordioncontent';
 import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const album = ref<any>(null);
 var _loading = ref(true);
 
@@ -34,6 +39,14 @@ const fetch_album = async () => {
             id
             href
             type
+        }
+        track_list {
+          name
+          duration_ms
+          id
+          external_urls {
+            spotify
+          }
         }
       }
     }`
@@ -85,6 +98,18 @@ watch(() => route.params.id, fetch_album, { immediate: true })
           <div class="text-sm sm:text-xl">
             <!-- TODO add track list (lazy load?) -->
           </div>
+          <Accordion value="0" unstyled>
+          <AccordionPanel value="0" unstyled>
+            <AccordionHeader unstyled>Track List </AccordionHeader>
+            <AccordionContent unstyled>
+              <div v-for="track in album.value.track_list" class="m-0">
+                <a @click="router.push({ name: 'track', params: { id: track.id } });" class="cursor-pointer">
+                  {{ track.name }}
+                </a>
+              </div>
+            </AccordionContent>
+          </AccordionPanel>
+        </Accordion>
         <!-- </template>
       </Card> -->
     </div>

@@ -59,6 +59,8 @@ type ComplexityRoot struct {
 		ReleaseDate          func(childComplexity int) int
 		ReleaseDatePrecision func(childComplexity int) int
 		TotalTracks          func(childComplexity int) int
+		TrackList            func(childComplexity int) int
+		Tracks               func(childComplexity int) int
 		Type                 func(childComplexity int) int
 		URI                  func(childComplexity int) int
 	}
@@ -295,6 +297,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Album.TotalTracks(childComplexity), true
+
+	case "Album.track_list":
+		if e.complexity.Album.TrackList == nil {
+			break
+		}
+
+		return e.complexity.Album.TrackList(childComplexity), true
+
+	case "Album.tracks":
+		if e.complexity.Album.Tracks == nil {
+			break
+		}
+
+		return e.complexity.Album.Tracks(childComplexity), true
 
 	case "Album.type":
 		if e.complexity.Album.Type == nil {
@@ -1855,6 +1871,146 @@ func (ec *executionContext) fieldContext_Album_artists(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Album_tracks(ctx context.Context, field graphql.CollectedField, obj *model.Album) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Album_tracks(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Tracks, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Tracks)
+	fc.Result = res
+	return ec.marshalNTracks2ᚖmusicboxdᚋgraphᚋmodelᚐTracks(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Album_tracks(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Album",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "href":
+				return ec.fieldContext_Tracks_href(ctx, field)
+			case "limit":
+				return ec.fieldContext_Tracks_limit(ctx, field)
+			case "next":
+				return ec.fieldContext_Tracks_next(ctx, field)
+			case "offset":
+				return ec.fieldContext_Tracks_offset(ctx, field)
+			case "previous":
+				return ec.fieldContext_Tracks_previous(ctx, field)
+			case "total":
+				return ec.fieldContext_Tracks_total(ctx, field)
+			case "items":
+				return ec.fieldContext_Tracks_items(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Tracks", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Album_track_list(ctx context.Context, field graphql.CollectedField, obj *model.Album) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Album_track_list(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TrackList, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Track)
+	fc.Result = res
+	return ec.marshalNTrack2ᚕᚖmusicboxdᚋgraphᚋmodelᚐTrackᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Album_track_list(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Album",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "album":
+				return ec.fieldContext_Track_album(ctx, field)
+			case "artists":
+				return ec.fieldContext_Track_artists(ctx, field)
+			case "available_markets":
+				return ec.fieldContext_Track_available_markets(ctx, field)
+			case "disc_number":
+				return ec.fieldContext_Track_disc_number(ctx, field)
+			case "duration_ms":
+				return ec.fieldContext_Track_duration_ms(ctx, field)
+			case "explicit":
+				return ec.fieldContext_Track_explicit(ctx, field)
+			case "external_urls":
+				return ec.fieldContext_Track_external_urls(ctx, field)
+			case "href":
+				return ec.fieldContext_Track_href(ctx, field)
+			case "id":
+				return ec.fieldContext_Track_id(ctx, field)
+			case "is_playable":
+				return ec.fieldContext_Track_is_playable(ctx, field)
+			case "name":
+				return ec.fieldContext_Track_name(ctx, field)
+			case "popularity":
+				return ec.fieldContext_Track_popularity(ctx, field)
+			case "preview_url":
+				return ec.fieldContext_Track_preview_url(ctx, field)
+			case "track_number":
+				return ec.fieldContext_Track_track_number(ctx, field)
+			case "type":
+				return ec.fieldContext_Track_type(ctx, field)
+			case "uri":
+				return ec.fieldContext_Track_uri(ctx, field)
+			case "is_local":
+				return ec.fieldContext_Track_is_local(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Track", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Albums_href(ctx context.Context, field graphql.CollectedField, obj *model.Albums) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Albums_href(ctx, field)
 	if err != nil {
@@ -2184,6 +2340,10 @@ func (ec *executionContext) fieldContext_Albums_items(_ context.Context, field g
 				return ec.fieldContext_Album_uri(ctx, field)
 			case "artists":
 				return ec.fieldContext_Album_artists(ctx, field)
+			case "tracks":
+				return ec.fieldContext_Album_tracks(ctx, field)
+			case "track_list":
+				return ec.fieldContext_Album_track_list(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -2831,6 +2991,10 @@ func (ec *executionContext) fieldContext_Query_album(ctx context.Context, field 
 				return ec.fieldContext_Album_uri(ctx, field)
 			case "artists":
 				return ec.fieldContext_Album_artists(ctx, field)
+			case "tracks":
+				return ec.fieldContext_Album_tracks(ctx, field)
+			case "track_list":
+				return ec.fieldContext_Album_track_list(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -3710,6 +3874,10 @@ func (ec *executionContext) fieldContext_Track_album(_ context.Context, field gr
 				return ec.fieldContext_Album_uri(ctx, field)
 			case "artists":
 				return ec.fieldContext_Album_artists(ctx, field)
+			case "tracks":
+				return ec.fieldContext_Album_tracks(ctx, field)
+			case "track_list":
+				return ec.fieldContext_Album_track_list(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -7870,6 +8038,16 @@ func (ec *executionContext) _Album(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "tracks":
+			out.Values[i] = ec._Album_tracks(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "track_list":
+			out.Values[i] = ec._Album_track_list(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -9513,6 +9691,16 @@ func (ec *executionContext) marshalNTrack2ᚖmusicboxdᚋgraphᚋmodelᚐTrack(c
 		return graphql.Null
 	}
 	return ec._Track(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNTracks2ᚖmusicboxdᚋgraphᚋmodelᚐTracks(ctx context.Context, sel ast.SelectionSet, v *model.Tracks) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Tracks(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {

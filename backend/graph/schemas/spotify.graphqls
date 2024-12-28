@@ -55,6 +55,9 @@ type Album {
   type: String!
   uri: String!
   artists: [SimplifiedArtist!]!
+  tracks: Tracks!
+
+  track_list: [Track!]!
 }
 
 type SimplifiedArtist {

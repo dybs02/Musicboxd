@@ -51,6 +51,16 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, err
 	if err != nil {
 		return nil, err
 	}
+
+	if isFieldRequested(ctx, "track_list") {
+		tracksRes, err := hlp.SpotifyGetAlbumTracks(*res.Tracks.Href, accessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		res.TrackList = tracksRes
+	}
+
 	return res, nil
 }
 
