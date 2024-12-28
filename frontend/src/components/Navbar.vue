@@ -127,9 +127,9 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
                       @complete="suggest_search"
                       @focus="suggest_search"
                       @option-select="select_track"
-                      class="w-96 block"
+                      class="sm:w-96 block"
                       fluid
-                      panelClass="w-96"
+                      panelClass="sm:w-96 w-full"
         >
           <template #header>
             <div class="rounded-md" style="background-color: #09090b;">

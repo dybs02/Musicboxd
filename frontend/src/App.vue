@@ -5,7 +5,7 @@ import Navbar from './components/Navbar.vue'
 
 <template>
   <div class="flex sm:justify-center">
-    <div class="max-w-6xl sm:w-full inline-block">
+    <div class="max-w-6xl w-full inline-block">
       <Navbar />
       <div class="pt-4 px-4">
         <RouterView/>
