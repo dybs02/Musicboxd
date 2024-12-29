@@ -4,13 +4,10 @@ import { useQuery } from '@vue/apollo-composable';
 import Divider from 'primevue/divider';
 import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
-import Accordion from 'primevue/accordion';
-import AccordionPanel from 'primevue/accordionpanel';
-import AccordionHeader from 'primevue/accordionheader';
-import AccordionContent from 'primevue/accordioncontent';
 import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import TrackList from "@/components/album/TrackList.vue";
 
 const route = useRoute();
 const router = useRouter();
@@ -53,7 +50,7 @@ const fetch_album = async () => {
   )
 
   _loading = loading;
-  album.value = computed(() => result.value.album ?? {});
+  album.value = computed(() => result?.value?.album ?? {});
 };
 
 
@@ -76,9 +73,9 @@ watch(() => route.params.id, fetch_album, { immediate: true })
         preview
         />
     </div>
-    <div class="w-1/2 px-4 pt-4">
-      <!-- <Card>
-        <template #content> -->
+    <div class="w-1/2 pl-4 sm:px-4 sm:pt-4">
+      <Card>
+        <template #content>
           <div class="text-3xl sm:text-5xl font-bold">
             <a :href="album.value.external_urls.spotify" target="_blank">
               {{ album.value.name }}
@@ -95,24 +92,20 @@ watch(() => route.params.id, fetch_album, { immediate: true })
               </a>
             </div>
           </div>
-          <div class="text-sm sm:text-xl">
-            <!-- TODO add track list (lazy load?) -->
+          <div class="hidden sm:block">
+            <TrackList :track_list="album.value.track_list" />
           </div>
-          <Accordion value="0" unstyled>
-          <AccordionPanel value="0" unstyled>
-            <AccordionHeader unstyled>Track List </AccordionHeader>
-            <AccordionContent unstyled>
-              <div v-for="track in album.value.track_list" class="m-0">
-                <a @click="router.push({ name: 'track', params: { id: track.id } });" class="cursor-pointer">
-                  {{ track.name }}
-                </a>
-              </div>
-            </AccordionContent>
-          </AccordionPanel>
-        </Accordion>
-        <!-- </template>
-      </Card> -->
+        </template>
+      </Card>
     </div>
+  </div>
+
+  <div class="block sm:hidden pt-4">
+    <Card>
+      <template #content>
+        <TrackList :track_list="album.value.track_list" />
+      </template>
+    </Card>
   </div>
 
 </template>

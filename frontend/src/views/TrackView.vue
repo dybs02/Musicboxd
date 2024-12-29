@@ -60,7 +60,7 @@ const fetch_track = async () => {
   )
 
   _loading = loading;
-  track.value = computed(() => result.value.track ?? {});
+  track.value = computed(() => result?.value?.track ?? {});
 };
 
 
@@ -83,9 +83,9 @@ watch(() => route.params.id, fetch_track, { immediate: true })
         preview
         />
     </div>
-    <div class="w-1/2 px-4 pt-4">
-      <!-- <Card>
-        <template #content> -->
+    <div class="w-1/2 pl-4 sm:px-4 sm:pt-4">
+      <Card>
+        <template #content>
           <div class="text-3xl sm:text-5xl font-bold">
             <a :href="track.value.external_urls.spotify" target="_blank">
               {{ track.value.name }}
@@ -105,8 +105,8 @@ watch(() => route.params.id, fetch_track, { immediate: true })
               ({{ track.value.album.release_date.split("-")[0] }})
             </a>
           </div>
-        <!-- </template>
-      </Card> -->
+        </template>
+      </Card>
     </div>
   </div>
 
