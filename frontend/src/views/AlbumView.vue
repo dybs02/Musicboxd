@@ -138,30 +138,22 @@ watch(() => route.params, fetch_data, { immediate: true })
       </Card>
 
       <div class="hidden sm:block pt-4">
-        <Card class="">
-          <template #content>
-            <Review
-              :rating="review.value.value"
-              :title="review.value.title"
-              :description="review.value.description"
-            />
-          </template>
-        </Card>
+        <Review
+          :rating="review.value.value"
+          :title="review.value.title"
+          :description="review.value.description"
+        />
       </div>
     </div>
   </div>
 
   <!-- TODO fix RatingForm is fetching data twice to preload this component -->
   <div class="block sm:hidden pt-4">
-    <Card class="">
-      <template #content>
-        <Review
-          :rating="review.value.value"
-          :title="review.value.title"
-          :description="review.value.description"
-        />
-      </template>
-    </Card>
+    <Review
+      :rating="review.value.value"
+      :title="review.value.title"
+      :description="review.value.description"
+    />
   </div>
 
   <div class="block sm:hidden pt-4">

@@ -94,7 +94,6 @@ const suggest_search = async (event: any) => {
     search_res = result.value?.search.albums?.items ?? []
   }
 
-  console.log(search_res)
   suggest_items.value = search_res
 }
 
