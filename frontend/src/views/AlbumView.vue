@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
 import Divider from 'primevue/divider';
 import Image from 'primevue/image';
@@ -9,10 +8,35 @@ import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import TrackList from "@/components/album/TrackList.vue";
 import Review from "@/components/Review.vue";
-import { GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
+import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
 import { useAuthStore } from "@/services/authStore";
 
 
+const emptyAlbum = {
+  total_tracks: 0,
+  name: "",
+  release_date: "",
+  images: [
+    {
+      url: null
+    }
+  ],
+  external_urls: {
+    spotify: ""
+  },
+  artists: [
+    {
+      external_urls: {
+        spotify: ""
+      },
+      name: "",
+      id: "",
+      href: "",
+      type: ""
+    }
+  ],
+  track_list: []
+};
 const emptyReview = {
   value: 0,
   title: '',
@@ -23,47 +47,30 @@ const emptyReview = {
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const album = ref<any>(null);
+const album = ref<any>(emptyAlbum);
 const review = ref<any>(emptyReview);
-var _loading = ref(true);
+
+let albumLoading = ref(true);
+let reviewLoading = ref(true);
 
 
 const fetch_album = async () => {
-  const { loading, result } = useQuery(gql`
-    query Search {
-      album(id: "${route.params.albumId}") {
-        total_tracks
-        name
-        release_date
-        images {
-          url
-        }
-        external_urls {
-          spotify
-        }
-        artists {
-            external_urls {
-              spotify
-            }
-            name
-            id
-            href
-            type
-        }
-        track_list {
-          name
-          duration_ms
-          id
-          external_urls {
-            spotify
-          }
-        }
-      }
-    }`
-  )
+  const { loading, error, result } = useQuery(GET_ALBUM_BY_ID, {
+    id: route.params.albumId
+  });
 
-  _loading = loading;
-  album.value = computed(() => result?.value?.album ?? {});
+  albumLoading = loading;
+
+  watch(error, (err) => {
+    if (err?.message === 'mongo: no documents in result') {
+      console.error(err);
+      router.push({ 
+        name: 'error'
+      });
+    }
+  });
+
+  album.value = computed(() => result?.value?.album ?? emptyAlbum);
 };
 
 const fetch_rewiew = async () => {
@@ -73,15 +80,16 @@ const fetch_rewiew = async () => {
     userId: store.getId(),
   });
 
-  // _loading.value = _loading.value || loading.value;
+  reviewLoading = loading;
 
-  // watch(error, (err) => {
-  //   if (err?.message === 'mongo: no documents in result') {
-  //     router.push({ 
-  //       name: 'error'
-  //     });
-  //   }
-  // });
+  watch(error, (err) => {
+    if (err?.message === 'mongo: no documents in result') {
+      console.error(err);
+      router.push({ 
+        name: 'error'
+      });
+    }
+  });
   
   review.value = computed(() => result.value?.review ?? emptyReview);
 };
@@ -98,8 +106,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 </script>
 
 <template>
-  <!-- TODO v-if for error -->
-  <div v-if="_loading" class="flex justify-center pt-12">
+  <div v-if="albumLoading || reviewLoading" class="flex justify-center pt-12">
     <ProgressSpinner />
   </div>
 

@@ -7,7 +7,7 @@ import Card from 'primevue/card';
 import FloatLabel from "primevue/floatlabel";
 import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -39,11 +39,12 @@ const { mutate: updateReview, error: updateReviewError, onDone: updateReviewOnDo
   }
 ));
 
-// watch(updateReviewError, (err) => {
-//   router.push({ 
-//     name: 'error' 
-//   });
-// });
+watch(updateReviewError, (err) => {
+  console.error(err);
+  router.push({ 
+    name: 'error' 
+  });
+});
 
 updateReviewOnDone(() => {
   // TODO refetch review data in parent, reload component and add toast component
