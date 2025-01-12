@@ -8,17 +8,30 @@ import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import TrackList from "@/components/album/TrackList.vue";
+import Review from "@/components/Review.vue";
+import { GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
+import { useAuthStore } from "@/services/authStore";
 
+
+const emptyReview = {
+  value: 0,
+  title: '',
+  description: '',
+};
+
+
+const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const album = ref<any>(null);
+const review = ref<any>(emptyReview);
 var _loading = ref(true);
 
 
 const fetch_album = async () => {
   const { loading, result } = useQuery(gql`
     query Search {
-      album(id: "${route.params.id}") {
+      album(id: "${route.params.albumId}") {
         total_tracks
         name
         release_date
@@ -53,8 +66,34 @@ const fetch_album = async () => {
   album.value = computed(() => result?.value?.album ?? {});
 };
 
+const fetch_rewiew = async () => {
 
-watch(() => route.params.id, fetch_album, { immediate: true })
+  const { loading, error, result } = useQuery(GET_REWIEW_BY_ITEM_ID_USER_ID, {
+    itemId: route.params.albumId,
+    userId: store.getId(),
+  });
+
+  // _loading.value = _loading.value || loading.value;
+
+  // watch(error, (err) => {
+  //   if (err?.message === 'mongo: no documents in result') {
+  //     router.push({ 
+  //       name: 'error'
+  //     });
+  //   }
+  // });
+  
+  review.value = computed(() => result.value?.review ?? emptyReview);
+};
+
+
+const fetch_data = async () => {
+  fetch_album();
+  fetch_rewiew();
+};
+
+
+watch(() => route.params, fetch_data, { immediate: true })
 
 </script>
 
@@ -97,7 +136,32 @@ watch(() => route.params.id, fetch_album, { immediate: true })
           </div>
         </template>
       </Card>
+
+      <div class="hidden sm:block pt-4">
+        <Card class="">
+          <template #content>
+            <Review
+              :rating="review.value.value"
+              :title="review.value.title"
+              :description="review.value.description"
+            />
+          </template>
+        </Card>
+      </div>
     </div>
+  </div>
+
+  <!-- TODO fix RatingForm is fetching data twice to preload this component -->
+  <div class="block sm:hidden pt-4">
+    <Card class="">
+      <template #content>
+        <Review
+          :rating="review.value.value"
+          :title="review.value.title"
+          :description="review.value.description"
+        />
+      </template>
+    </Card>
   </div>
 
   <div class="block sm:hidden pt-4">

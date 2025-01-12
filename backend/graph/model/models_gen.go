@@ -56,6 +56,15 @@ type Mutation struct {
 type Query struct {
 }
 
+type Review struct {
+	ID          *string `json:"_id,omitempty" bson:"_id,omitempty"`
+	Value       int     `json:"value" bson:"value"`
+	ItemID      string  `json:"itemId" bson:"itemId"`
+	Title       string  `json:"title" bson:"title"`
+	Description string  `json:"description" bson:"description"`
+	UserID      string  `json:"userId" bson:"userId"`
+}
+
 type SearchResponse struct {
 	Tracks *Tracks `json:"tracks,omitempty" bson:"tracks,omitempty"`
 	Albums *Albums `json:"albums,omitempty" bson:"albums,omitempty"`

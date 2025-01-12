@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { useAuthStore } from "@/services/authStore";
 import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
+import Cookies from "js-cookie";
 import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
@@ -9,7 +11,7 @@ import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 
-
+const store = useAuthStore();
 const router = useRouter();
 const search_value = ref('');
 const nav_items = ref([
@@ -99,13 +101,18 @@ const suggest_search = async (event: any) => {
 const login = () => {
   // @ts-ignore
   window.location.href = import.meta.env.VITE_BACKEND_URL+'/v1/api/auth/login'
+
+  const userId = Cookies.get('userId');
+  if (userId) {
+    store.setId(userId);
+  }
 }
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
   if (search_type.value === 'Track')
     router.push({ name: 'track', params: { id: event.value.id } });
   else if (search_type.value === 'Album')
-    router.push({ name: 'album', params: { id: event.value.id } });
+    router.push({ name: 'album', params: { albumId: event.value.id, userId: store.getId() } });
 
   search_value.value = ''
 }

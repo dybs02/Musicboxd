@@ -1,0 +1,16 @@
+type Review {
+  _id: ID
+  value: Int!
+  itemId: String!
+  title: String!
+  description: String!
+  userId: String!
+}
+
+extend type Query {
+  review(itemId: String!, userId: String!): Review!
+}
+
+extend type Mutation {
+  createOrUpdateReview(itemId: String!, title: String, description: String, value: Int): Review!
+}

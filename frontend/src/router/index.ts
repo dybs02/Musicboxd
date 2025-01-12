@@ -9,7 +9,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/album/:id',
+      path: '/album/:albumId/review/:userId',
       name: 'album',
       component: () => import('@/views/AlbumView.vue')
     },
