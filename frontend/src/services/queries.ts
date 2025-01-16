@@ -40,6 +40,18 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
       value
       title
       description
+      comments {
+        text
+        createdAt
+        updatedAt
+        user {
+          _id
+          displayName
+          images {
+            url
+          }
+        }
+      }
     }
   }
 `;
@@ -54,9 +66,27 @@ const CREATE_UPDATE_REWIEW_BY_ITEM_ID = gql`
   }
 `;
 
+const ADD_COMMENT = gql`
+  mutation AddComment($itemId: String!, $reviewId: String!, $text: String!) {
+    addComment(itemId: $itemId, reviewId: $reviewId, text: $text) {
+      text
+      createdAt
+      updatedAt
+      user {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
+    }
+  }
+`;
+
 
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
   CREATE_UPDATE_REWIEW_BY_ITEM_ID,
+  ADD_COMMENT,
 };

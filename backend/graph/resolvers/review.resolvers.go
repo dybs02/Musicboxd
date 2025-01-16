@@ -9,8 +9,10 @@ import (
 	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -24,7 +26,15 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	review := coll.FindOneAndUpdate(
 		ctx,
 		bson.M{"itemId": itemID, "userId": cc.UserID},
-		bson.M{"$set": bson.M{"title": title, "description": description, "value": value}},
+		bson.M{
+			"$setOnInsert": bson.M{
+				"comments": []interface{}{},
+			},
+			"$set": bson.M{
+				"title":       title,
+				"description": description,
+				"value":       value,
+			}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	)
 	if review.Err() != nil {
@@ -38,6 +48,63 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	}
 
 	return &res, nil
+}
+
+func (r *mutationResolver) AddComment(ctx context.Context, itemID string, reviewID string, text string) ([]*model.Comment, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	comment := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"itemId": itemID, "userId": cc.UserID},
+		bson.M{
+			"$push": bson.M{
+				"comments": bson.M{
+					"_id":       primitive.NewObjectID(),
+					"reviewId":  reviewID,
+					"userId":    cc.UserID,
+					"text":      text,
+					"createdAt": time.Now(), // TODO check if timezone independent - utc+0?
+					"updatedAt": time.Now(),
+				},
+			},
+		},
+		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+	)
+
+	if comment.Err() != nil {
+		return nil, comment.Err()
+	}
+
+	res := model.Review{}
+	err = comment.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	if isFieldRequested(ctx, "comments.user") {
+		for _, comment := range res.Comments {
+			coll := database.GetDB().GetCollection("users")
+			user := coll.FindOne(ctx, bson.M{"_id": comment.UserID})
+			if user.Err() != nil {
+				return nil, user.Err()
+			}
+
+			u := model.UserResponse{}
+			err = user.Decode(&u)
+			if err != nil {
+				return nil, err
+			}
+
+			comment.User = &u
+		}
+	}
+
+	// TODO return only the added comment?
+	return res.Comments, nil
 }
 
 func (r *queryResolver) Review(ctx context.Context, itemID string, userID string) (*model.Review, error) {
@@ -56,6 +123,24 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 	err = review.Decode(&res)
 	if err != nil {
 		return nil, err
+	}
+
+	if isFieldRequested(ctx, "comments.user") {
+		for _, comment := range res.Comments {
+			coll := database.GetDB().GetCollection("users")
+			user := coll.FindOne(ctx, bson.M{"_id": comment.UserID})
+			if user.Err() != nil {
+				return nil, user.Err()
+			}
+
+			u := model.UserResponse{}
+			err = user.Decode(&u)
+			if err != nil {
+				return nil, err
+			}
+
+			comment.User = &u
+		}
 	}
 
 	return &res, nil

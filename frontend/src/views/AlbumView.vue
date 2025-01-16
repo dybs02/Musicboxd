@@ -2,14 +2,14 @@
 import AlbumInfo from '@/components/album/AlbumInfo.vue';
 import TrackList from "@/components/album/TrackList.vue";
 import Review from "@/components/Review.vue";
+import ReviewComments from '@/components/ReviewComments.vue';
 import { useAuthStore } from "@/services/authStore";
 import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
 import { useQuery } from '@vue/apollo-composable';
-import Card from 'primevue/card';
-import { useMediaQuery } from '@vueuse/core'
+import { useMediaQuery } from '@vueuse/core';
 import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
-import { computed, ref, watch } from 'vue';
+import { computed, reactive, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -42,6 +42,7 @@ const emptyReview = {
   value: 0,
   title: '',
   description: '',
+  comments: [],
 };
 
 
@@ -102,6 +103,14 @@ const fetch_data = async () => {
 
 watch(() => route.params, fetch_data, { immediate: true })
 
+const updateComments = (comments: Comments) => {
+  // idk if there is a better way to update comments & keep them reactive
+  let newReview = {}
+  Object.assign(newReview, review.value.value);
+  Object.assign(newReview, { comments: comments });
+  review.value = computed(() => newReview);
+};
+
 </script>
 
 <template>
@@ -149,6 +158,13 @@ watch(() => route.params, fetch_data, { immediate: true })
         class="pt-4"
       />
     </div>
+
+    <ReviewComments
+      v-if="review.value !== emptyReview"
+      :comments="review.value.comments"
+      @update-comments="updateComments"
+      class="sm:px-4 mt-4"
+    />
   </div>
 
 </template>
