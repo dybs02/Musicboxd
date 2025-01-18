@@ -70,9 +70,9 @@ stages:
           steps:
           - task: AzureWebApp@1
             inputs:
-              azureSubscription: 'Azure for Students(2)(a01e0481-f64f-4175-bb08-5fb645938877)'
+              azureSubscription: 'Azure for Students(a01e0481-f64f-4175-bb08-5fb645938877)'
               appType: 'webAppLinux'
-              appName: 'webapp-azure-pipelines-test-36526451845164'
+              appName: 'webapp-musicboxd-746263'
               package: '$(Pipeline.Workspace)/frontend/$(Build.BuildId).zip'
               deploymentMethod: auto
               appSettings: |
