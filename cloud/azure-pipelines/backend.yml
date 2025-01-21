@@ -20,6 +20,8 @@ variables:
     value: '$(projectRoot)/app'
   - name: IMAGE_NAME
     value: 'musicboxd-backend'
+  - group: docker-registry
+  - group: vg-backend
 
 stages:
 - stage: Build
