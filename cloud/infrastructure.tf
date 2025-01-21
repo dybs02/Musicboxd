@@ -57,6 +57,24 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 }
 
+// Backend Web App Container
+resource "azurerm_linux_web_app" "app" {
+  name                = "backend-musicboxd-746263"
+  location            = azurerm_resource_group.rg.location
+  resource_group_name = azurerm_resource_group.rg.name
+  service_plan_id     = azurerm_service_plan.appserviceplan.id
+
+  site_config {
+  }
+}
+
+resource "azurerm_container_registry" "acr" {
+  name                = "acr746263"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  sku                 = "Basic"
+  admin_enabled       = true
+}
 
 // Pipelines Agent Pool VM
 resource "azurerm_virtual_network" "vnet" {
