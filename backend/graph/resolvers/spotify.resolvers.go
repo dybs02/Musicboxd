@@ -6,7 +6,6 @@ package resolver
 
 import (
 	"context"
-	"musicboxd/graph"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
 )
@@ -63,7 +62,3 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, err
 
 	return res, nil
 }
-
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
-
-type queryResolver struct{ *Resolver }
