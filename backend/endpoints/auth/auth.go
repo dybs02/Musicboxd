@@ -36,8 +36,8 @@ func LoginEndpoint(c *gin.Context) {
 	// or should it be stored in a backend session?
 
 	// TODO enable secure cookie only in production
-	c.SetCookie(CODE_VERIFIER_KEY, codeVerifier, 0, "/", hlp.Envs["BACKEND_DOMAIN"], false, true)
-	c.SetCookie(STATE_KEY, state, 0, "/", hlp.Envs["BACKEND_DOMAIN"], false, true)
+	c.SetCookie(CODE_VERIFIER_KEY, codeVerifier, 0, "/", "", false, true)
+	c.SetCookie(STATE_KEY, state, 0, "/", "", false, true)
 	c.SetSameSite(http.SameSiteStrictMode)
 	c.Redirect(http.StatusTemporaryRedirect, url)
 }
@@ -68,8 +68,8 @@ func CallbackEndpoint(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(CODE_VERIFIER_KEY, "", -1, "/", hlp.Envs["BACKEND_DOMAIN"], false, true)
-	c.SetCookie(STATE_KEY, "", -1, "/", hlp.Envs["BACKEND_DOMAIN"], false, true)
+	c.SetCookie(CODE_VERIFIER_KEY, "", -1, "/", "", false, true)
+	c.SetCookie(STATE_KEY, "", -1, "/", "", false, true)
 
 	tokens, err := requestTokens(c)
 	if err != nil {
@@ -99,8 +99,8 @@ func CallbackEndpoint(c *gin.Context) {
 		return
 	}
 
-	c.SetCookie(JWT_KEY, token, 0, "/", hlp.Envs["BACKEND_DOMAIN"], false, true)
-	c.SetCookie(USERID_KEY, *dbUser.ID, 0, "/", hlp.Envs["BACKEND_DOMAIN"], false, false)
+	c.SetCookie(JWT_KEY, token, 0, "/", "", false, true)
+	c.SetCookie(USERID_KEY, *dbUser.ID, 0, "/", "", false, false)
 	c.Redirect(http.StatusFound, hlp.Envs["FRONTEND_URL"])
 }
 
