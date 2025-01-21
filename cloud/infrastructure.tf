@@ -57,7 +57,7 @@ resource "azurerm_linux_web_app" "webapp" {
   }
 }
 
-# Backend Web App Container
+// Backend Web App Container
 resource "azurerm_linux_web_app" "app" {
   name                = "backend-musicboxd-746263"
   location            = azurerm_resource_group.rg.location

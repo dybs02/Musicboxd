@@ -2,6 +2,10 @@
 
 package model
 
+import (
+	"time"
+)
+
 type Album struct {
 	AlbumType            string              `json:"album_type" bson:"album_type"`
 	TotalTracks          int                 `json:"total_tracks" bson:"total_tracks"`
@@ -30,6 +34,16 @@ type Albums struct {
 	Items    []*Album `json:"items" bson:"items"`
 }
 
+type Comment struct {
+	ID        *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	ReviewID  *string       `json:"reviewId,omitempty" bson:"reviewId,omitempty"`
+	UserID    *string       `json:"userId,omitempty" bson:"userId,omitempty"`
+	User      *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	Text      *string       `json:"text,omitempty" bson:"text,omitempty"`
+	CreatedAt *time.Time    `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
+	UpdatedAt *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+}
+
 type ExplicitContent struct {
 	FilterEnabled bool `json:"filterEnabled" bson:"filterEnabled"`
 	FilterLocked  bool `json:"filterLocked" bson:"filterLocked"`
@@ -54,6 +68,16 @@ type Mutation struct {
 }
 
 type Query struct {
+}
+
+type Review struct {
+	ID          *string    `json:"_id,omitempty" bson:"_id,omitempty"`
+	Value       int        `json:"value" bson:"value"`
+	ItemID      string     `json:"itemId" bson:"itemId"`
+	Title       string     `json:"title" bson:"title"`
+	Description string     `json:"description" bson:"description"`
+	UserID      string     `json:"userId" bson:"userId"`
+	Comments    []*Comment `json:"comments,omitempty" bson:"comments,omitempty"`
 }
 
 type SearchResponse struct {

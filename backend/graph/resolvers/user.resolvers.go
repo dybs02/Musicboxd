@@ -7,7 +7,6 @@ package resolver
 import (
 	"context"
 	"musicboxd/database"
-	"musicboxd/graph"
 	"musicboxd/graph/model"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -53,7 +52,3 @@ func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName strin
 	}
 	return &res, nil
 }
-
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
-type mutationResolver struct{ *Resolver }

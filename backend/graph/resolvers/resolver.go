@@ -8,6 +8,7 @@ import (
 	"musicboxd/endpoints/auth"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
+	"slices"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gin-gonic/gin"
@@ -78,12 +79,31 @@ func GetUserAccessToken(ctx context.Context) (string, error) {
 	return *res.Tokens.AccessToken, nil
 }
 
-func isFieldRequested(ctx context.Context, fieldName string) bool {
-	fields := graphql.CollectFieldsCtx(ctx, nil)
-	for _, field := range fields {
-		if field.Name == fieldName {
-			return true
-		}
+func GetPreloads(ctx context.Context) []string {
+	return GetNestedPreloads(
+		graphql.GetOperationContext(ctx),
+		graphql.CollectFieldsCtx(ctx, nil),
+		"",
+	)
+}
+
+func GetNestedPreloads(ctx *graphql.OperationContext, fields []graphql.CollectedField, prefix string) (preloads []string) {
+	for _, column := range fields {
+		prefixColumn := GetPreloadString(prefix, column.Name)
+		preloads = append(preloads, prefixColumn)
+		preloads = append(preloads, GetNestedPreloads(ctx, graphql.CollectFields(ctx, column.Selections, nil), prefixColumn)...)
 	}
-	return false
+	return
+}
+
+func GetPreloadString(prefix, name string) string {
+	if len(prefix) > 0 {
+		return prefix + "." + name
+	}
+	return name
+}
+
+func isFieldRequested(ctx context.Context, fieldName string) bool {
+	fields := GetPreloads(ctx)
+	return slices.Contains(fields, fieldName)
 }
