@@ -1,0 +1,64 @@
+trigger:
+  batch: true
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - frontend
+      - cloud
+      - .vscode
+
+pool:
+  name: Default
+  vmImage: self-hosted
+
+variables:
+  - name: projectRoot
+    value: '$(System.DefaultWorkingDirectory)'
+  - name: buildPath
+    value: '$(projectRoot)/app'
+  - name: IMAGE_NAME
+    value: 'musicboxd-backend'
+
+stages:
+- stage: Build
+  displayName: 'Build backend'
+  jobs:
+  - job: 
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'ACR-ServiceConnection'
+        repository: '$(IMAGE_NAME)'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: |
+          $(Build.BuildId)
+          latest
+      displayName: 'Build and Push Docker Image'
+  
+- stage: Deploy
+  displayName: 'Deploy backend'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeploymentJob
+    environment: 'prod'
+    displayName: 'Deploy backend'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureRmWebAppDeployment@4
+            inputs:
+              ConnectionType: 'AzureRM'
+              azureSubscription: 'Azure for Students(a01e0481-f64f-4175-bb08-5fb645938877)'
+              appType: 'webAppContainer'
+              WebAppName: 'backend-musicboxd-746263'
+              DockerNamespace: '$(DOCKER_REGISTRY_SERVER_URL)'
+              DockerRepository: '$(IMAGE_NAME)'
+              DockerImageTag: '$(Build.BuildId)'
+              AppSettings: -DOCKER_REGISTRY_SERVER_URL "$(DOCKER_REGISTRY_SERVER_URL)" -DOCKER_REGISTRY_SERVER_USERNAME "$(DOCKER_REGISTRY_SERVER_USERNAME)" -DOCKER_REGISTRY_SERVER_PASSWORD "$(DOCKER_REGISTRY_SERVER_PASSWORD)" -MESSAGE "$(MESSAGE)"
+            displayName: 'Deploy to AzureWebApp'
+            
