@@ -18,6 +18,7 @@ variables:
     value: '$(System.DefaultWorkingDirectory)/frontend'
   - name: buildPath
     value: '$(projectRoot)/dist'
+  - group: vg-frontend
 
 stages:
 - stage: Build
@@ -75,7 +76,5 @@ stages:
               appName: 'webapp-musicboxd-746263'
               package: '$(Pipeline.Workspace)/frontend/$(Build.BuildId).zip'
               deploymentMethod: auto
-              appSettings: |
-                -VITE_GRAPHQL_API_URL "$(VITE_GRAPHQL_API_URL)"
-                -VITE_BACKEND_URL "$(VITE_BACKEND_URL)"
+              appSettings: -VITE_GRAPHQL_API_URL "$(VITE_GRAPHQL_API_URL)" -VITE_BACKEND_URL "$(VITE_BACKEND_URL)"
             displayName: 'Deploy to AzureWebApp'
