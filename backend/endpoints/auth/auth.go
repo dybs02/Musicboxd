@@ -39,7 +39,7 @@ func LoginEndpoint(c *gin.Context) {
 	c.SetCookie(CODE_VERIFIER_KEY, codeVerifier, 0, "/", "", false, true)
 	c.SetCookie(STATE_KEY, state, 0, "/", "", false, true)
 	c.SetSameSite(http.SameSiteStrictMode)
-	c.Redirect(http.StatusTemporaryRedirect, url)
+	c.Redirect(http.StatusOK, url)
 }
 
 func CallbackEndpoint(c *gin.Context) {
