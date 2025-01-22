@@ -108,7 +108,7 @@ func CallbackEndpoint(c *gin.Context) {
 	c.SetCookie(JWT_KEY, token, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, true)
 	c.SetSameSite(http.SameSiteNoneMode)
 	c.SetCookie(USERID_KEY, *dbUser.ID, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, false)
-	c.Redirect(http.StatusOK, hlp.Envs["FRONTEND_URL"])
+	c.Redirect(http.StatusFound, hlp.Envs["FRONTEND_URL"])
 }
 
 func requestTokens(c *gin.Context) (*tokenResponse, error) {
