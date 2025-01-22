@@ -128,3 +128,30 @@ func SpotifyGetAlbumTracks(url string, accessToken string) ([]*model.Track, erro
 
 	return response.Items, nil
 }
+
+func SpotifyGetAlbumsById(ids []string, accessToken string) ([]*model.Album, error) {
+	idsParam := ids[0]
+	for _, id := range ids[1:] {
+		idsParam += "," + id
+	}
+
+	url := fmt.Sprintf("https://api.spotify.com/v1/albums?ids=%s", idsParam)
+	reqBody, code, err := makeSpotifyRequest(url, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	if code == 401 {
+		// TODO refresh token
+		return nil, fmt.Errorf("unauthorized spotify request - bad token")
+	}
+
+	response := struct {
+		Albums []*model.Album `json:"albums"`
+	}{}
+	err = json.Unmarshal(reqBody, &response)
+	if err != nil {
+		return nil, err
+	}
+
+	return response.Albums, nil
+}

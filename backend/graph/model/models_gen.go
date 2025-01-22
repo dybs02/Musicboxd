@@ -71,13 +71,20 @@ type Query struct {
 }
 
 type Review struct {
-	ID          *string    `json:"_id,omitempty" bson:"_id,omitempty"`
-	Value       int        `json:"value" bson:"value"`
-	ItemID      string     `json:"itemId" bson:"itemId"`
-	Title       string     `json:"title" bson:"title"`
-	Description string     `json:"description" bson:"description"`
-	UserID      string     `json:"userId" bson:"userId"`
-	Comments    []*Comment `json:"comments,omitempty" bson:"comments,omitempty"`
+	ID          *string      `json:"_id,omitempty" bson:"_id,omitempty"`
+	Value       int          `json:"value" bson:"value"`
+	ItemID      string       `json:"itemId" bson:"itemId"`
+	Title       string       `json:"title" bson:"title"`
+	Description string       `json:"description" bson:"description"`
+	UserID      string       `json:"userId" bson:"userId"`
+	Comments    []*Comment   `json:"comments,omitempty" bson:"comments,omitempty"`
+	Album       *ReviewAlbum `json:"album,omitempty" bson:"album,omitempty"`
+}
+
+type ReviewAlbum struct {
+	Name    string              `json:"name" bson:"name"`
+	Images  []*Image            `json:"images" bson:"images"`
+	Artists []*SimplifiedArtist `json:"artists" bson:"artists"`
 }
 
 type SearchResponse struct {

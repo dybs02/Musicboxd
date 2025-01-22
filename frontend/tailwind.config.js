@@ -15,6 +15,8 @@ export default {
         'snow-light': 'var(--color-snow-light)',
         'snow': 'var(--color-snow)',
         'snow-dark': 'var(--color-snow-dark)',
+
+        'primary-light': 'var(--color-primary-light)',
       },
       fontFamily: {
         sans: ['Lato', 'sans-serif'],

@@ -82,4 +82,5 @@ extend type Query {
   search(type: String, query: String!): SearchResponse!
   track(id: String!): Track!
   album(id: String!): Album!
+  albumsByIds(ids: [String!]!): [Album!]!
 }

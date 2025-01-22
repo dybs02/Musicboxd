@@ -9,6 +9,7 @@ import (
 	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
+	"musicboxd/hlp"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,6 +21,22 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	accessToken, err := GetUserAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	album, err := hlp.SpotifyGetAlbum(itemID, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	dbAlbum := map[string]interface{}{
+		"name":    album.Name,
+		"images":  album.Images,
+		"artists": album.Artists,
 	}
 
 	coll := database.GetDB().GetCollection("reviews")
@@ -34,6 +51,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 				"title":       title,
 				"description": description,
 				"value":       value,
+				"album":       dbAlbum,
 			}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	)
@@ -144,6 +162,33 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 	}
 
 	return &res, nil
+}
+
+func (r *queryResolver) RecentReviews(ctx context.Context, number *int) ([]*model.Review, error) {
+	coll := database.GetDB().GetCollection("reviews")
+	cursor, err := coll.Find(
+		ctx,
+		bson.M{},
+		options.Find().SetSort(bson.M{"createdAt": -1}).SetLimit(int64(min(*number, 20))),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*model.Review{}
+	for cursor.Next(ctx) {
+		r := model.Review{}
+		err = cursor.Decode(&r)
+		if err != nil {
+			return nil, err
+		}
+
+		// comments.user field is not added
+
+		res = append(res, &r)
+	}
+
+	return res, nil
 }
 
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }

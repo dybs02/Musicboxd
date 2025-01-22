@@ -62,3 +62,19 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, err
 
 	return res, nil
 }
+
+func (r *queryResolver) AlbumsByIds(ctx context.Context, ids []string) ([]*model.Album, error) {
+	accessToken, err := GetUserAccessToken(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := hlp.SpotifyGetAlbumsById(ids, accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO if needed implement track_list field
+
+	return res, nil
+}

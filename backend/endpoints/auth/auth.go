@@ -100,13 +100,15 @@ func CallbackEndpoint(c *gin.Context) {
 	}
 
 	isSecureCookie := false
+	sameSiteMode := http.SameSiteLaxMode
 	if hlp.Envs["ENVIRONMENT"] == "prod" {
 		isSecureCookie = true
+		sameSiteMode = http.SameSiteNoneMode
 	}
 
-	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetSameSite(sameSiteMode)
 	c.SetCookie(JWT_KEY, token, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, true)
-	c.SetSameSite(http.SameSiteNoneMode)
+	c.SetSameSite(sameSiteMode)
 	c.SetCookie(USERID_KEY, *dbUser.ID, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, false)
 	c.Redirect(http.StatusFound, hlp.Envs["FRONTEND_URL"])
 }
