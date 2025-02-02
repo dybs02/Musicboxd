@@ -43,6 +43,11 @@ const router = createRouter({
       name: 'error',
       component: () => import('@/views/ErrorView.vue')
     },
+    {
+      path: '/loginredirect',
+      name: 'loginredirect',
+      component: () => import('@/views/LoginRedirectView.vue')
+    },
   ]
 })
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"musicboxd/api/middleware"
 	"musicboxd/database"
-	"musicboxd/endpoints/auth"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
 	"slices"
@@ -42,8 +41,8 @@ func ValidateJWT(ctx context.Context) (*hlp.CustomClaims, error) {
 		return nil, err
 	}
 
-	jwt, err := ginCtx.Cookie(auth.JWT_KEY)
-	if err != nil {
+	jwt := ginCtx.GetHeader("Authorization")
+	if jwt == "" {
 		return nil, err
 	}
 

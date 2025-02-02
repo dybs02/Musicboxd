@@ -1,4 +1,5 @@
 import { ApolloClient, ApolloLink, InMemoryCache, concat, createHttpLink } from '@apollo/client/core';
+import { useAuthStore } from './authStore';
 
 
 const httpLink = createHttpLink({
@@ -9,11 +10,11 @@ const httpLink = createHttpLink({
 
 
 const authMiddleware = new ApolloLink((operation, forward) => {
-  // TODO set token
-  const token = null;
+  const store = useAuthStore();
+  const token = store.getJWT();
   operation.setContext({
     headers: {
-      authorization: token ? `Bearer ${token}` : "",
+      Authorization: token ? `${token}` : "",
     },
   });
   return forward(operation);
