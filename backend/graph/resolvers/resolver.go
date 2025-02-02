@@ -63,6 +63,11 @@ func GetUserAccessToken(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	fmt.Println(cc)
+	fmt.Println(cc.UserID)
+	fmt.Println(cc.Email)
+	fmt.Println(cc.StandardClaims.ExpiresAt)
+
 	coll := database.GetDB().GetCollection("users")
 	user := coll.FindOne(ctx, bson.M{"_id": cc.UserID})
 	if user.Err() != nil {
