@@ -70,6 +70,7 @@ func GetUserAccessToken(ctx context.Context) (string, error) {
 
 	coll := database.GetDB().GetCollection("users")
 	user := coll.FindOne(ctx, bson.M{"_id": cc.UserID})
+	fmt.Println(user)
 	if user.Err() != nil {
 		return "", user.Err()
 	}
