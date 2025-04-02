@@ -19,9 +19,11 @@ let recentReviewsLoading = ref(true);
 
 
 const fetch_recent_reviews = async () => {
-  const { loading, error, result } = useQuery(RECENT_REVIEWS, {
-    number: recentReviewsNumber
-  });
+  const { loading, error, result } = useQuery(
+    RECENT_REVIEWS,
+    { number: recentReviewsNumber },
+    { fetchPolicy: 'network-only' }
+  );
 
   recentReviewsLoading = loading;
 
