@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
 import Divider from 'primevue/divider';
 import Image from 'primevue/image';
@@ -7,70 +6,78 @@ import ProgressSpinner from 'primevue/progressspinner';
 import Card from 'primevue/card';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { GET_TRACK_BY_ID } from "@/services/queries";
+
+const emptyTrack = {
+  duration_ms: 0,
+  href: "",
+  id: "",
+  name: "",
+  popularity: 0,
+  track_number: 0,
+  external_urls: {
+    spotify: ""
+  },
+  artists: [
+    {
+      external_urls: {
+        spotify: ""
+      },
+      name: "",
+      id: "",
+    }
+  ],
+  album: {
+    images: {
+      url: ""
+    },
+    name: "",
+    id: "",
+    total_tracks: 0,
+    release_date: "",
+    external_urls: {
+      spotify: ""
+    }
+  }
+};
 
 const route = useRoute();
 const router = useRouter();
-const track = ref<any>(null);
-var _loading = ref(true);
+const track = ref<any>(emptyTrack);
 
+let trackLoading = ref(true);
+let reviewLoading = ref(true);
 
 const fetch_track = async () => {
-  const { loading, result } = useQuery(gql`
-    query Search {
-      track(id: "${route.params.id}") {
-        duration_ms
-        explicit
-        href
-        id
-        name
-        popularity
-        track_number
-        type
-        uri
-        external_urls {
-          spotify
-        }
-        artists {
-            external_urls {
-              spotify
-            }
-            name
-            id
-            href
-            type
-        }
-        album {
-            images {
-                url
-                height
-                width
-            }
-            release_date
-            name
-            type
-            id
-            href
-            total_tracks
-            external_urls {
-              spotify
-            }
-        }
-      }
-    }`
-  )
+  const { loading, error, result } = useQuery(GET_TRACK_BY_ID, {
+    id: route.params.trackId
+  });
 
-  _loading = loading;
-  track.value = computed(() => result?.value?.track ?? {});
+  trackLoading = loading;
+
+  watch(error, (err) => {
+    console.error(err);
+    router.push({ 
+      name: 'error'
+    });
+  });
+
+  track.value = computed(() => result?.value?.track ?? emptyTrack);
 };
 
 
-watch(() => route.params.id, fetch_track, { immediate: true })
+const fetch_data = async () => {
+  fetch_track();
+  // fetch_rewiew();
+};
+
+watch(() => route.params.id, fetch_data, { immediate: true })
 
 </script>
 
 <template>
   <!-- TODO v-if for error -->
-  <div v-if="_loading" class="flex justify-center pt-12">
+  <div v-if="trackLoading" class="flex justify-center pt-12"> // TODO add loading OR
     <ProgressSpinner />
   </div>
 

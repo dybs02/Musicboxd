@@ -124,6 +124,41 @@ query AlbumsByIds($ids: [String!]!) {
 }
 `;
 
+const GET_TRACK_BY_ID = gql`
+  query Track($id: String!) {
+    track(id: $id) {
+      duration_ms
+      href
+      id
+      name
+      popularity
+      track_number
+      external_urls {
+        spotify
+      }
+      artists {
+        external_urls {
+          spotify
+        }
+        name
+        id
+      }
+      album {
+        images {
+          url
+        }
+        name
+        id
+        total_tracks
+        release_date
+        external_urls {
+          spotify
+        }
+      }
+    }
+  }
+`;
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -131,4 +166,5 @@ export {
   ADD_COMMENT,
   RECENT_REVIEWS,
   ALBUMS_BY_IDS,
+  GET_TRACK_BY_ID,
 };

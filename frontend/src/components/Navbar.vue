@@ -109,7 +109,7 @@ const login = () => {
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
   if (search_type.value === 'Track')
-    router.push({ name: 'track', params: { id: event.value.id } });
+    router.push({ name: 'track', params: { trackId: event.value.id, userId: store.getId() } });
   else if (search_type.value === 'Album')
     router.push({ name: 'album', params: { albumId: event.value.id, userId: store.getId() } });
 

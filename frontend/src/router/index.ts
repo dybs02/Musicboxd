@@ -14,7 +14,7 @@ const router = createRouter({
       component: () => import('@/views/AlbumView.vue')
     },
     {
-      path: '/track/:id',
+      path: '/track/:trackId/review/:userId',
       name: 'track',
       component: () => import('@/views/TrackView.vue')
     },
