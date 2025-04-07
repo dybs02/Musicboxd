@@ -83,10 +83,52 @@ const ADD_COMMENT = gql`
   }
 `;
 
+const RECENT_REVIEWS = gql`
+query RecentReviews($number: Int!) {
+  recentReviews(number: $number) {
+    _id
+    value
+    itemId
+    title
+    description
+    userId
+    album {
+      name
+      images {
+        url
+      }
+      artists {
+        name
+      }
+    }
+  }
+}
+`;
+
+const ALBUMS_BY_IDS = gql`
+query AlbumsByIds($ids: [String!]!) {
+  albumsByIds(ids: $ids) {
+    id
+    name
+    images {
+      url
+    }
+    external_urls {
+      spotify
+    }
+    artists {
+      id
+      name
+    }
+  }
+}
+`;
 
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
   CREATE_UPDATE_REWIEW_BY_ITEM_ID,
   ADD_COMMENT,
+  RECENT_REVIEWS,
+  ALBUMS_BY_IDS,
 };

@@ -8,6 +8,13 @@ type Review {
   description: String!
   userId: String!
   comments: [Comment!]
+  album: ReviewAlbum
+}
+
+type ReviewAlbum {
+  name: String!
+  images: [Image!]!
+  artists: [SimplifiedArtist!]!
 }
 
 type Comment {
@@ -22,6 +29,7 @@ type Comment {
 
 extend type Query {
   review(itemId: String!, userId: String!): Review!
+  recentReviews(number: Int): [Review!]!
 }
 
 extend type Mutation {

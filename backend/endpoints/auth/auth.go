@@ -103,6 +103,18 @@ func CallbackEndpoint(c *gin.Context) {
 	q.Set(USERID_KEY, *dbUser.ID)
 	q.Set(JWT_KEY, token)
 	location := url.URL{Path: hlp.Envs["FRONTEND_URL"] + "/loginredirect", RawQuery: q.Encode()}
+
+	isSecureCookie := false
+	sameSiteMode := http.SameSiteLaxMode
+	if hlp.Envs["ENVIRONMENT"] == "prod" {
+		isSecureCookie = true
+		sameSiteMode = http.SameSiteNoneMode
+	}
+
+	c.SetSameSite(sameSiteMode)
+	c.SetCookie(JWT_KEY, token, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, true)
+	c.SetSameSite(sameSiteMode)
+	c.SetCookie(USERID_KEY, *dbUser.ID, 0, "/", hlp.Envs["BACKEND_DOMAIN"], isSecureCookie, false)
 	c.Redirect(http.StatusFound, location.RequestURI())
 }
 
