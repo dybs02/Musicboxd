@@ -138,6 +138,8 @@ const updateComments = (comments: Comments) => {
             class="mt-4"
           />
           <Review
+            :item-id="route.params.albumId as string"
+            :item-type="'album'"
             :rating="review.value.value"
             :title="review.value.title"
             :description="review.value.description"
@@ -152,6 +154,8 @@ const updateComments = (comments: Comments) => {
         class="mt-4"
       />
       <Review
+        :item-id="route.params.albumId as string"
+        :item-type="'album'"
         :rating="review.value.value"
         :title="review.value.title"
         :description="review.value.description"
@@ -161,6 +165,7 @@ const updateComments = (comments: Comments) => {
 
     <ReviewComments
       v-if="review.value !== emptyReview"
+      :item-id="route.params.albumId as string"
       :comments="review.value.comments"
       @update-comments="updateComments"
       class="sm:px-4 mt-4"

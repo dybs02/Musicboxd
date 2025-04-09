@@ -33,6 +33,6 @@ extend type Query {
 }
 
 extend type Mutation {
-  createOrUpdateReview(itemId: String!, title: String, description: String, value: Int): Review!
+  createOrUpdateReview(itemId: String!, itemType: String!, title: String, description: String, value: Int): Review!
   addComment(itemId: String!, reviewId: String!, text: String!): [Comment!]!
 }

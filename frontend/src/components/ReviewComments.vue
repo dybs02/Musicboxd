@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/services/authStore';
 import { ADD_COMMENT } from '@/services/queries';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
@@ -10,6 +11,8 @@ import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+
+const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const newComment = ref({
@@ -21,6 +24,7 @@ const emit = defineEmits<{
   updateComments: [comments: Comments]
 }>();
 const props = defineProps<{
+  itemId: string;
   comments: Comments;
 }>();
 
@@ -30,7 +34,7 @@ const { mutate: addComment, error: addCommentError, onDone: addCommentOnDone } =
   ADD_COMMENT,
   () => ({
     variables: {
-      itemId: route.params.albumId,
+      itemId: props.itemId,
       reviewId: route.params.userId,
       text: newComment.value.text,
     },

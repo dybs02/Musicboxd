@@ -14,6 +14,8 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<{
+  itemId: string;
+  itemType: string;
   rating:  number;
   title: string;
   description: string;
@@ -21,6 +23,8 @@ const props = defineProps<{
 const reviewEditable = ref(props.title == '');
 
 let review = ref({
+  itemId: props.itemId,
+  itemType: props.itemType,
   rating: props.rating,
   title: props.title,
   description: props.description,
@@ -31,7 +35,8 @@ const { mutate: updateReview, error: updateReviewError, onDone: updateReviewOnDo
   CREATE_UPDATE_REWIEW_BY_ITEM_ID,
   () => ({
     variables: {
-      itemId: route.params.albumId,
+      itemId: review.value.itemId,
+      itemType: review.value.itemType,
       value: review.value.rating,
       title: review.value.title,
       description: review.value.description,

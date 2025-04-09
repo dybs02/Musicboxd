@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
@@ -17,7 +18,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID string, title *string, description *string, value *int) (*model.Review, error) {
+func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -28,9 +29,21 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 		return nil, err
 	}
 
-	album, err := hlp.SpotifyGetAlbum(itemID, accessToken)
-	if err != nil {
-		return nil, err
+	var album *model.Album
+
+	if itemType == "track" {
+		track, err := hlp.SpotifyGetTrack(itemID, accessToken)
+		if err != nil {
+			return nil, err
+		}
+		album = track.Album
+	} else if itemType == "album" {
+		album, err = hlp.SpotifyGetAlbum(itemID, accessToken)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, errors.New("invalid item type")
 	}
 
 	dbAlbum := map[string]interface{}{
@@ -103,7 +116,7 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 		return nil, err
 	}
 
-	if isFieldRequested(ctx, "comments.user") {
+	if isFieldRequested(ctx, "user") {
 		for _, comment := range res.Comments {
 			coll := database.GetDB().GetCollection("users")
 			user := coll.FindOne(ctx, bson.M{"_id": comment.UserID})

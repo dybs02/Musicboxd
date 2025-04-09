@@ -108,7 +108,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddComment           func(childComplexity int, itemID string, reviewID string, text string) int
-		CreateOrUpdateReview func(childComplexity int, itemID string, title *string, description *string, value *int) int
+		CreateOrUpdateReview func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
 		UpdateCurrentUser    func(childComplexity int, displayName *string) int
 	}
 
@@ -226,7 +226,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	CreateOrUpdateReview(ctx context.Context, itemID string, title *string, description *string, value *int) (*model.Review, error)
+	CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error)
 	AddComment(ctx context.Context, itemID string, reviewID string, text string) ([]*model.Comment, error)
 	UpdateCurrentUser(ctx context.Context, displayName *string) (*model.UserResponse, error)
 }
@@ -540,7 +540,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateOrUpdateReview(childComplexity, args["itemId"].(string), args["title"].(*string), args["description"].(*string), args["value"].(*int)), true
+		return e.complexity.Mutation.CreateOrUpdateReview(childComplexity, args["itemId"].(string), args["itemType"].(string), args["title"].(*string), args["description"].(*string), args["value"].(*int)), true
 
 	case "Mutation.updateCurrentUser":
 		if e.complexity.Mutation.UpdateCurrentUser == nil {
@@ -1355,21 +1355,26 @@ func (ec *executionContext) field_Mutation_createOrUpdateReview_args(ctx context
 		return nil, err
 	}
 	args["itemId"] = arg0
-	arg1, err := ec.field_Mutation_createOrUpdateReview_argsTitle(ctx, rawArgs)
+	arg1, err := ec.field_Mutation_createOrUpdateReview_argsItemType(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["title"] = arg1
-	arg2, err := ec.field_Mutation_createOrUpdateReview_argsDescription(ctx, rawArgs)
+	args["itemType"] = arg1
+	arg2, err := ec.field_Mutation_createOrUpdateReview_argsTitle(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["description"] = arg2
-	arg3, err := ec.field_Mutation_createOrUpdateReview_argsValue(ctx, rawArgs)
+	args["title"] = arg2
+	arg3, err := ec.field_Mutation_createOrUpdateReview_argsDescription(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["value"] = arg3
+	args["description"] = arg3
+	arg4, err := ec.field_Mutation_createOrUpdateReview_argsValue(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["value"] = arg4
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_createOrUpdateReview_argsItemID(
@@ -1378,6 +1383,19 @@ func (ec *executionContext) field_Mutation_createOrUpdateReview_argsItemID(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
 	if tmp, ok := rawArgs["itemId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_createOrUpdateReview_argsItemType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemType"))
+	if tmp, ok := rawArgs["itemType"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -3471,7 +3489,7 @@ func (ec *executionContext) _Mutation_createOrUpdateReview(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateOrUpdateReview(rctx, fc.Args["itemId"].(string), fc.Args["title"].(*string), fc.Args["description"].(*string), fc.Args["value"].(*int))
+		return ec.resolvers.Mutation().CreateOrUpdateReview(rctx, fc.Args["itemId"].(string), fc.Args["itemType"].(string), fc.Args["title"].(*string), fc.Args["description"].(*string), fc.Args["value"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

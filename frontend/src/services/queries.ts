@@ -57,8 +57,8 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
 `;
 
 const CREATE_UPDATE_REWIEW_BY_ITEM_ID = gql`
-  mutation CreateOrUpdateReview($itemId: String!, $title: String, $description: String, $value: Int) {
-    createOrUpdateReview(itemId: $itemId, title: $title, description: $description, value: $value) {
+  mutation CreateOrUpdateReview($itemId: String!, $itemType: String!, $title: String, $description: String, $value: Int) {
+    createOrUpdateReview(itemId: $itemId, itemType: $itemType, title: $title, description: $description, value: $value) {
       value
       title
       description
