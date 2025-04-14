@@ -5,11 +5,12 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type CustomClaims struct {
-	UserID string `json:"id"`
-	Email  string `json:"email"`
+	UserID primitive.ObjectID `json:"id"`
+	Email  string             `json:"email"`
 	jwt.StandardClaims
 }
 
@@ -23,8 +24,13 @@ var jwtSecret = Envs["JWT_SECRET"]
 func GenerateJWT(userInfo UserInfo) (string, error) {
 	expirationTime := time.Now().Add(1 * time.Hour)
 
+	convertedID, err := primitive.ObjectIDFromHex(userInfo.ID)
+	if err != nil {
+		return "", err
+	}
+
 	claims := CustomClaims{
-		UserID: userInfo.ID,
+		UserID: convertedID,
 		Email:  userInfo.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),

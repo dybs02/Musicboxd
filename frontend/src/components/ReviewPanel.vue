@@ -45,7 +45,7 @@ const responsiveOptions = ref([
       <Carousel :value="props.reviews" :numVisible="4" :numScroll="2" :responsiveOptions="responsiveOptions">
         <template #item="slotProps">
           <div class="bg-primary-light 0 rounded-lg mx-auto m-2 p-4 w-[200px] h-[320px]">
-            <div class="cursor-pointer" @click="router.push({ name: 'album', params: { albumId: slotProps.data.itemId, userId: store.getId() } });">
+            <div class="cursor-pointer" @click="router.push({ name: 'album', params: { albumId: slotProps.data.itemId, userId: slotProps.data.userId } });">
               <div class="mb-4">
                 <div class="relative mx-auto">
                   <img :src="slotProps.data.album.images[0].url" :alt="slotProps.data.album.name" class="w-full" />

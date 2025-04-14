@@ -144,8 +144,13 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		return nil, err
 	}
 
+	convertedID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
 	coll := database.GetDB().GetCollection("reviews")
-	review := coll.FindOne(ctx, bson.M{"itemId": itemID, "userId": userID})
+	review := coll.FindOne(ctx, bson.M{"itemId": itemID, "userId": convertedID})
 	if review.Err() != nil {
 		return nil, review.Err()
 	}

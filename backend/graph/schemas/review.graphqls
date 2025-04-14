@@ -6,7 +6,7 @@ type Review {
   itemId: String!
   title: String!
   description: String!
-  userId: String!
+  userId: ID!
   comments: [Comment!]
   album: ReviewAlbum
 }

@@ -75,9 +75,11 @@ const fetch_album = async () => {
 
 const fetch_rewiew = async () => {
 
+  const userId = route.params.userId ?? store.getId();
+
   const { loading, error, result } = useQuery(GET_REWIEW_BY_ITEM_ID_USER_ID, {
     itemId: route.params.albumId,
-    userId: store.getId(),
+    userId: userId,
   });
 
   reviewLoading = loading;
@@ -89,6 +91,17 @@ const fetch_rewiew = async () => {
         name: 'error'
       });
     }
+
+    if (route.params.userId !== store.getId()) {
+      router.push({ 
+        name: 'album',
+        params: { 
+          albumId: route.params.albumId,
+          userId: store.getId()
+        }
+      });
+    }
+
   });
   
   review.value = computed(() => result.value?.review ?? emptyReview);
