@@ -119,7 +119,13 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 	if isFieldRequested(ctx, "user") {
 		for _, comment := range res.Comments {
 			coll := database.GetDB().GetCollection("users")
-			user := coll.FindOne(ctx, bson.M{"_id": comment.UserID})
+
+			convertedID, err := primitive.ObjectIDFromHex(*comment.UserID)
+			if err != nil {
+				return nil, err
+			}
+
+			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
 			if user.Err() != nil {
 				return nil, user.Err()
 			}
@@ -164,7 +170,13 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 	if isFieldRequested(ctx, "comments.user") {
 		for _, comment := range res.Comments {
 			coll := database.GetDB().GetCollection("users")
-			user := coll.FindOne(ctx, bson.M{"_id": comment.UserID})
+
+			convertedID, err := primitive.ObjectIDFromHex(*comment.UserID)
+			if err != nil {
+				return nil, err
+			}
+
+			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
 			if user.Err() != nil {
 				return nil, user.Err()
 			}
