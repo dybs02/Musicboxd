@@ -202,6 +202,7 @@ type ComplexityRoot struct {
 		ID              func(childComplexity int) int
 		Images          func(childComplexity int) int
 		Product         func(childComplexity int) int
+		Role            func(childComplexity int) int
 		SpotifyID       func(childComplexity int) int
 		Tokens          func(childComplexity int) int
 		Type            func(childComplexity int) int
@@ -219,6 +220,7 @@ type ComplexityRoot struct {
 		ID              func(childComplexity int) int
 		Images          func(childComplexity int) int
 		Product         func(childComplexity int) int
+		Role            func(childComplexity int) int
 		SpotifyID       func(childComplexity int) int
 		Type            func(childComplexity int) int
 		URI             func(childComplexity int) int
@@ -1044,6 +1046,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Product(childComplexity), true
 
+	case "User.role":
+		if e.complexity.User.Role == nil {
+			break
+		}
+
+		return e.complexity.User.Role(childComplexity), true
+
 	case "User.spotifyId":
 		if e.complexity.User.SpotifyID == nil {
 			break
@@ -1141,6 +1150,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserResponse.Product(childComplexity), true
+
+	case "UserResponse.role":
+		if e.complexity.UserResponse.Role == nil {
+			break
+		}
+
+		return e.complexity.UserResponse.Role(childComplexity), true
 
 	case "UserResponse.spotifyId":
 		if e.complexity.UserResponse.SpotifyID == nil {
@@ -3002,6 +3018,8 @@ func (ec *executionContext) fieldContext_Comment_user(_ context.Context, field g
 				return ec.fieldContext_UserResponse_type(ctx, field)
 			case "uri":
 				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -3681,6 +3699,8 @@ func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.
 				return ec.fieldContext_UserResponse_type(ctx, field)
 			case "uri":
 				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -4233,6 +4253,8 @@ func (ec *executionContext) fieldContext_Query_userByDisplayName(ctx context.Con
 				return ec.fieldContext_UserResponse_type(ctx, field)
 			case "uri":
 				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -7264,6 +7286,50 @@ func (ec *executionContext) fieldContext_User_tokens(_ context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _User_role(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserResponse__id(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserResponse__id(ctx, field)
 	if err != nil {
@@ -7848,6 +7914,50 @@ func (ec *executionContext) _UserResponse_uri(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_UserResponse_uri(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserResponse_role(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_role(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Role, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserResponse_role(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UserResponse",
 		Field:      field,
@@ -10806,6 +10916,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "tokens":
 			out.Values[i] = ec._User_tokens(ctx, field, obj)
+		case "role":
+			out.Values[i] = ec._User_role(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -10902,6 +11017,11 @@ func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.Selection
 			}
 		case "uri":
 			out.Values[i] = ec._UserResponse_uri(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "role":
+			out.Values[i] = ec._UserResponse_role(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

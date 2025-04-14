@@ -12,10 +12,12 @@ const router = useRouter();
 onMounted(() => {
   const jwt = route.query.jwt;
   const userId = route.query.userId;
+  const userRole = route.query.role;
 
-  if (jwt && userId) {
+  if (jwt && userId && userRole) {
     store.setId(userId as string);
     store.setJWT(jwt as string);
+    store.setRole(userRole as string);
   }
   
   router.push({ name: 'home' });

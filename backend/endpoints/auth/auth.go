@@ -102,6 +102,7 @@ func CallbackEndpoint(c *gin.Context) {
 	q := url.Values{}
 	q.Set(USERID_KEY, *dbUser.ID)
 	q.Set(JWT_KEY, token)
+	q.Set("role", dbUser.Role)
 	location := url.URL{Path: hlp.Envs["FRONTEND_URL"] + "/loginredirect", RawQuery: q.Encode()}
 
 	isSecureCookie := false
@@ -236,13 +237,30 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 		Type:            userData.Type,
 		URI:             userData.Uri,
 		Tokens:          tokens,
+		Role:            `user`,
 	}
 
 	db := database.GetDB()
 	res := db.GetCollection("users").FindOne(context.TODO(), bson.M{"spotifyId": userData.Id})
 	var err error
 	if res.Err() == nil {
-		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyId": userData.Id}, bson.M{"$set": user})
+		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyId": userData.Id}, bson.M{
+			"$set": bson.M{
+				"country":         userData.Country,
+				"displayName":     userData.DisplayName,
+				"email":           userData.Email,
+				"explicitContent": explicitContent,
+				"externalUrls":    externalUrls,
+				"followers":       followers,
+				"href":            userData.Href,
+				"spotifyId":       userData.Id,
+				"images":          images,
+				"product":         userData.Product,
+				"type":            userData.Type,
+				"uri":             userData.Uri,
+				"tokens":          tokens, // TODO update tokens or just refresh them?
+			},
+		})
 	} else {
 		_, err = db.GetCollection("users").InsertOne(context.TODO(), user)
 	}

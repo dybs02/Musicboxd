@@ -13,6 +13,7 @@ type User {
   type: String!
   uri: String!
   tokens: Tokens
+  role: String!
 }
 
 type ExplicitContent {
@@ -58,6 +59,7 @@ type UserResponse {
   product: String!
   type: String!
   uri: String!
+  role: String!
 }
 
 extend type Query {

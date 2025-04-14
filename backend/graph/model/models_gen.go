@@ -154,6 +154,7 @@ type User struct {
 	Type            string           `json:"type" bson:"type"`
 	URI             string           `json:"uri" bson:"uri"`
 	Tokens          *Tokens          `json:"tokens,omitempty" bson:"tokens,omitempty"`
+	Role            string           `json:"role" bson:"role"`
 }
 
 type UserResponse struct {
@@ -170,4 +171,5 @@ type UserResponse struct {
 	Product         string           `json:"product" bson:"product"`
 	Type            string           `json:"type" bson:"type"`
 	URI             string           `json:"uri" bson:"uri"`
+	Role            string           `json:"role" bson:"role"`
 }
