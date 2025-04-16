@@ -10,6 +10,9 @@ import FloatLabel from "primevue/floatlabel";
 import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ConfirmPopup from 'primevue/confirmpopup';
+import { useConfirm } from 'primevue/useconfirm';
+import { useToast } from 'primevue/usetoast';
 
 
 const store = useAuthStore();
@@ -18,6 +21,33 @@ const router = useRouter();
 const newComment = ref({
   text: '',
 });
+
+
+const confirm = useConfirm();
+const toast = useToast();
+
+
+const confirmReport = (event: any, commentID: string) => {
+  confirm.require({
+    target: event.currentTarget,
+    message: 'Are you sure you want report this comment?',
+    icon: 'pi pi-exclamation-triangle',
+    rejectProps: {
+      label: 'Cancel',
+      severity: 'secondary',
+      outlined: true
+    },
+    acceptProps: {
+      label: 'Report'
+    },
+    accept: () => {
+      // TODO add report comment mutation
+      console.log('report comment', commentID);
+
+      toast.add({ severity: 'info', summary: 'Comment reported', life: 2000 });
+    }
+  });
+};
 
 
 const emit = defineEmits<{
@@ -76,7 +106,7 @@ const navigateToUser = (userId: string) => {
 
 <template>
   <!-- TODO enable editing, delete, reply -->
-  
+  <Toast />
   <div>
     <Card>
       <template #title>
@@ -106,6 +136,10 @@ const navigateToUser = (userId: string) => {
                       minute: 'numeric'
                     }).format(new Date(c.updatedAt)) }}
                   </span>
+                </div>
+                <div class="ml-auto">
+                  <ConfirmPopup></ConfirmPopup>
+                  <Button @click="confirmReport($event, c._id)" icon="pi pi-flag-fill" aria-label="Save" severity="secondary" size="small" />
                 </div>
               </div>
             </template>

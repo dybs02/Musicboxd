@@ -6,6 +6,8 @@ import Aura from '@primevue/themes/aura'
 import { DefaultApolloClient, provideApolloClient } from '@vue/apollo-composable'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
+import ConfirmationService from 'primevue/confirmationservice'
+import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip'
 import { createApp, h, provide } from 'vue'
 import apolloClient from './services/apollo'
@@ -33,5 +35,8 @@ app.directive('tooltip', Tooltip);
 
 app.use(createPinia())
 app.use(router)
+
+app.use(ConfirmationService);
+app.use(ToastService);
 
 app.mount('#app')

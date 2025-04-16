@@ -41,6 +41,7 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
       title
       description
       comments {
+        _id
         text
         createdAt
         updatedAt
@@ -69,6 +70,7 @@ const CREATE_UPDATE_REWIEW_BY_ITEM_ID = gql`
 const ADD_COMMENT = gql`
   mutation AddComment($itemId: String!, $reviewId: String!, $text: String!) {
     addComment(itemId: $itemId, reviewId: $reviewId, text: $text) {
+      _id
       text
       createdAt
       updatedAt
