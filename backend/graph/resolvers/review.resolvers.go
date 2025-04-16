@@ -87,15 +87,20 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 		return nil, err
 	}
 
+	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
+	if err != nil {
+		return nil, err
+	}
+
 	coll := database.GetDB().GetCollection("reviews")
 	comment := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"itemId": itemID, "userId": cc.UserID},
+		bson.M{"itemId": itemID, "userId": convertedReviewID},
 		bson.M{
 			"$push": bson.M{
 				"comments": bson.M{
 					"_id":       primitive.NewObjectID(),
-					"reviewId":  reviewID,
+					"reviewId":  reviewID, // why would i need it here?
 					"userId":    cc.UserID,
 					"text":      text,
 					"createdAt": time.Now(), // TODO check if timezone independent - utc+0?
@@ -103,7 +108,7 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 				},
 			},
 		},
-		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	)
 
 	if comment.Err() != nil {
