@@ -11,12 +11,14 @@ import (
 type CustomClaims struct {
 	UserID primitive.ObjectID `json:"id"`
 	Email  string             `json:"email"`
+	Role   string             `json:"role"`
 	jwt.StandardClaims
 }
 
 type UserInfo struct {
 	ID    string `json:"id"`
 	Email string `json:"email"`
+	Role  string `json:"role"`
 }
 
 var jwtSecret = Envs["JWT_SECRET"]
@@ -32,6 +34,7 @@ func GenerateJWT(userInfo UserInfo) (string, error) {
 	claims := CustomClaims{
 		UserID: convertedID,
 		Email:  userInfo.Email,
+		Role:   userInfo.Role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

@@ -1,0 +1,22 @@
+
+type ReportedComment {
+  _id: ID,
+  commentId: ID!
+  # reviewId: ID!
+  reportedBy: ID!
+  # reason: String!
+  status: String!
+  createdAt: Time!
+  resolvedAt: Time
+  moderatorId: ID
+  moderatorNotes: String
+}
+
+extend type Query {
+  reportedComments: [ReportedComment]!
+  reportedComment(id: String!): ReportedComment!
+}
+
+extend type Mutation {
+  reportComment(id: String!): ID!
+}

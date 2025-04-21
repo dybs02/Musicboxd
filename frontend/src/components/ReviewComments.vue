@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/services/authStore';
-import { ADD_COMMENT } from '@/services/queries';
+import { ADD_COMMENT, REPORT_COMMENT } from '@/services/queries';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
 import Avatar from 'primevue/avatar';
@@ -41,9 +41,22 @@ const confirmReport = (event: any, commentID: string) => {
       label: 'Report'
     },
     accept: () => {
-      // TODO add report comment mutation
-      console.log('report comment', commentID);
+      // TODO move to a different file
+      // TODO confirm report with a reason
+      const { mutate: reportComment, onDone: successfulMutation} = useMutation(
+        REPORT_COMMENT,
+        () => ({
+          variables: {
+            id: commentID,
+          },
+        }
+      ));
 
+      successfulMutation((result: any) => {
+        console.log(result);
+      });
+
+      reportComment()
       toast.add({ severity: 'info', summary: 'Comment reported', life: 2000 });
     }
   });

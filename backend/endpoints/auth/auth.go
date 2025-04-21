@@ -92,6 +92,7 @@ func CallbackEndpoint(c *gin.Context) {
 	ui := hlp.UserInfo{
 		ID:    *dbUser.ID,
 		Email: dbUser.Email,
+		Role:  dbUser.Role,
 	}
 	token, err := hlp.GenerateJWT(ui)
 	if err != nil {

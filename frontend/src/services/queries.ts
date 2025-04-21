@@ -161,6 +161,12 @@ const GET_TRACK_BY_ID = gql`
   }
 `;
 
+const REPORT_COMMENT = gql`
+  mutation ReportComment($id: String!) {
+    reportComment(id: $id)
+  }
+`;
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -169,4 +175,5 @@ export {
   RECENT_REVIEWS,
   ALBUMS_BY_IDS,
   GET_TRACK_BY_ID,
+  REPORT_COMMENT,
 };
