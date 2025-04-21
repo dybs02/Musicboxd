@@ -2,8 +2,9 @@
 type ReportedComment {
   _id: ID,
   commentId: ID!
-  # reviewId: ID!
+  comment: Comment
   reportedBy: ID!
+  reportedByUser: UserResponse
   # reason: String!
   status: String!
   createdAt: Time!
@@ -13,8 +14,7 @@ type ReportedComment {
 }
 
 extend type Query {
-  reportedComments: [ReportedComment]!
-  reportedComment(id: String!): ReportedComment!
+  reportedComments(number: Int): [ReportedComment]!
 }
 
 extend type Mutation {

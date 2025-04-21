@@ -14,6 +14,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func (r *mutationResolver) ReportComment(ctx context.Context, id string) (string, error) {
@@ -27,7 +28,8 @@ func (r *mutationResolver) ReportComment(ctx context.Context, id string) (string
 		return "", fmt.Errorf("invalid comment ID")
 	}
 
-	coll := database.GetDB().GetCollection("comments")
+	// TODO move to different dataset ?
+	coll := database.GetDB().GetCollection("reported_comments")
 	report, err := coll.InsertOne(
 		ctx,
 		bson.M{
@@ -50,12 +52,127 @@ func (r *mutationResolver) ReportComment(ctx context.Context, id string) (string
 	return reportID.Hex(), nil
 }
 
-func (r *queryResolver) ReportedComments(ctx context.Context) ([]*model.ReportedComment, error) {
-	panic(fmt.Errorf("not implemented: ReportedComments - reportedComments"))
-}
+func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
 
-func (r *queryResolver) ReportedComment(ctx context.Context, id string) (*model.ReportedComment, error) {
-	panic(fmt.Errorf("not implemented: ReportedComment - reportedComment"))
+	if cc.Role != "moderator" {
+		return nil, fmt.Errorf("unauthorized")
+	}
+
+	coll := database.GetDB().GetCollection("reported_comments")
+	cursor, err := coll.Find(
+		ctx,
+		bson.M{
+			"status": "reported", // add this as parameter
+		},
+		// TODO add pagination
+		// options.Find().SetSort(bson.M{"createdAt": 1}).SetSkip(offset).SetLimit(int64(min(*number, 20))),
+		options.Find().SetSort(bson.M{"createdAt": 1}).SetLimit(20),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+
+	res := []*model.ReportedComment{}
+	for cursor.Next(ctx) {
+		reportedComment := model.ReportedComment{}
+		err = cursor.Decode(&reportedComment)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, &reportedComment)
+	}
+
+	err = cursor.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(res) == 0 {
+		return nil, fmt.Errorf("no reported comments found")
+	}
+
+	for i, reportedComment := range res {
+
+		// TODO move those requests to a different function
+		if isFieldRequested(ctx, "comment") {
+			review := model.Review{}
+
+			convertedID, err := primitive.ObjectIDFromHex(reportedComment.CommentID)
+			if err != nil {
+				return nil, err
+			}
+
+			coll := database.GetDB().GetCollection("reviews")
+			err = coll.FindOne(
+				ctx,
+				bson.M{
+					"comments._id": bson.M{
+						"$eq": convertedID,
+					},
+				},
+			).Decode(&review)
+			if err != nil {
+				return nil, err
+			}
+			if len(review.Comments) == 0 {
+				return nil, fmt.Errorf("no comments found")
+			}
+
+			res[i].Comment = review.Comments[0]
+
+			if isFieldRequested(ctx, "comment.user") {
+				coll := database.GetDB().GetCollection("users")
+
+				convertedID, err := primitive.ObjectIDFromHex(*res[i].Comment.UserID)
+				if err != nil {
+					return nil, err
+				}
+
+				user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+				if user.Err() != nil {
+					return nil, user.Err()
+				}
+
+				u := model.UserResponse{}
+				err = user.Decode(&u)
+				if err != nil {
+					return nil, err
+				}
+
+				res[i].Comment.User = &u
+			}
+		}
+
+		if isFieldRequested(ctx, "reportedByUser") {
+			coll := database.GetDB().GetCollection("users")
+
+			convertedID, err := primitive.ObjectIDFromHex(res[i].ReportedBy)
+			if err != nil {
+				return nil, err
+			}
+
+			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+			if user.Err() != nil {
+				return nil, user.Err()
+			}
+
+			u := model.UserResponse{}
+			err = user.Decode(&u)
+			if err != nil {
+				return nil, err
+			}
+
+			res[i].ReportedByUser = &u
+		}
+	}
+
+	return res, nil
 }
 
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }

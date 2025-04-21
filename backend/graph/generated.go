@@ -117,8 +117,7 @@ type ComplexityRoot struct {
 		Album             func(childComplexity int, id string) int
 		AlbumsByIds       func(childComplexity int, ids []string) int
 		RecentReviews     func(childComplexity int, number *int) int
-		ReportedComment   func(childComplexity int, id string) int
-		ReportedComments  func(childComplexity int) int
+		ReportedComments  func(childComplexity int, number *int) int
 		Review            func(childComplexity int, itemID string, userID string) int
 		Search            func(childComplexity int, typeArg *string, query string) int
 		Track             func(childComplexity int, id string) int
@@ -126,12 +125,14 @@ type ComplexityRoot struct {
 	}
 
 	ReportedComment struct {
+		Comment        func(childComplexity int) int
 		CommentID      func(childComplexity int) int
 		CreatedAt      func(childComplexity int) int
 		ID             func(childComplexity int) int
 		ModeratorID    func(childComplexity int) int
 		ModeratorNotes func(childComplexity int) int
 		ReportedBy     func(childComplexity int) int
+		ReportedByUser func(childComplexity int) int
 		ResolvedAt     func(childComplexity int) int
 		Status         func(childComplexity int) int
 	}
@@ -248,8 +249,7 @@ type MutationResolver interface {
 	UpdateCurrentUser(ctx context.Context, displayName *string) (*model.UserResponse, error)
 }
 type QueryResolver interface {
-	ReportedComments(ctx context.Context) ([]*model.ReportedComment, error)
-	ReportedComment(ctx context.Context, id string) (*model.ReportedComment, error)
+	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
 	RecentReviews(ctx context.Context, number *int) ([]*model.Review, error)
 	Search(ctx context.Context, typeArg *string, query string) (*model.SearchResponse, error)
@@ -621,24 +621,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.RecentReviews(childComplexity, args["number"].(*int)), true
 
-	case "Query.reportedComment":
-		if e.complexity.Query.ReportedComment == nil {
-			break
-		}
-
-		args, err := ec.field_Query_reportedComment_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ReportedComment(childComplexity, args["id"].(string)), true
-
 	case "Query.reportedComments":
 		if e.complexity.Query.ReportedComments == nil {
 			break
 		}
 
-		return e.complexity.Query.ReportedComments(childComplexity), true
+		args, err := ec.field_Query_reportedComments_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReportedComments(childComplexity, args["number"].(*int)), true
 
 	case "Query.review":
 		if e.complexity.Query.Review == nil {
@@ -688,6 +681,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.UserByDisplayName(childComplexity, args["displayName"].(string)), true
 
+	case "ReportedComment.comment":
+		if e.complexity.ReportedComment.Comment == nil {
+			break
+		}
+
+		return e.complexity.ReportedComment.Comment(childComplexity), true
+
 	case "ReportedComment.commentId":
 		if e.complexity.ReportedComment.CommentID == nil {
 			break
@@ -729,6 +729,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ReportedComment.ReportedBy(childComplexity), true
+
+	case "ReportedComment.reportedByUser":
+		if e.complexity.ReportedComment.ReportedByUser == nil {
+			break
+		}
+
+		return e.complexity.ReportedComment.ReportedByUser(childComplexity), true
 
 	case "ReportedComment.resolvedAt":
 		if e.complexity.ReportedComment.ResolvedAt == nil {
@@ -1701,26 +1708,26 @@ func (ec *executionContext) field_Query_recentReviews_argsNumber(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_reportedComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_reportedComments_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_reportedComment_argsID(ctx, rawArgs)
+	arg0, err := ec.field_Query_reportedComments_argsNumber(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["id"] = arg0
+	args["number"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_reportedComment_argsID(
+func (ec *executionContext) field_Query_reportedComments_argsNumber(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
+	if tmp, ok := rawArgs["number"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
 	}
 
-	var zeroVal string
+	var zeroVal *int
 	return zeroVal, nil
 }
 
@@ -3939,7 +3946,7 @@ func (ec *executionContext) _Query_reportedComments(ctx context.Context, field g
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ReportedComments(rctx)
+		return ec.resolvers.Query().ReportedComments(rctx, fc.Args["number"].(*int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3956,7 +3963,7 @@ func (ec *executionContext) _Query_reportedComments(ctx context.Context, field g
 	return ec.marshalNReportedComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐReportedComment(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_reportedComments(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_reportedComments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -3968,70 +3975,12 @@ func (ec *executionContext) fieldContext_Query_reportedComments(_ context.Contex
 				return ec.fieldContext_ReportedComment__id(ctx, field)
 			case "commentId":
 				return ec.fieldContext_ReportedComment_commentId(ctx, field)
+			case "comment":
+				return ec.fieldContext_ReportedComment_comment(ctx, field)
 			case "reportedBy":
 				return ec.fieldContext_ReportedComment_reportedBy(ctx, field)
-			case "status":
-				return ec.fieldContext_ReportedComment_status(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_ReportedComment_createdAt(ctx, field)
-			case "resolvedAt":
-				return ec.fieldContext_ReportedComment_resolvedAt(ctx, field)
-			case "moderatorId":
-				return ec.fieldContext_ReportedComment_moderatorId(ctx, field)
-			case "moderatorNotes":
-				return ec.fieldContext_ReportedComment_moderatorNotes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type ReportedComment", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_reportedComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_reportedComment(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ReportedComment(rctx, fc.Args["id"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.ReportedComment)
-	fc.Result = res
-	return ec.marshalNReportedComment2ᚖmusicboxdᚋgraphᚋmodelᚐReportedComment(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_reportedComment(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "_id":
-				return ec.fieldContext_ReportedComment__id(ctx, field)
-			case "commentId":
-				return ec.fieldContext_ReportedComment_commentId(ctx, field)
-			case "reportedBy":
-				return ec.fieldContext_ReportedComment_reportedBy(ctx, field)
+			case "reportedByUser":
+				return ec.fieldContext_ReportedComment_reportedByUser(ctx, field)
 			case "status":
 				return ec.fieldContext_ReportedComment_status(ctx, field)
 			case "createdAt":
@@ -4053,7 +4002,7 @@ func (ec *executionContext) fieldContext_Query_reportedComment(ctx context.Conte
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_reportedComment_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_reportedComments_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4828,6 +4777,63 @@ func (ec *executionContext) fieldContext_ReportedComment_commentId(_ context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _ReportedComment_comment(ctx context.Context, field graphql.CollectedField, obj *model.ReportedComment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReportedComment_comment(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Comment, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Comment)
+	fc.Result = res
+	return ec.marshalOComment2ᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReportedComment_comment(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReportedComment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Comment__id(ctx, field)
+			case "reviewId":
+				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "userId":
+				return ec.fieldContext_Comment_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Comment_user(ctx, field)
+			case "text":
+				return ec.fieldContext_Comment_text(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Comment_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Comment_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ReportedComment_reportedBy(ctx context.Context, field graphql.CollectedField, obj *model.ReportedComment) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ReportedComment_reportedBy(ctx, field)
 	if err != nil {
@@ -4867,6 +4873,77 @@ func (ec *executionContext) fieldContext_ReportedComment_reportedBy(_ context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReportedComment_reportedByUser(ctx context.Context, field graphql.CollectedField, obj *model.ReportedComment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReportedComment_reportedByUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReportedByUser, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserResponse)
+	fc.Result = res
+	return ec.marshalOUserResponse2ᚖmusicboxdᚋgraphᚋmodelᚐUserResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReportedComment_reportedByUser(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReportedComment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_UserResponse__id(ctx, field)
+			case "country":
+				return ec.fieldContext_UserResponse_country(ctx, field)
+			case "displayName":
+				return ec.fieldContext_UserResponse_displayName(ctx, field)
+			case "email":
+				return ec.fieldContext_UserResponse_email(ctx, field)
+			case "explicitContent":
+				return ec.fieldContext_UserResponse_explicitContent(ctx, field)
+			case "externalUrls":
+				return ec.fieldContext_UserResponse_externalUrls(ctx, field)
+			case "followers":
+				return ec.fieldContext_UserResponse_followers(ctx, field)
+			case "href":
+				return ec.fieldContext_UserResponse_href(ctx, field)
+			case "spotifyId":
+				return ec.fieldContext_UserResponse_spotifyId(ctx, field)
+			case "images":
+				return ec.fieldContext_UserResponse_images(ctx, field)
+			case "product":
+				return ec.fieldContext_UserResponse_product(ctx, field)
+			case "type":
+				return ec.fieldContext_UserResponse_type(ctx, field)
+			case "uri":
+				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
 	}
 	return fc, nil
@@ -10933,28 +11010,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "reportedComment":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_reportedComment(ctx, field)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "review":
 			field := field
 
@@ -11155,11 +11210,15 @@ func (ec *executionContext) _ReportedComment(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "comment":
+			out.Values[i] = ec._ReportedComment_comment(ctx, field, obj)
 		case "reportedBy":
 			out.Values[i] = ec._ReportedComment_reportedBy(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "reportedByUser":
+			out.Values[i] = ec._ReportedComment_reportedByUser(ctx, field, obj)
 		case "status":
 			out.Values[i] = ec._ReportedComment_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -12409,10 +12468,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNReportedComment2musicboxdᚋgraphᚋmodelᚐReportedComment(ctx context.Context, sel ast.SelectionSet, v model.ReportedComment) graphql.Marshaler {
-	return ec._ReportedComment(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNReportedComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐReportedComment(ctx context.Context, sel ast.SelectionSet, v []*model.ReportedComment) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -12449,16 +12504,6 @@ func (ec *executionContext) marshalNReportedComment2ᚕᚖmusicboxdᚋgraphᚋmo
 	wg.Wait()
 
 	return ret
-}
-
-func (ec *executionContext) marshalNReportedComment2ᚖmusicboxdᚋgraphᚋmodelᚐReportedComment(ctx context.Context, sel ast.SelectionSet, v *model.ReportedComment) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ReportedComment(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNReview2musicboxdᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v model.Review) graphql.Marshaler {
@@ -13048,6 +13093,13 @@ func (ec *executionContext) marshalOComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐCo
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOComment2ᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Comment(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

@@ -71,14 +71,16 @@ type Query struct {
 }
 
 type ReportedComment struct {
-	ID             *string    `json:"_id,omitempty" bson:"_id,omitempty"`
-	CommentID      string     `json:"commentId" bson:"commentId"`
-	ReportedBy     string     `json:"reportedBy" bson:"reportedBy"`
-	Status         string     `json:"status" bson:"status"`
-	CreatedAt      time.Time  `json:"createdAt" bson:"createdAt"`
-	ResolvedAt     *time.Time `json:"resolvedAt,omitempty" bson:"resolvedAt,omitempty"`
-	ModeratorID    *string    `json:"moderatorId,omitempty" bson:"moderatorId,omitempty"`
-	ModeratorNotes *string    `json:"moderatorNotes,omitempty" bson:"moderatorNotes,omitempty"`
+	ID             *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	CommentID      string        `json:"commentId" bson:"commentId"`
+	Comment        *Comment      `json:"comment,omitempty" bson:"comment,omitempty"`
+	ReportedBy     string        `json:"reportedBy" bson:"reportedBy"`
+	ReportedByUser *UserResponse `json:"reportedByUser,omitempty" bson:"reportedByUser,omitempty"`
+	Status         string        `json:"status" bson:"status"`
+	CreatedAt      time.Time     `json:"createdAt" bson:"createdAt"`
+	ResolvedAt     *time.Time    `json:"resolvedAt,omitempty" bson:"resolvedAt,omitempty"`
+	ModeratorID    *string       `json:"moderatorId,omitempty" bson:"moderatorId,omitempty"`
+	ModeratorNotes *string       `json:"moderatorNotes,omitempty" bson:"moderatorNotes,omitempty"`
 }
 
 type Review struct {
