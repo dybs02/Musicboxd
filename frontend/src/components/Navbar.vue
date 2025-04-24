@@ -35,8 +35,17 @@ const nav_items = ref([
       command: () => {
           router.push({name: 'about'});
       }
-  }
+  },
 ]);
+const admin_nav_items = ref([
+  {
+      label: 'Admin',
+      icon: 'pi pi-pen-to-square',
+      command: () => {
+          router.push({name: 'reported'});
+      }
+  }
+])
 const suggest_items = ref([]);
 const search_type = ref('Track');
 const search_options = ref(['Track', 'Album']);
@@ -119,7 +128,7 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
 </script>
 
 <template>
-  <Menubar :model="nav_items">
+  <Menubar :model="store.isModerator() ? nav_items.concat(admin_nav_items) : nav_items">
     <template #start>
       <div class="w-10 h-10">
         <img alt="Vue logo" src="https://picsum.photos/640" />

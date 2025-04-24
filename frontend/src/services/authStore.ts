@@ -52,6 +52,10 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem(LOCAL_STORAGE_KEY_ROLE)
   }
 
+  const isModerator = () => {
+    return role.value === 'moderator'
+  }
+
   // Persist the token across page refreshes
   const idFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_ID)
   if (idFromLocalStorage) {
@@ -78,5 +82,6 @@ export const useAuthStore = defineStore('auth', () => {
     setRole,
     getRole,
     removeRole,
+    isModerator,
   }
 })
