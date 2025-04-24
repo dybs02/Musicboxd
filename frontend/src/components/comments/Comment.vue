@@ -20,10 +20,6 @@ const props = defineProps({
     default: true,
     required: false
   },
-  propE: {
-    type: Number,
-    default: 100
-  },
 });
 
 
