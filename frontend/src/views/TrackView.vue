@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Review from "@/components/Review.vue";
-import ReviewComments from '@/components/ReviewComments.vue';
+import ReviewComments from '@/components/comments/ReviewComments.vue';
 import { useAuthStore } from '@/services/authStore';
 import { GET_REWIEW_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
+import type { CommentType } from "@/types/comments";
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Card from 'primevue/card';
@@ -120,7 +121,7 @@ const fetch_data = async () => {
 };
 
 // TODO: move to separate file
-const updateComments = (comments: Comments) => {
+const updateComments = (comments: CommentType[]) => {
   // idk if there is a better way to update comments & keep them reactive
   let newReview = {}
   Object.assign(newReview, review.value.value);

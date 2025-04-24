@@ -1,4 +1,4 @@
-type Comments = {
+export type CommentType = {
   _id: string;
   text: string;
   createdAt: string;
@@ -10,4 +10,4 @@ type Comments = {
       url: string;
     }[];
   };
-}[];
+};

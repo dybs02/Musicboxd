@@ -2,9 +2,10 @@
 import AlbumInfo from '@/components/album/AlbumInfo.vue';
 import TrackList from "@/components/album/TrackList.vue";
 import Review from "@/components/Review.vue";
-import ReviewComments from '@/components/ReviewComments.vue';
+import ReviewComments from '@/components/comments/ReviewComments.vue';
 import { useAuthStore } from "@/services/authStore";
 import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
+import type { CommentType } from '@/types/comments';
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Image from 'primevue/image';
@@ -116,7 +117,7 @@ const fetch_data = async () => {
 
 watch(() => route.params, fetch_data, { immediate: true })
 
-const updateComments = (comments: Comments) => {
+const updateComments = (comments: CommentType[]) => {
   // idk if there is a better way to update comments & keep them reactive
   let newReview = {}
   Object.assign(newReview, review.value.value);
