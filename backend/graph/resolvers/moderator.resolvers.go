@@ -17,6 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+// TODO if comment has already been reported, dont add it again
 func (r *mutationResolver) ReportComment(ctx context.Context, id string) (string, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
@@ -89,12 +90,53 @@ func (r *mutationResolver) ResolveComment(ctx context.Context, id string, status
 				"resolvedAt": primitive.NewDateTimeFromTime(time.Now()),
 			},
 		},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
 	)
-
-	// TODO if removed, remove from reviews as well
 
 	if comment.Err() != nil {
 		return "", comment.Err()
+	}
+
+	if status == "ignored" {
+		return commentID.Hex(), nil
+	}
+
+	reportedComment := model.ReportedComment{}
+	err = comment.Decode(&reportedComment)
+	if err != nil {
+		return "", err
+	}
+
+	convertedCommentID, err := primitive.ObjectIDFromHex(reportedComment.CommentID)
+	if err != nil {
+		return "", fmt.Errorf("invalid comment ID")
+	}
+
+	rewiews := database.GetDB().GetCollection("reviews")
+	review := rewiews.FindOneAndUpdate(
+		ctx,
+		bson.M{
+			"comments._id": bson.M{
+				"$eq": convertedCommentID,
+			},
+		},
+		bson.M{
+			"$set": bson.M{
+				"comments.$[elem].text":      "Comment deleted by moderator",
+				"comments.$[elem].updatedAt": primitive.NewDateTimeFromTime(time.Now()),
+			},
+		},
+		options.FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetArrayFilters(options.ArrayFilters{
+				Filters: []interface{}{
+					bson.M{"elem._id": convertedCommentID},
+				},
+			}),
+	)
+
+	if review.Err() != nil {
+		return "", review.Err()
 	}
 
 	return commentID.Hex(), nil
@@ -172,7 +214,12 @@ func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*m
 				return nil, fmt.Errorf("no comments found")
 			}
 
-			res[i].Comment = review.Comments[0]
+			for _, comment := range review.Comments {
+				if *comment.ID == reportedComment.CommentID {
+					res[i].Comment = comment
+					break
+				}
+			}
 
 			if isFieldRequested(ctx, "comment.user") {
 				coll := database.GetDB().GetCollection("users")

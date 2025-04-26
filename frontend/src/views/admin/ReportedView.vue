@@ -26,9 +26,9 @@ const toast = useToast();
 // TODO use this approach in other components
 let reportedComments = ref<ReportedCommentType[]>([]);
 let reportedCommentsLoading = ref(true);
-const moderatorNotesMap = ref({})
 
 
+// TODO refresh comments after mutation also do this in reviewcomments?? - or it might be just caching issue
 const fetch_reported_comments = async () => {
   const { loading, error, result } = useQuery(
     GET_REPORTED_COMMENTS,
