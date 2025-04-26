@@ -52,6 +52,54 @@ func (r *mutationResolver) ReportComment(ctx context.Context, id string) (string
 	return reportID.Hex(), nil
 }
 
+func (r *mutationResolver) ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	if cc.Role != "moderator" {
+		return "", fmt.Errorf("unauthorized")
+	}
+
+	commentID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return "", fmt.Errorf("invalid comment ID")
+	}
+
+	if status != "deleted" && status != "ignored" {
+		return "", fmt.Errorf("invalid status")
+	}
+
+	if notes == nil {
+		defaultNotes := ""
+		notes = &defaultNotes
+	}
+
+	coll := database.GetDB().GetCollection("reported_comments")
+	comment := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": commentID},
+		bson.M{
+			// TODO only set is status is reported ??
+			"$set": bson.M{
+				"status":     status,
+				"resolvedBy": cc.UserID,
+				"notes":      notes,
+				"resolvedAt": primitive.NewDateTimeFromTime(time.Now()),
+			},
+		},
+	)
+
+	// TODO if removed, remove from reviews as well
+
+	if comment.Err() != nil {
+		return "", comment.Err()
+	}
+
+	return commentID.Hex(), nil
+}
+
 func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {

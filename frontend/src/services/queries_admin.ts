@@ -32,6 +32,13 @@ const GET_REPORTED_COMMENTS = gql`
   }
 `;
 
+const RESOLE_REPORTED_COMMENT = gql`
+  mutation ResolveComment($id: String!, $status: String!, $notes: String) {
+    resolveComment(id: $id, status: $status, notes: $notes)
+  }
+`;
+
 export { 
-  GET_REPORTED_COMMENTS
+  GET_REPORTED_COMMENTS,
+  RESOLE_REPORTED_COMMENT,
 };
