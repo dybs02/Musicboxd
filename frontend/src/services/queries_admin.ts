@@ -27,6 +27,7 @@ const GET_REPORTED_COMMENTS = gql`
           url
         }
       }
+      createdAt
     }
   }
 `;
