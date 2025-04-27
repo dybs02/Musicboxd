@@ -3,7 +3,8 @@ import Review from "@/components/Review.vue";
 import ReviewComments from '@/components/comments/ReviewComments.vue';
 import { useAuthStore } from '@/services/authStore';
 import { GET_REWIEW_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
-import type { CommentType } from "@/types/comments";
+import { emptyReview, type CommentType, type ReviewType } from "@/types/review";
+import { emptyTrack, type TrackType } from "@/types/spotify";
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Card from 'primevue/card';
@@ -13,61 +14,28 @@ import ProgressSpinner from 'primevue/progressspinner';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-const emptyTrack = {
-  duration_ms: 0,
-  href: "",
-  id: "",
-  name: "",
-  popularity: 0,
-  track_number: 0,
-  external_urls: {
-    spotify: ""
-  },
-  artists: [
-    {
-      external_urls: {
-        spotify: ""
-      },
-      name: "",
-      id: "",
-    }
-  ],
-  album: {
-    images: {
-      url: ""
-    },
-    name: "",
-    id: "",
-    total_tracks: 0,
-    release_date: "",
-    external_urls: {
-      spotify: ""
-    }
-  }
-};
-// TODO separate file for empty objects
-const emptyReview = {
-  value: 0,
-  title: '',
-  description: '',
-  comments: [],
-};
-
 
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const track = ref<any>(emptyTrack);
-const review = ref<any>(emptyReview);
 const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
 
+
+let track = ref<TrackType>(emptyTrack);
 let trackLoading = ref(true);
+
+let review = ref<ReviewType>(emptyReview);
 let reviewLoading = ref(true);
 
+
+
 const fetch_track = async () => {
-  const { loading, error, result } = useQuery(GET_TRACK_BY_ID, {
-    id: route.params.trackId
-  });
+  const { loading, error, result } = useQuery(
+    GET_TRACK_BY_ID,
+    {
+      id: route.params.trackId
+    }
+  );
 
   trackLoading = loading;
 
@@ -78,17 +46,19 @@ const fetch_track = async () => {
     });
   });
 
-  track.value = computed(() => result?.value?.track ?? emptyTrack);
+  track = computed<TrackType>(() => result?.value?.track ?? emptyTrack);
 };
 
 const fetch_rewiew = async () => {
-
   const userId = route.params.userId ?? store.getId();
 
-  const { loading, error, result } = useQuery(GET_REWIEW_BY_ITEM_ID_USER_ID, {
-    itemId: route.params.trackId,
-    userId: userId,
-  });
+  const { loading, error, result } = useQuery(
+    GET_REWIEW_BY_ITEM_ID_USER_ID,
+    {
+      itemId: route.params.trackId,
+      userId: userId,
+    }
+  );
 
   reviewLoading = loading;
 
@@ -112,7 +82,7 @@ const fetch_rewiew = async () => {
 
   });
 
-  review.value = computed(() => result.value?.review ?? emptyReview);
+  review = computed<ReviewType>(() => result.value?.review ?? emptyReview);
 };
 
 const fetch_data = async () => {
@@ -120,16 +90,18 @@ const fetch_data = async () => {
   fetch_rewiew();
 };
 
+
+watch(() => route.params.id, fetch_data, { immediate: true })
+
+
 // TODO: move to separate file
 const updateComments = (comments: CommentType[]) => {
   // idk if there is a better way to update comments & keep them reactive
-  let newReview = {}
+  let newReview = emptyReview
   Object.assign(newReview, review.value.value);
   Object.assign(newReview, { comments: comments });
-  review.value = computed(() => newReview);
+  review = computed<ReviewType>(() => newReview);
 };
-
-watch(() => route.params.id, fetch_data, { immediate: true })
 
 </script>
 
@@ -143,7 +115,7 @@ watch(() => route.params.id, fetch_data, { immediate: true })
     <div class="flex">
       <div class="w-1/2">
         <Image
-          :src="track.value.album.images[0].url ?? ''"
+          :src="track.album.images[0].url ?? ''"
           alt="Album Cover"
           class="sm:p-4 drop-shadow-xl"
           preview
@@ -153,22 +125,22 @@ watch(() => route.params.id, fetch_data, { immediate: true })
         <Card>
           <template #content>
             <div class="text-3xl sm:text-5xl font-bold">
-              <a :href="track.value.external_urls.spotify" target="_blank">
-                {{ track.value.name }}
+              <a :href="track.external_urls.spotify" target="_blank">
+                {{ track.name }}
               </a>
             </div>
             <Divider />
             <div class="sm:text-2xl pb-1">
-              <a :href="track.value.artists[0].external_urls.spotify" target="_blank">
-                {{ track.value.artists[0].name }}
+              <a :href="track.artists[0].external_urls.spotify" target="_blank">
+                {{ track.artists[0].name }}
               </a>
             </div>
             <div class="text-sm sm:text-xl">
-              <a @click="router.push({ name: 'album', params: { id: track.value.album.id } });" class="cursor-pointer" target="_blank">
-                {{ track.value.album.name }}
+              <a @click="router.push({ name: 'album', params: { id: track.album.id } });" class="cursor-pointer" target="_blank">
+                {{ track.album.name }}
               </a>
               <a class="text-slate-500">
-                ({{ track.value.album.release_date.split("-")[0] }})
+                ({{ track.album.release_date.split("-")[0] }})
               </a>
             </div>
           </template>
@@ -177,9 +149,9 @@ watch(() => route.params.id, fetch_data, { immediate: true })
           <Review
             :item-id="route.params.trackId as string"
             :item-type="'track'"
-            :rating="review.value.value"
-            :title="review.value.title"
-            :description="review.value.description"
+            :rating="review.value"
+            :title="review.title"
+            :description="review.description"
             class="pt-4"
           />
         </div>
@@ -190,17 +162,17 @@ watch(() => route.params.id, fetch_data, { immediate: true })
       <Review
         :item-id="route.params.trackId as string"
         :item-type="'track'"
-        :rating="review.value.value"
-        :title="review.value.title"
-        :description="review.value.description"
+        :rating="review.value"
+        :title="review.title"
+        :description="review.description"
         class="pt-4"
       />
     </div>
 
     <ReviewComments
-      v-if="review.value !== emptyReview"
+      v-if="review !== emptyReview"
       :item-id="route.params.trackId as string"
-      :comments="review.value.comments"
+      :comments="review.comments"
       @update-comments="updateComments"
       class="sm:px-4 mt-4"
     />

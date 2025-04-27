@@ -1,30 +1,10 @@
 <script setup lang="ts">
-import TrackList from "@/components/album/TrackList.vue";
+import type { AlbumType } from '@/types/spotify';
 import Card from 'primevue/card';
 import Divider from 'primevue/divider';
 
 const props = defineProps<{
-  album: {
-    total_tracks: number;
-    name: string;
-    release_date: string;
-    images: {
-      url: string;
-    }[];
-    external_urls: {
-      spotify: string;
-    };
-    artists: {
-      external_urls: {
-        spotify: string;
-      };
-      name: string;
-      id: string;
-      href: string;
-      type: string;
-    }[];
-    track_list: any[];
-  };
+  album: AlbumType;
 }>();
 
 </script>

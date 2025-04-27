@@ -20,8 +20,8 @@ const props = defineProps<{
   title: string;
   description: string;
 }>();
-const reviewEditable = ref(props.title == '');
 
+const reviewEditable = ref(props.title == '');
 let review = ref({
   itemId: props.itemId,
   itemType: props.itemType,

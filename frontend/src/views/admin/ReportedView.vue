@@ -2,7 +2,7 @@
 import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { GET_REPORTED_COMMENTS, RESOLE_REPORTED_COMMENT } from '@/services/queries_admin';
-import type { ReportedCommentType } from '@/types/comments';
+import type { ReportedCommentType } from '@/types/moderator';
 import { useMutation, useQuery } from '@vue/apollo-composable';
 import Button from 'primevue/button';
 import Card from 'primevue/card';

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import ReviewPanel from '@/components/ReviewPanel.vue';
 import { RECENT_REVIEWS } from '@/services/queries';
-import { emptyReview, type Review } from '@/types/reviews';
+import { emptyReview, type ReviewType } from '@/types/review';
 import { useQuery } from '@vue/apollo-composable';
 import ProgressSpinner from 'primevue/progressspinner';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -13,16 +13,20 @@ const router = useRouter();
 
 const recentReviewsNumber = 8;
 const emptyRecentReviews = Array(recentReviewsNumber).fill(emptyReview);
-const recentReviews = ref<Review[]>(emptyRecentReviews);
 
+let recentReviews = ref<ReviewType[]>(emptyRecentReviews);
 let recentReviewsLoading = ref(true);
 
 
 const fetch_recent_reviews = async () => {
   const { loading, error, result } = useQuery(
     RECENT_REVIEWS,
-    { number: recentReviewsNumber },
-    { fetchPolicy: 'network-only' }
+    { 
+      number: recentReviewsNumber
+    },
+    {
+      fetchPolicy: 'network-only'
+    }
   );
 
   recentReviewsLoading = loading;
@@ -34,11 +38,7 @@ const fetch_recent_reviews = async () => {
     });
   });
 
-  watch(result, (data) => {
-    if (data) {
-      recentReviews.value = data.recentReviews ?? [];
-    }
-  });
+  recentReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
 };
 
 const fetch_data = async () => {

@@ -7,7 +7,7 @@ import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autoc
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
 import SelectButton from 'primevue/selectbutton';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 

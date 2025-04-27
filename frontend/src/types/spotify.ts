@@ -1,0 +1,134 @@
+import { emptyExternalUrls, emptyImage, type ExternalUrlsType, type ImageType } from "./user";
+
+type SimplifiedArtistType = {
+  external_urls: ExternalUrlsType;
+  href: string;
+  id: string;
+  name: string;
+  type: string;
+  uri: string;
+}
+
+const emptySimplifiedArtist: SimplifiedArtistType = {
+  external_urls: emptyExternalUrls,
+  href: '',
+  id: '',
+  name: '',
+  type: '',
+  uri: ''
+};
+
+
+type TracksType = {
+  href: string;
+  limit: number;
+  next: string;
+  offset: number;
+  previous: string;
+  total: number;
+  items: TrackType[];
+}
+
+const emptyTracks: TracksType = {
+  href: '',
+  limit: 0,
+  next: '',
+  offset: 0,
+  previous: '',
+  total: 0,
+  items: []
+};
+
+
+type TrackType = {
+  album: AlbumType;
+  artists: SimplifiedArtistType[];
+  available_markets: string[];
+  disc_number: number;
+  duration_ms: number;
+  explicit: boolean;
+  external_urls: ExternalUrlsType;
+  href: string;
+  id: string;
+  is_playable: boolean;
+  name: string;
+  popularity: number;
+  preview_url: string | null;
+  track_number: number;
+  type: string;
+  uri: string;
+  is_local: boolean;
+}
+
+const emptyTrack: TrackType = {
+  album: {} as AlbumType,
+  artists: [],
+  available_markets: [],
+  disc_number: 0,
+  duration_ms: 0,
+  explicit: false,
+  external_urls: emptyExternalUrls,
+  href: '',
+  id: '',
+  is_playable: false,
+  name: '',
+  popularity: 0,
+  preview_url: null,
+  track_number: 0,
+  type: '',
+  uri: '',
+  is_local: false
+};
+
+
+type AlbumType = {
+  album_type: string;
+  total_tracks: number;
+  available_markets: string[];
+  external_urls: ExternalUrlsType;
+  href: string;
+  id: string;
+  images: ImageType[];
+  name: string;
+  release_date: string;
+  release_date_precision: string;
+  type: string;
+  uri: string;
+  artists: SimplifiedArtistType[];
+  tracks: TracksType;
+  track_list: TrackType[];
+};
+
+const emptyAlbum: AlbumType = {
+  album_type: '',
+  total_tracks: 0,
+  available_markets: [""],
+  external_urls: emptyExternalUrls,
+  href: '',
+  id: '',
+  images: [emptyImage],
+  name: '',
+  release_date: '',
+  release_date_precision: '',
+  type: '',
+  uri: '',
+  artists: [emptySimplifiedArtist],
+  tracks: emptyTracks,
+  track_list: [emptyTrack]
+};
+
+
+
+export type {
+  AlbumType,
+  TracksType,
+  TrackType,
+  SimplifiedArtistType,
+}
+
+export {
+  emptyAlbum,
+  emptyTracks,
+  emptyTrack,
+  emptySimplifiedArtist,
+}

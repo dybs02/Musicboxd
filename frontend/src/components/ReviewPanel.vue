@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/services/authStore';
-import { type Review } from '@/types/reviews';
+import type { ReviewType } from '@/types/review';
 import Avatar from 'primevue/avatar';
 import Card from 'primevue/card';
 import Carousel from 'primevue/carousel';
@@ -12,7 +12,7 @@ import { useRouter } from 'vue-router';
 const store = useAuthStore();
 const router = useRouter();
 const props = defineProps<{
-  reviews:  Review[];
+  reviews:  ReviewType[];
 }>();
 const responsiveOptions = ref([
     {

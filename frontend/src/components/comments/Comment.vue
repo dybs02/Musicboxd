@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { REPORT_COMMENT } from '@/services/queries';
+import type { CommentType } from '@/types/review';
 import { useMutation } from '@vue/apollo-composable';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
@@ -8,7 +9,6 @@ import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
-import type { CommentType } from '@/types/comments'
 
 const props = defineProps({
   comment: {

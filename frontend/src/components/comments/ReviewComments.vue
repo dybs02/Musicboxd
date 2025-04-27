@@ -2,7 +2,7 @@
 import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { ADD_COMMENT } from '@/services/queries';
-import type { CommentType } from '@/types/comments';
+import type { CommentType } from '@/types/review';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
 import Button from 'primevue/button';
