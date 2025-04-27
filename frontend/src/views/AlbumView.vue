@@ -7,6 +7,7 @@ import { useAuthStore } from "@/services/authStore";
 import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
 import { emptyReview, type CommentType, type ReviewType } from '@/types/review';
 import { emptyAlbum, type AlbumType } from '@/types/spotify';
+import { navigateToAlbum } from '@/utils/navigate';
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Image from 'primevue/image';
@@ -72,13 +73,11 @@ const fetch_rewiew = async () => {
     }
 
     if (route.params.userId !== store.getId()) {
-      router.push({ 
-        name: 'album',
-        params: { 
-          albumId: route.params.albumId,
-          userId: store.getId()
-        }
-      });
+      navigateToAlbum(
+        router,
+        route.params.albumId as string,
+        store.getId()
+      );
     }
 
   });

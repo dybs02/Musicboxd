@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/services/authStore";
+import { navigateToAlbum, navigateToTrack } from "@/utils/navigate";
 import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
 import Cookies from "js-cookie";
@@ -26,7 +27,7 @@ const nav_items = ref([
       label: 'Profile',
       icon: 'pi pi-star',
       command: () => {
-          router.push({name: 'user', params: {id: 123}});
+          router.push({name: 'user', params: {id: 123}}); // TODO fix this when setting up user profile
       }
   },
   {
@@ -118,9 +119,9 @@ const login = () => {
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
   if (search_type.value === 'Track')
-    router.push({ name: 'track', params: { trackId: event.value.id, userId: store.getId() } });
+    navigateToTrack(router, event.value.id, store.getId())
   else if (search_type.value === 'Album')
-    router.push({ name: 'album', params: { albumId: event.value.id, userId: store.getId() } });
+    navigateToAlbum(router, event.value.id, store.getId())
 
   search_value.value = ''
 }

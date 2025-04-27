@@ -3,6 +3,7 @@ import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { GET_REPORTED_COMMENTS, RESOLE_REPORTED_COMMENT } from '@/services/queries_admin';
 import type { ReportedCommentType } from '@/types/moderator';
+import { navigateToUser } from '@/utils/navigate';
 import { useMutation, useQuery } from '@vue/apollo-composable';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
@@ -23,7 +24,7 @@ const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
 
-// TODO use this approach in other components
+
 let reportedComments = ref<ReportedCommentType[]>([]);
 let reportedCommentsLoading = ref(true);
 
@@ -56,13 +57,6 @@ const fetch_reported_comments = async () => {
 }
 
 
-// TODO move to separate file - used bt Comments.vue as well
-const navigateToUser = (userId: string) => {
-  router.push({ 
-    name: 'user', 
-    params: { id: userId }
-  });
-}
 
 const resolveComment = (event: any, id: string, status: string, notes: string) => {
   confirm.require({
@@ -137,7 +131,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 
               <div class="text-sm text-neutral-500">
                 Reporter:
-                <span class="cursor-pointer text-neutral-200" @click="navigateToUser(c.reportedByUser._id)">
+                <span class="cursor-pointer text-neutral-200" @click="navigateToUser(router, c.reportedByUser._id)">
                   {{ c.reportedByUser.displayName }}
                 </span>
               </div>

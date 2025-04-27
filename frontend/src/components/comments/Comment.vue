@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { REPORT_COMMENT } from '@/services/queries';
 import type { CommentType } from '@/types/review';
+import { navigateToUser } from '@/utils/navigate';
 import { useMutation } from '@vue/apollo-composable';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
@@ -21,8 +22,6 @@ const props = defineProps({
     required: false
   },
 });
-
-
 
 
 
@@ -66,19 +65,6 @@ const confirmReport = (event: any, commentID: string) => {
   });
 };
 
-
-
-
-
-
-const navigateToUser = (userId: string) => {
-  router.push({ 
-    name: 'user', 
-    params: { id: userId }
-  });
-}
-
-
 </script>
 
 <template>
@@ -86,11 +72,11 @@ const navigateToUser = (userId: string) => {
   <Card class="bg-comment">
     <template #title>
       <div class="flex mb-1">
-        <div class="my-auto cursor-pointer" @click="navigateToUser(props.comment.user._id)">
+        <div class="my-auto cursor-pointer" @click="navigateToUser(router, props.comment.user._id)">
           <Avatar :image="props.comment.user.images[0].url" class="mr-2" size="normal" shape="circle" />
         </div>
         <div class="block">
-          <span class="cursor-pointer" @click="navigateToUser(props.comment.user._id)">
+          <span class="cursor-pointer" @click="navigateToUser(router, props.comment.user._id)">
             {{ props.comment.user.displayName }}
           </span>
           <br>

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/services/authStore';
+import { navigateToTrack } from '@/utils/navigate';
 import Accordion from 'primevue/accordion';
 import AccordionContent from 'primevue/accordioncontent';
 import AccordionHeader from 'primevue/accordionheader';
@@ -7,6 +9,7 @@ import Card from 'primevue/card';
 import { useRouter } from 'vue-router';
 
 
+const store = useAuthStore();
 const router = useRouter();
 
 const props = defineProps<{
@@ -30,7 +33,7 @@ const props = defineProps<{
           </AccordionHeader>
           <AccordionContent unstyled class="bg-neutral-800 rounded-md p-2">
             <div v-for="track in props.track_list" class="m-0">
-              <a @click="router.push({ name: 'track', params: { id: track.id } });" class="cursor-pointer">
+              <a @click="navigateToTrack(router, track.id, store.getId())" class="cursor-pointer">
                 {{ track.name }}
               </a>
             </div>

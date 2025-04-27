@@ -5,6 +5,7 @@ import { useAuthStore } from '@/services/authStore';
 import { GET_REWIEW_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
 import { emptyReview, type CommentType, type ReviewType } from "@/types/review";
 import { emptyTrack, type TrackType } from "@/types/spotify";
+import { navigateToAlbum } from "@/utils/navigate";
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Card from 'primevue/card';
@@ -71,13 +72,11 @@ const fetch_rewiew = async () => {
     }
 
     if (route.params.userId !== store.getId()) {
-      router.push({ 
-        name: 'album',
-        params: { 
-          albumId: route.params.albumId,
-          userId: store.getId()
-        }
-      });
+      navigateToAlbum(
+        router,
+        route.params.albumId as string,
+        store.getId()
+      );
     }
 
   });
@@ -136,7 +135,7 @@ const updateComments = (comments: CommentType[]) => {
               </a>
             </div>
             <div class="text-sm sm:text-xl">
-              <a @click="router.push({ name: 'album', params: { id: track.album.id } });" class="cursor-pointer" target="_blank">
+              <a @click="navigateToAlbum(router, track.album.id, store.getId())" class="cursor-pointer">
                 {{ track.album.name }}
               </a>
               <a class="text-slate-500">
