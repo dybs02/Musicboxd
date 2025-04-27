@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
+import { handleGqlError } from '@/utils/error';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
 import Button from 'primevue/button';
@@ -45,10 +46,7 @@ const { mutate: updateReview, error: updateReviewError, onDone: updateReviewOnDo
 ));
 
 watch(updateReviewError, (err) => {
-  console.error(err);
-  router.push({ 
-    name: 'error' 
-  });
+  handleGqlError(router, err);
 });
 
 updateReviewOnDone(() => {

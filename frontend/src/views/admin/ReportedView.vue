@@ -3,6 +3,7 @@ import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { GET_REPORTED_COMMENTS, RESOLE_REPORTED_COMMENT } from '@/services/queries_admin';
 import type { ReportedCommentType } from '@/types/moderator';
+import { handleGqlError } from '@/utils/error';
 import { navigateToUser } from '@/utils/navigate';
 import { useMutation, useQuery } from '@vue/apollo-composable';
 import Button from 'primevue/button';
@@ -42,15 +43,7 @@ const fetch_reported_comments = async () => {
   reportedCommentsLoading = loading;
 
   watch(error, (err) => {
-    if (err?.message === 'no reported comments found') {
-      console.log('no reported comments in DB');
-      return;
-    }
-
-    console.error(err);
-    router.push({ 
-      name: 'error'
-    });
+    handleGqlError(router, err, ['no reported comments found']);
   });
 
   reportedComments = computed<ReportedCommentType[]>(() => result?.value?.reportedComments ?? []);
@@ -84,10 +77,7 @@ const resolveComment = (event: any, id: string, status: string, notes: string) =
       ));
 
       watch(onError, (err) => {
-        console.error(err);
-        router.push({ 
-          name: 'error'
-        });
+        handleGqlError(router, err);
       });
 
       successfulMutation((result: any) => {

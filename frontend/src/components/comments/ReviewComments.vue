@@ -3,6 +3,7 @@ import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { ADD_COMMENT } from '@/services/queries';
 import type { CommentType } from '@/types/review';
+import { handleGqlError } from '@/utils/error';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
 import Button from 'primevue/button';
@@ -44,10 +45,7 @@ const { mutate: addComment, error: addCommentError, onDone: addCommentOnDone } =
 ));
 
 watch(addCommentError, (err) => {
-  console.error(err);
-  router.push({ 
-    name: 'error' 
-  });
+  handleGqlError(router, err);
 });
 
 addCommentOnDone((result) => {

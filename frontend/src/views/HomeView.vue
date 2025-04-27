@@ -6,6 +6,7 @@ import { useQuery } from '@vue/apollo-composable';
 import ProgressSpinner from 'primevue/progressspinner';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { handleGqlError } from '@/utils/error';
 
 
 const route = useRoute();
@@ -32,10 +33,11 @@ const fetch_recent_reviews = async () => {
   recentReviewsLoading = loading;
 
   watch(error, (err) => {
-    console.error(err);
-    router.push({ 
-      name: 'error'
-    });
+    handleGqlError(router, err);
+    // console.error(err);
+    // router.push({ 
+    //   name: 'error'
+    // });
   });
 
   recentReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);

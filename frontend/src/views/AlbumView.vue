@@ -7,6 +7,7 @@ import { useAuthStore } from "@/services/authStore";
 import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
 import { emptyReview, type CommentType, type ReviewType } from '@/types/review';
 import { emptyAlbum, type AlbumType } from '@/types/spotify';
+import { handleGqlError } from '@/utils/error';
 import { navigateToAlbum } from '@/utils/navigate';
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
@@ -42,10 +43,7 @@ const fetch_album = async () => {
   albumLoading = loading;
 
   watch(error, (err) => {
-    console.error(err);
-    router.push({ 
-      name: 'error'
-    });
+    handleGqlError(router, err);
   });
 
   album = computed<AlbumType>(() => result?.value?.album ?? emptyAlbum);
@@ -65,12 +63,7 @@ const fetch_rewiew = async () => {
   reviewLoading = loading;
 
   watch(error, (err) => {
-    if (err?.message !== 'mongo: no documents in result') {
-      console.error(err);
-      router.push({ 
-        name: 'error'
-      });
-    }
+    handleGqlError(router, err, ['mongo: no documents in result']);
 
     if (route.params.userId !== store.getId()) {
       navigateToAlbum(
