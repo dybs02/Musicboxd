@@ -56,8 +56,6 @@ type Album {
   uri: String!
   artists: [SimplifiedArtist!]!
   tracks: Tracks!
-
-  track_list: [Track!]!
 }
 
 type SimplifiedArtist {
@@ -68,10 +66,6 @@ type SimplifiedArtist {
   type: String!
   uri: String!
 }
-
-# type ExternalUrls {
-#   spotify: String!
-# }
 
 type SearchResponse {
   tracks: Tracks

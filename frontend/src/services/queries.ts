@@ -22,12 +22,15 @@ const GET_ALBUM_BY_ID = gql`
         href
         type
       }
-      track_list {
-        name
-        duration_ms
-        id
-        external_urls {
-          spotify
+      tracks {
+        total
+        items {
+          name
+          duration_ms
+          id
+          external_urls {
+            spotify
+          }
         }
       }
     }

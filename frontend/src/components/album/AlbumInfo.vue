@@ -29,9 +29,6 @@ const props = defineProps<{
           </a>
         </div>
       </div>
-      <!-- <div class="hidden sm:block">
-        <TrackList :track_list="props.album.track_list" />
-      </div> -->
     </template>
   </Card>
 

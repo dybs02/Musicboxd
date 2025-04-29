@@ -96,7 +96,6 @@ type AlbumType = {
   uri: string;
   artists: SimplifiedArtistType[];
   tracks: TracksType;
-  track_list: TrackType[];
 };
 
 const emptyAlbum: AlbumType = {
@@ -114,7 +113,6 @@ const emptyAlbum: AlbumType = {
   uri: '',
   artists: [emptySimplifiedArtist],
   tracks: emptyTracks,
-  track_list: [emptyTrack]
 };
 
 

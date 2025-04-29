@@ -51,14 +51,15 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, err
 		return nil, err
 	}
 
-	if isFieldRequested(ctx, "track_list") {
-		tracksRes, err := hlp.SpotifyGetAlbumTracks(*res.Tracks.Href, accessToken)
-		if err != nil {
-			return nil, err
-		}
+	// not sure why this was needed in the first place ?
+	// if isFieldRequested(ctx, "track_list") {
+	// 	tracksRes, err := hlp.SpotifyGetAlbumTracks(*res.Tracks.Href, accessToken)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
 
-		res.TrackList = tracksRes
-	}
+	// 	res.TrackList = tracksRes
+	// }
 
 	return res, nil
 }

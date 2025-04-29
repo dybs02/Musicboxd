@@ -119,7 +119,7 @@ const updateComments = (comments: CommentType[]) => {
         />
         <div v-if="!isMdScreen" >
           <TrackList
-            :track_list="album.track_list"
+            :track_list="album.tracks.items"
             class="mt-4"
           />
           <Review
@@ -135,7 +135,7 @@ const updateComments = (comments: CommentType[]) => {
     </div>
     <div v-if="isMdScreen" class="sm:px-4 sm:pt-4">
       <TrackList
-        :track_list="album.track_list"
+        :track_list="album.tracks.items"
         class="mt-4"
       />
       <Review
