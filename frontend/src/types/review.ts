@@ -1,19 +1,5 @@
-import { emptySimplifiedArtist, type SimplifiedArtistType } from "./spotify";
-import { emptyImage, emptyUser, type ImageType, type UserType } from "./user";
-
-
-type ReviewAlbum = {
-  name: string;
-  images: ImageType[];
-  artists: SimplifiedArtistType[];
-}
-
-const emptyReviewAlbum: ReviewAlbum = {
-  name: "",
-  images: [emptyImage],
-  artists: [emptySimplifiedArtist],
-}
-
+import { emptyReviewAlbum, type ReviewAlbumType } from "./common";
+import { emptyUser, type UserType } from "./user";
 
 type CommentType = {
   _id: string;
@@ -44,7 +30,7 @@ type ReviewType = {
   description: string;
   userId: string;
   comments: CommentType[];
-  album: ReviewAlbum;
+  album: ReviewAlbumType;
 }
 
 const emptyReview: ReviewType = {
@@ -60,7 +46,7 @@ const emptyReview: ReviewType = {
 
 export type {
   ReviewType,
-  ReviewAlbum,
+  ReviewAlbumType,
   CommentType,
 };
 

@@ -182,6 +182,19 @@ const GET_USER_BY_ID = gql`
       images {
         url
       }
+      favouriteAlbums {
+        key
+        album {
+          name
+          images {
+            url
+          }
+          artists {
+            id
+            name
+          }
+        }
+        }
     }
   }
 `;
@@ -206,6 +219,27 @@ const SEARCH_FOR_ALBUMS = gql`
 `
 
 
+const UPDATE_CURRENT_USER_FAVOURITE_ALBUM = gql`
+  mutation UpdateCurrentUser($favouriteAlbum: FavouriteAlbumEntryInput) {
+    updateCurrentUser(favouriteAlbum: $favouriteAlbum) {
+        favouriteAlbums {
+            key
+            album {
+                name
+                images {
+                    url
+                }
+                artists {
+                    id
+                    name
+                }
+            }
+        }
+    }
+  }
+`
+
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -217,4 +251,5 @@ export {
   REPORT_COMMENT,
   GET_USER_BY_ID,
   SEARCH_FOR_ALBUMS,
+  UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
 };

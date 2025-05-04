@@ -1,3 +1,13 @@
+type FavouriteAlbumEntry {
+  key: Int!
+  album: ReviewAlbum
+}
+
+input FavouriteAlbumEntryInput {
+  key: Int!
+  albumId: String!
+}
+
 type User {
   _id: ID
   country: String!
@@ -14,6 +24,7 @@ type User {
   uri: String!
   tokens: Tokens
   role: String!
+  favouriteAlbums: [FavouriteAlbumEntry]!
 }
 
 type ExplicitContent {
@@ -60,6 +71,7 @@ type UserResponse {
   type: String!
   uri: String!
   role: String!
+  favouriteAlbums: [FavouriteAlbumEntry]!
 }
 
 extend type Query {
@@ -68,5 +80,5 @@ extend type Query {
 }
 
 extend type Mutation {
-  updateCurrentUser(displayName: String): UserResponse
+  updateCurrentUser(displayName: String, favouriteAlbum: FavouriteAlbumEntryInput): UserResponse
 }

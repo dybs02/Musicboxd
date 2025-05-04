@@ -224,6 +224,13 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 		RefreshToken: &tokensData.RefreshToken,
 	}
 
+	favouriteAlbumsAlbumsMap := []*model.FavouriteAlbumEntry{
+		{Key: 1, Album: nil},
+		{Key: 2, Album: nil},
+		{Key: 3, Album: nil},
+		{Key: 4, Album: nil},
+	}
+
 	user := &model.User{
 		Country:         userData.Country,
 		DisplayName:     userData.DisplayName,
@@ -239,6 +246,7 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 		URI:             userData.Uri,
 		Tokens:          tokens,
 		Role:            `user`,
+		FavouriteAlbums: favouriteAlbumsAlbumsMap,
 	}
 
 	db := database.GetDB()
@@ -246,6 +254,7 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 	var err error
 	if res.Err() == nil {
 		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyId": userData.Id}, bson.M{
+			// TODO add setOnInsert ??
 			"$set": bson.M{
 				"country":         userData.Country,
 				"displayName":     userData.DisplayName,

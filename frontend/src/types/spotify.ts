@@ -1,23 +1,4 @@
-import { emptyExternalUrls, emptyImage, type ExternalUrlsType, type ImageType } from "./user";
-
-type SimplifiedArtistType = {
-  external_urls: ExternalUrlsType;
-  href: string;
-  id: string;
-  name: string;
-  type: string;
-  uri: string;
-}
-
-const emptySimplifiedArtist: SimplifiedArtistType = {
-  external_urls: emptyExternalUrls,
-  href: '',
-  id: '',
-  name: '',
-  type: '',
-  uri: ''
-};
-
+import { emptyExternalUrls, emptyImage, emptySimplifiedArtist, type ExternalUrlsType, type ImageType, type SimplifiedArtistType } from "./common";
 
 type TracksType = {
   href: string;

@@ -2,23 +2,26 @@
 import type { AlbumType } from '@/types/spotify';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
-import { defineProps, ref } from 'vue';
+import { defineProps, ref, watch } from 'vue';
 import SearchItem from './SearchItem.vue';
+import { useMutation } from '@vue/apollo-composable';
+import { UPDATE_CURRENT_USER_FAVOURITE_ALBUM } from '@/services/queries';
+import type { ReviewAlbumType } from '@/types/review';
+import type { FavouriteAlbumEntryType } from '@/types/user';
+import { handleGqlError } from '@/utils/error';
+import { useRouter } from 'vue-router';
 
 
 
 const props = defineProps({
   album: {
-    type: Object as () => ({
-      id: String,
-      title: String,
-      artist: String,
-      cover: String,
-    }),
+    type: Object as () => FavouriteAlbumEntryType,
     required: true,
   },
 });
 
+
+const router = useRouter();
 
 const visible = ref(false);
 let selectedAlbum = ref<AlbumType | null>(null);
@@ -33,26 +36,54 @@ const saveFavouriteAlbum = async () => {
     return;
   }
 
-  // TODO save the selected album to the user's favourite albums
+  const { mutate: updateFavouriteAlbum, error, onDone: successfulMutation} = useMutation(
+    UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
+    () => ({
+      variables: {
+        favouriteAlbum: {
+          key: props.album.key,
+          albumId: selectedAlbum?.value?.id,
+        },
+      },
+    }
+  ));
+
+  watch(error, (err) => {
+    visible.value = false;
+    selectedAlbum.value = null;
+    handleGqlError(router, err);
+  });
+
+  successfulMutation((result: any) => {
+    console.log(result);
+    visible.value = false;
+    selectedAlbum.value = null;
+
+    router.go(0);
+    // TODO or instead of reloading the page, update the album in the parent component by emit
+    // props.album.album = result.data.updateCurrentUser.favouriteAlbums.find(
+    //   (entry: FavouriteAlbumEntryType) => entry.key === props.album.key
+    // );
+  });
+
+  updateFavouriteAlbum();
 }
 
 
 </script>
 
 <template>
-  
-  
-  <div v-if="album.id == '1'" class="border rounded">
-    <div
-      class="bg-gray-800 aspect-square justify-center items-center flex flex-col cursor-pointer"
-      @click="visible = true"
-    >
-      <i class="pi pi-plus plus-icon" style="font-size: 2rem"></i>
+  <div class="border rounded shadow">
+    <div class="relative">
+      <div v-if="album.album">
+        <img :src="album.album.images[0].url as string" alt="Album Cover" />
+      </div>
+      <div v-else class="bg-gray-800 aspect-square justify-center items-center flex flex-col">
+      </div>
+      <div class="opacity-0 hover:opacity-100 duration-100 absolute inset-0 z-10 flex justify-center items-center text-6xl text-white font-semibold">
+        <i class="pi pi-plus plus-icon" @click="visible = true"></i>
+      </div>
     </div>
-  </div>
-
-  <div v-else class="border rounded shadow">
-    <img :src="album.cover as string" alt="Album Cover" />
   </div>
 
   <Dialog v-model:visible="visible" modal header="Search for album" :style="{ width: '25rem' }">
@@ -70,7 +101,7 @@ const saveFavouriteAlbum = async () => {
         </span>
       </div>
     </div>
-    <div class="flex justify-end gap-2">
+    <div class="flex justify-end gap-2 pt-4">
       <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
       <Button type="button" label="Save" @click="saveFavouriteAlbum"></Button>
     </div>

@@ -10,7 +10,7 @@ import Avatar from 'primevue/avatar';
 import Card from 'primevue/card';
 import { getCountryName } from '@/utils/country';
 import FavouriteAlbums from '@/components/favouriteAlbums/FavouriteAlbums.vue';
-
+import Divider from 'primevue/divider';
 
 
 const route = useRoute();
@@ -71,7 +71,11 @@ watch(() => route.params, fetch_data, { immediate: true })
       </div>
     </template>
     <template #content>
-      <FavouriteAlbums />
+      <h2 class="text-2xl font-bold mb-4">Favourite Albums</h2>
+      <Divider />
+      <FavouriteAlbums
+        :favourite-albums="user.favouriteAlbums"
+      />
     </template>
   </Card>
 

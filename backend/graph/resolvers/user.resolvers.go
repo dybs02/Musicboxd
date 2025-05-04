@@ -6,26 +6,68 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"musicboxd/database"
 	"musicboxd/graph/model"
+	"musicboxd/hlp"
+	"slices"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *string) (*model.UserResponse, error) {
+func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) (*model.UserResponse, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	coll := database.GetDB().GetCollection("users")
-	_, err = coll.UpdateOne(ctx, bson.M{"_id": cc.UserID}, bson.M{"$set": bson.M{"displayName": displayName}})
-	if err != nil {
-		return nil, err
+	changedValues := bson.M{}
+	filters := bson.M{
+		"_id": cc.UserID,
 	}
 
-	user := coll.FindOne(ctx, bson.M{"_id": cc.UserID})
+	if displayName != nil {
+		changedValues["displayName"] = *displayName
+	}
+
+	if favouriteAlbum != nil {
+		if !slices.Contains([]int{1, 2, 3, 4}, favouriteAlbum.Key) {
+			return nil, errors.New("invalid favourite album key")
+		}
+
+		accessToken, err := GetUserAccessToken(ctx)
+		if err != nil {
+			return nil, err
+		}
+
+		album, err := hlp.SpotifyGetAlbum(favouriteAlbum.AlbumID, accessToken)
+		if err != nil {
+			return nil, err
+		}
+
+		// TODO not sure if updating displayName at the same time will work
+		changedValues["favouriteAlbums.$.album"] = bson.M{
+			"name":    album.Name,
+			"images":  album.Images,
+			"artists": album.Artists,
+		}
+
+		filters["favouriteAlbums.key"] = favouriteAlbum.Key
+	}
+
+	if len(changedValues) == 0 {
+		return nil, nil
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOneAndUpdate(
+		ctx,
+		filters,
+		bson.M{"$set": changedValues},
+		options.FindOneAndUpdate().SetReturnDocument(options.After),
+	)
 	if user.Err() != nil {
 		return nil, user.Err()
 	}

@@ -1,16 +1,11 @@
 <script setup lang="ts">
-import { computed, defineProps, ref, watch } from 'vue';
-import Dialog from 'primevue/dialog';
-import InputText from 'primevue/inputtext';
-import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
-
-import Button from 'primevue/button';
-import type { ReviewAlbum } from '@/types/review';
-import { useQuery } from '@vue/apollo-composable';
 import { SEARCH_FOR_ALBUMS } from '@/services/queries';
+import type { AlbumType } from '@/types/spotify';
 import { handleGqlError } from '@/utils/error';
+import { useQuery } from '@vue/apollo-composable';
+import AutoComplete from 'primevue/autocomplete';
+import { computed, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import type { AlbumsType, AlbumType } from '@/types/spotify';
 
 
 
