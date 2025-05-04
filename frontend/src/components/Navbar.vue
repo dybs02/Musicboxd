@@ -27,7 +27,7 @@ const nav_items = ref([
       label: 'Profile',
       icon: 'pi pi-star',
       command: () => {
-          router.push({name: 'user', params: {id: 123}}); // TODO fix this when setting up user profile
+          router.push({name: 'user', params: {id: store.getId()}});
       }
   },
   {

@@ -170,6 +170,42 @@ const REPORT_COMMENT = gql`
   }
 `;
 
+const GET_USER_BY_ID = gql`
+  query UserById($id: String!) {
+    userById(id: $id) {
+      _id
+      country
+      displayName
+      href
+      spotifyId
+      role
+      images {
+        url
+      }
+    }
+  }
+`;
+
+const SEARCH_FOR_ALBUMS = gql`
+  query SearchForAlbum($query: String!) {
+    search(query: $query, type: "album") {
+      albums {
+        items {
+          images {
+            url
+          }
+          artists {
+            name
+          }
+          name
+          id
+        }
+      }
+    }
+  }
+`
+
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -179,4 +215,6 @@ export {
   ALBUMS_BY_IDS,
   GET_TRACK_BY_ID,
   REPORT_COMMENT,
+  GET_USER_BY_ID,
+  SEARCH_FOR_ALBUMS,
 };

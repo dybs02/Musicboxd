@@ -81,6 +81,27 @@ const emptyTrack: TrackType = {
 };
 
 
+type AlbumsType = {
+  href: string;
+  limit: number;
+  next: string;
+  offset: number;
+  previous: string;
+  total: number;
+  items: AlbumType[];
+}
+
+const emptyAlbums: AlbumsType = {
+  href: '',
+  limit: 0,
+  next: '',
+  offset: 0,
+  previous: '',
+  total: 0,
+  items: []
+};
+
+
 type AlbumType = {
   album_type: string;
   total_tracks: number;
@@ -118,6 +139,7 @@ const emptyAlbum: AlbumType = {
 
 
 export type {
+  AlbumsType,
   AlbumType,
   TracksType,
   TrackType,
@@ -125,6 +147,7 @@ export type {
 }
 
 export {
+  emptyAlbums,
   emptyAlbum,
   emptyTracks,
   emptyTrack,

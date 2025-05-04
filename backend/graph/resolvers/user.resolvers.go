@@ -10,6 +10,7 @@ import (
 	"musicboxd/graph/model"
 
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *string) (*model.UserResponse, error) {
@@ -50,5 +51,26 @@ func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName strin
 	if err != nil {
 		return nil, err
 	}
+	return &res, nil
+}
+
+func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.UserResponse, error) {
+	convertedID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err = user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
 	return &res, nil
 }

@@ -64,6 +64,7 @@ type UserResponse {
 
 extend type Query {
   userByDisplayName(displayName: String!): UserResponse
+  userById(id: String!): UserResponse
 }
 
 extend type Mutation {

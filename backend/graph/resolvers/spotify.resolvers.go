@@ -20,6 +20,14 @@ func (r *queryResolver) Search(ctx context.Context, typeArg *string, query strin
 		return nil, err
 	}
 
+	if query == "" {
+		emptyRes := &model.SearchResponse{
+			Tracks: nil,
+			Albums: nil,
+		}
+		return emptyRes, nil
+	}
+
 	res, err := hlp.SpotifySearch(query, *typeArg, accessToken)
 	if err != nil {
 		return nil, err

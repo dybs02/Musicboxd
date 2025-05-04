@@ -1,51 +1,83 @@
 <script setup lang="ts">
-import { useQuery } from '@vue/apollo-composable'
-import { gql } from "@apollo/client/core";
-import { computed } from 'vue';
+import { GET_USER_BY_ID } from '@/services/queries';
+import { emptyUser, type UserType } from '@/types/user';
+import { handleGqlError } from '@/utils/error';
+import { useQuery } from '@vue/apollo-composable';
+import { computed, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import Panel from 'primevue/panel';
+import Avatar from 'primevue/avatar';
+import Card from 'primevue/card';
+import { getCountryName } from '@/utils/country';
+import FavouriteAlbums from '@/components/favouriteAlbums/FavouriteAlbums.vue';
 
 
-const userName = "dybs"
 
-const { result } = useQuery(gql`
-  query UserByDisplayName($_displayName: String!) {
-    userByDisplayName(displayName: $_displayName) {
-      country
-      displayName
-      email
-      href
-      spotifyId
-      product
-      type
-      uri
-      explicitContent {
-        filterEnabled
-        filterLocked
-      }
-      externalUrls {
-        spotify
-      }
-      followers {
-        href
-        total
-      }
-      images {
-        url
-        height
-        width
-      }
+const route = useRoute();
+const router = useRouter();
+
+
+let user = ref<UserType>(emptyUser);
+let userLoading = ref(true);
+
+
+const fetch_user = async () => {
+  const { loading, error, result } = useQuery(
+    GET_USER_BY_ID,
+    {
+      id: route.params.id,
     }
-  }
-`, {
-  _displayName: userName
-})
-const user = computed(() => result.value?.userByDisplayName ?? {})
+  );
 
+  userLoading = loading;
+
+  watch(error, (err) => {
+    handleGqlError(router, err);
+  });
+
+  user = computed<UserType>(() => result?.value?.userById ?? emptyUser);
+};
+
+
+const fetch_data = async () => {
+  fetch_user();
+};
+
+watch(() => route.params, fetch_data, { immediate: true })
 
 </script>
 
+
+
 <template>
-  <h1>User Profile</h1>
-  {{ user }}
+
+  <Card>
+    <template #header>
+      <div class="flex items-center gap-2 p-4">
+        <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
+        <div class="flex flex-col">
+          <span class="text-3xl font-bold">{{ user.displayName }}</span>
+          <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
+        </div>
+
+        <div class="mx-auto">
+        </div>
+
+        <div class="flex flex-col items-center">
+          <span class="text-neutral-500">Total reviews:</span>
+          <!-- TODO add number of total reviews -->
+          <span class="text-3xl">12</span> 
+        </div>
+      </div>
+    </template>
+    <template #content>
+      <FavouriteAlbums />
+    </template>
+  </Card>
+
+
+
+
 </template>
 
 <style scoped>
