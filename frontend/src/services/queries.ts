@@ -94,6 +94,7 @@ query RecentReviews($number: Int!) {
     _id
     value
     itemId
+    itemType
     title
     description
     userId

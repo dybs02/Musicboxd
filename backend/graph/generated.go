@@ -149,12 +149,14 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		ItemID      func(childComplexity int) int
+		ItemType    func(childComplexity int) int
 		Title       func(childComplexity int) int
 		UserID      func(childComplexity int) int
 		Value       func(childComplexity int) int
 	}
 
 	ReviewAlbum struct {
+		AlbumID func(childComplexity int) int
 		Artists func(childComplexity int) int
 		Images  func(childComplexity int) int
 		Name    func(childComplexity int) int
@@ -827,6 +829,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Review.ItemID(childComplexity), true
 
+	case "Review.itemType":
+		if e.complexity.Review.ItemType == nil {
+			break
+		}
+
+		return e.complexity.Review.ItemType(childComplexity), true
+
 	case "Review.title":
 		if e.complexity.Review.Title == nil {
 			break
@@ -847,6 +856,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Review.Value(childComplexity), true
+
+	case "ReviewAlbum.albumId":
+		if e.complexity.ReviewAlbum.AlbumID == nil {
+			break
+		}
+
+		return e.complexity.ReviewAlbum.AlbumID(childComplexity), true
 
 	case "ReviewAlbum.artists":
 		if e.complexity.ReviewAlbum.Artists == nil {
@@ -3597,6 +3613,8 @@ func (ec *executionContext) fieldContext_FavouriteAlbumEntry_album(_ context.Con
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "albumId":
+				return ec.fieldContext_ReviewAlbum_albumId(ctx, field)
 			case "name":
 				return ec.fieldContext_ReviewAlbum_name(ctx, field)
 			case "images":
@@ -3976,6 +3994,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrUpdateReview(ctx conte
 				return ec.fieldContext_Review_value(ctx, field)
 			case "itemId":
 				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
 			case "title":
 				return ec.fieldContext_Review_title(ctx, field)
 			case "description":
@@ -4281,6 +4301,8 @@ func (ec *executionContext) fieldContext_Query_review(ctx context.Context, field
 				return ec.fieldContext_Review_value(ctx, field)
 			case "itemId":
 				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
 			case "title":
 				return ec.fieldContext_Review_title(ctx, field)
 			case "description":
@@ -4354,6 +4376,8 @@ func (ec *executionContext) fieldContext_Query_recentReviews(ctx context.Context
 				return ec.fieldContext_Review_value(ctx, field)
 			case "itemId":
 				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
 			case "title":
 				return ec.fieldContext_Review_title(ctx, field)
 			case "description":
@@ -5600,6 +5624,50 @@ func (ec *executionContext) fieldContext_Review_itemId(_ context.Context, field 
 	return fc, nil
 }
 
+func (ec *executionContext) _Review_itemType(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Review_itemType(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ItemType, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Review_itemType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Review_title(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Review_title(ctx, field)
 	if err != nil {
@@ -5825,6 +5893,8 @@ func (ec *executionContext) fieldContext_Review_album(_ context.Context, field g
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "albumId":
+				return ec.fieldContext_ReviewAlbum_albumId(ctx, field)
 			case "name":
 				return ec.fieldContext_ReviewAlbum_name(ctx, field)
 			case "images":
@@ -5833,6 +5903,50 @@ func (ec *executionContext) fieldContext_Review_album(_ context.Context, field g
 				return ec.fieldContext_ReviewAlbum_artists(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type ReviewAlbum", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewAlbum_albumId(ctx context.Context, field graphql.CollectedField, obj *model.ReviewAlbum) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReviewAlbum_albumId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlbumID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReviewAlbum_albumId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewAlbum",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -11786,6 +11900,11 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "itemType":
+			out.Values[i] = ec._Review_itemType(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "title":
 			out.Values[i] = ec._Review_title(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -11839,6 +11958,11 @@ func (ec *executionContext) _ReviewAlbum(ctx context.Context, sel ast.SelectionS
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ReviewAlbum")
+		case "albumId":
+			out.Values[i] = ec._ReviewAlbum_albumId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "name":
 			out.Values[i] = ec._ReviewAlbum_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

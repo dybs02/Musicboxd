@@ -26,6 +26,7 @@ type ReviewType = {
   _id: string;
   value: number;
   itemId: string;
+  itemType: string;
   title: string;
   description: string;
   userId: string;
@@ -37,6 +38,7 @@ const emptyReview: ReviewType = {
   _id: "",
   value: 0,
   itemId: "",
+  itemType: "",
   title: "",
   description: "",
   userId: "",

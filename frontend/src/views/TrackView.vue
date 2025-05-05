@@ -62,9 +62,7 @@ const fetch_rewiew = async () => {
   reviewLoading = loading;
 
   watch(error, (err) => {
-    if (err?.message !== 'mongo: no documents in result') {
-      handleGqlError(router, err);
-    }
+    handleGqlError(router, err, ['mongo: no documents in result']);
 
     if (route.params.userId !== store.getId()) {
       navigateToAlbum(

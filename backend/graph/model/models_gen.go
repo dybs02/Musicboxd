@@ -96,6 +96,7 @@ type Review struct {
 	ID          *string      `json:"_id,omitempty" bson:"_id,omitempty"`
 	Value       int          `json:"value" bson:"value"`
 	ItemID      string       `json:"itemId" bson:"itemId"`
+	ItemType    string       `json:"itemType" bson:"itemType"`
 	Title       string       `json:"title" bson:"title"`
 	Description string       `json:"description" bson:"description"`
 	UserID      string       `json:"userId" bson:"userId"`
@@ -104,6 +105,7 @@ type Review struct {
 }
 
 type ReviewAlbum struct {
+	AlbumID string              `json:"albumId" bson:"albumId"`
 	Name    string              `json:"name" bson:"name"`
 	Images  []*Image            `json:"images" bson:"images"`
 	Artists []*SimplifiedArtist `json:"artists" bson:"artists"`
