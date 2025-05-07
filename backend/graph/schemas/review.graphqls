@@ -32,7 +32,7 @@ type Comment {
 
 extend type Query {
   review(itemId: String!, userId: String!): Review!
-  recentReviews(number: Int): [Review!]!
+  recentReviews(number: Int, itemType: String!): [Review!]!
 }
 
 extend type Mutation {

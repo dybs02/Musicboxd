@@ -14,6 +14,7 @@ const store = useAuthStore();
 const router = useRouter();
 const props = defineProps<{
   reviews:  ReviewType[];
+  title: string;
 }>();
 const responsiveOptions = ref([
     {
@@ -39,7 +40,7 @@ const responsiveOptions = ref([
   <Card class="bg-comment">
     <template #title>
       <div class="text-2xl font-bold mb-4">
-        Recently added reviews
+        {{ props.title }}
       </div>
     </template>
     <template #content>

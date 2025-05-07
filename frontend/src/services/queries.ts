@@ -96,8 +96,8 @@ const ADD_COMMENT = gql`
 `;
 
 const RECENT_REVIEWS = gql`
-query RecentReviews($number: Int!) {
-  recentReviews(number: $number) {
+query RecentReviews($number: Int!, $itemType: String!) {
+  recentReviews(number: $number, itemType: $itemType) {
     _id
     value
     itemId

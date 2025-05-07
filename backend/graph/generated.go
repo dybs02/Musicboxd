@@ -121,7 +121,7 @@ type ComplexityRoot struct {
 	Query struct {
 		Album             func(childComplexity int, id string) int
 		AlbumsByIds       func(childComplexity int, ids []string) int
-		RecentReviews     func(childComplexity int, number *int) int
+		RecentReviews     func(childComplexity int, number *int, itemType string) int
 		ReportedComments  func(childComplexity int, number *int) int
 		Review            func(childComplexity int, itemID string, userID string) int
 		Search            func(childComplexity int, typeArg *string, query string) int
@@ -263,7 +263,7 @@ type MutationResolver interface {
 type QueryResolver interface {
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
-	RecentReviews(ctx context.Context, number *int) ([]*model.Review, error)
+	RecentReviews(ctx context.Context, number *int, itemType string) ([]*model.Review, error)
 	Search(ctx context.Context, typeArg *string, query string) (*model.SearchResponse, error)
 	Track(ctx context.Context, id string) (*model.Track, error)
 	Album(ctx context.Context, id string) (*model.Album, error)
@@ -651,7 +651,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.RecentReviews(childComplexity, args["number"].(*int)), true
+		return e.complexity.Query.RecentReviews(childComplexity, args["number"].(*int), args["itemType"].(string)), true
 
 	case "Query.reportedComments":
 		if e.complexity.Query.ReportedComments == nil {
@@ -1851,6 +1851,11 @@ func (ec *executionContext) field_Query_recentReviews_args(ctx context.Context, 
 		return nil, err
 	}
 	args["number"] = arg0
+	arg1, err := ec.field_Query_recentReviews_argsItemType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["itemType"] = arg1
 	return args, nil
 }
 func (ec *executionContext) field_Query_recentReviews_argsNumber(
@@ -1863,6 +1868,19 @@ func (ec *executionContext) field_Query_recentReviews_argsNumber(
 	}
 
 	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_recentReviews_argsItemType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemType"))
+	if tmp, ok := rawArgs["itemType"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -4357,7 +4375,7 @@ func (ec *executionContext) _Query_recentReviews(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().RecentReviews(rctx, fc.Args["number"].(*int))
+		return ec.resolvers.Query().RecentReviews(rctx, fc.Args["number"].(*int), fc.Args["itemType"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

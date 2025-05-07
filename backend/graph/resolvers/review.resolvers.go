@@ -220,11 +220,11 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 	return &res, nil
 }
 
-func (r *queryResolver) RecentReviews(ctx context.Context, number *int) ([]*model.Review, error) {
+func (r *queryResolver) RecentReviews(ctx context.Context, number *int, itemType string) ([]*model.Review, error) {
 	coll := database.GetDB().GetCollection("reviews")
 	cursor, err := coll.Find(
 		ctx,
-		bson.M{},
+		bson.M{"itemType": itemType},
 		options.Find().SetSort(bson.M{"createdAt": -1}).SetLimit(int64(min(*number, 20))),
 	)
 	if err != nil {

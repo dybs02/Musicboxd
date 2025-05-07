@@ -15,36 +15,57 @@ const router = useRouter();
 const recentReviewsNumber = 8;
 const emptyRecentReviews = Array(recentReviewsNumber).fill(emptyReview);
 
-let recentReviews = ref<ReviewType[]>(emptyRecentReviews);
-let recentReviewsLoading = ref(true);
+let recentAlbumReviews = ref<ReviewType[]>(emptyRecentReviews);
+let recentAlbumReviewsLoading = ref(true);
 
+let recentTrackReviews = ref<ReviewType[]>(emptyRecentReviews);
+let recentTrackReviewsLoading = ref(true);
 
-const fetch_recent_reviews = async () => {
+const fetch_recent_album_reviews = async () => {
   const { loading, error, result } = useQuery(
     RECENT_REVIEWS,
     { 
-      number: recentReviewsNumber
+      number: recentReviewsNumber,
+      itemType: 'album',
     },
     {
       fetchPolicy: 'network-only'
     }
   );
 
-  recentReviewsLoading = loading;
+  recentAlbumReviewsLoading = loading;
 
   watch(error, (err) => {
     handleGqlError(router, err);
-    // console.error(err);
-    // router.push({ 
-    //   name: 'error'
-    // });
   });
 
-  recentReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
+  recentAlbumReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
+};
+
+const fetch_recent_track_reviews = async () => {
+  const { loading, error, result } = useQuery(
+    RECENT_REVIEWS,
+    { 
+      number: recentReviewsNumber,
+      itemType: 'track',
+    },
+    {
+      fetchPolicy: 'network-only'
+    }
+  );
+
+  recentTrackReviewsLoading = loading;
+
+  watch(error, (err) => {
+    handleGqlError(router, err);
+  });
+
+  recentTrackReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
 };
 
 const fetch_data = async () => {
-  fetch_recent_reviews();
+  fetch_recent_album_reviews();
+  fetch_recent_track_reviews();
 };
 
 
@@ -53,13 +74,19 @@ watch(() => route.params, fetch_data, { immediate: true })
 </script>
 
 <template>
-  <div v-if="recentReviewsLoading" class="flex justify-center pt-12">
+  <div v-if="recentAlbumReviewsLoading" class="flex justify-center pt-12">
     <ProgressSpinner />
   </div>
 
   <div v-else>
     <ReviewPanel
-      :reviews="recentReviews"
+      :reviews="recentAlbumReviews"
+      title="Recently added album reviews"
+    />
+    <ReviewPanel
+      :reviews="recentTrackReviews"
+      title="Recently added track reviews"
+      class="mt-4"
     />
   </div>
 
