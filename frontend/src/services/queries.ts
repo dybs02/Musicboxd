@@ -94,6 +94,7 @@ query RecentReviews($number: Int!) {
     _id
     value
     itemId
+    itemType
     title
     description
     userId
@@ -170,6 +171,78 @@ const REPORT_COMMENT = gql`
   }
 `;
 
+const GET_USER_BY_ID = gql`
+  query UserById($id: String!) {
+    userById(id: $id) {
+      _id
+      country
+      displayName
+      href
+      spotifyId
+      role
+      images {
+        url
+      }
+      favouriteAlbums {
+        key
+        album {
+          albumId
+          name
+          images {
+            url
+          }
+          artists {
+            id
+            name
+          }
+        }
+        }
+    }
+  }
+`;
+
+const SEARCH_FOR_ALBUMS = gql`
+  query SearchForAlbum($query: String!) {
+    search(query: $query, type: "album") {
+      albums {
+        items {
+          images {
+            url
+          }
+          artists {
+            name
+          }
+          name
+          id
+        }
+      }
+    }
+  }
+`
+
+
+const UPDATE_CURRENT_USER_FAVOURITE_ALBUM = gql`
+  mutation UpdateCurrentUser($favouriteAlbum: FavouriteAlbumEntryInput) {
+    updateCurrentUser(favouriteAlbum: $favouriteAlbum) {
+      favouriteAlbums {
+        key
+        album {
+          albumId
+          name
+          images {
+            url
+          }
+          artists {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`
+
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -179,4 +252,7 @@ export {
   ALBUMS_BY_IDS,
   GET_TRACK_BY_ID,
   REPORT_COMMENT,
+  GET_USER_BY_ID,
+  SEARCH_FOR_ALBUMS,
+  UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
 };

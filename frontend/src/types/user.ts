@@ -1,44 +1,15 @@
-type ExplicitContentType = {
-  filterEnabled: boolean;
-  filterLocked: boolean;
-};
-
-const emptyExplicitContent: ExplicitContentType = {
-  filterEnabled: false,
-  filterLocked: false
-};
+import { emptyExplicitContent, emptyExternalUrls, emptyFollowers, emptyImage, type ExplicitContentType, type ExternalUrlsType, type FollowersType, type ImageType } from "./common";
+import { emptyReviewAlbum, type ReviewAlbumType } from "./review";
 
 
-type ExternalUrlsType = {
-  spotify: string;
-};
+type FavouriteAlbumEntryType = {
+  key: number;
+  album: ReviewAlbumType;
+}
 
-const emptyExternalUrls: ExternalUrlsType = {
-  spotify: ""
-};
-
-
-type FollowersType = {
-  href: string;
-  total: number;
-};
-
-const emptyFollowers: FollowersType = {
-  href: "",
-  total: 0
-};
-
-
-type ImageType = {
-  url: string;
-  height: number;
-  width: number;
-};
-
-const emptyImage: ImageType = {
-  url: "",
-  height: 0,
-  width: 0
+const emptyFavouriteAlbumEntry: FavouriteAlbumEntryType = {
+  key: -1,
+  album: emptyReviewAlbum
 };
 
 
@@ -57,6 +28,7 @@ type UserType = {
   type: string;
   uri: string;
   role: string;
+  favouriteAlbums: FavouriteAlbumEntryType[];
 };
 
 const emptyUser: UserType = {
@@ -73,21 +45,16 @@ const emptyUser: UserType = {
   product: "",
   type: "",
   uri: "",
-  role: ""
+  role: "",
+  favouriteAlbums: [emptyFavouriteAlbumEntry],
 };
 
 export type {
-  ExplicitContentType,
-  ExternalUrlsType,
-  FollowersType,
-  ImageType,
+  FavouriteAlbumEntryType,
   UserType
 };
 
-export { 
-  emptyExplicitContent,
-  emptyExternalUrls,
-  emptyFollowers,
-  emptyImage,
+export {
+  emptyFavouriteAlbumEntry,
   emptyUser
 };

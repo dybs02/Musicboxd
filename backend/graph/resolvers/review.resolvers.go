@@ -46,6 +46,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	}
 
 	dbAlbum := map[string]interface{}{
+		"albumId": album.ID,
 		"name":    album.Name,
 		"images":  album.Images,
 		"artists": album.Artists,
@@ -54,7 +55,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	coll := database.GetDB().GetCollection("reviews")
 	review := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"itemId": itemID, "userId": cc.UserID},
+		bson.M{"itemId": itemID, "userId": cc.UserID, "itemType": itemType},
 		bson.M{
 			"$setOnInsert": bson.M{
 				"comments": []interface{}{},

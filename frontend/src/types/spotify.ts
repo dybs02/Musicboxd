@@ -1,23 +1,4 @@
-import { emptyExternalUrls, emptyImage, type ExternalUrlsType, type ImageType } from "./user";
-
-type SimplifiedArtistType = {
-  external_urls: ExternalUrlsType;
-  href: string;
-  id: string;
-  name: string;
-  type: string;
-  uri: string;
-}
-
-const emptySimplifiedArtist: SimplifiedArtistType = {
-  external_urls: emptyExternalUrls,
-  href: '',
-  id: '',
-  name: '',
-  type: '',
-  uri: ''
-};
-
+import { emptyExternalUrls, emptyImage, emptySimplifiedArtist, type ExternalUrlsType, type ImageType, type SimplifiedArtistType } from "./common";
 
 type TracksType = {
   href: string;
@@ -81,6 +62,27 @@ const emptyTrack: TrackType = {
 };
 
 
+type AlbumsType = {
+  href: string;
+  limit: number;
+  next: string;
+  offset: number;
+  previous: string;
+  total: number;
+  items: AlbumType[];
+}
+
+const emptyAlbums: AlbumsType = {
+  href: '',
+  limit: 0,
+  next: '',
+  offset: 0,
+  previous: '',
+  total: 0,
+  items: []
+};
+
+
 type AlbumType = {
   album_type: string;
   total_tracks: number;
@@ -118,6 +120,7 @@ const emptyAlbum: AlbumType = {
 
 
 export type {
+  AlbumsType,
   AlbumType,
   TracksType,
   TrackType,
@@ -125,6 +128,7 @@ export type {
 }
 
 export {
+  emptyAlbums,
   emptyAlbum,
   emptyTracks,
   emptyTrack,

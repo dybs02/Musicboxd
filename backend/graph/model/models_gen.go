@@ -52,6 +52,16 @@ type ExternalUrls struct {
 	Spotify string `json:"spotify" bson:"spotify"`
 }
 
+type FavouriteAlbumEntry struct {
+	Key   int          `json:"key" bson:"key"`
+	Album *ReviewAlbum `json:"album,omitempty" bson:"album,omitempty"`
+}
+
+type FavouriteAlbumEntryInput struct {
+	Key     int    `json:"key" bson:"key"`
+	AlbumID string `json:"albumId" bson:"albumId"`
+}
+
 type Followers struct {
 	Href  *string `json:"href,omitempty" bson:"href,omitempty"`
 	Total int     `json:"total" bson:"total"`
@@ -86,6 +96,7 @@ type Review struct {
 	ID          *string      `json:"_id,omitempty" bson:"_id,omitempty"`
 	Value       int          `json:"value" bson:"value"`
 	ItemID      string       `json:"itemId" bson:"itemId"`
+	ItemType    string       `json:"itemType" bson:"itemType"`
 	Title       string       `json:"title" bson:"title"`
 	Description string       `json:"description" bson:"description"`
 	UserID      string       `json:"userId" bson:"userId"`
@@ -94,6 +105,7 @@ type Review struct {
 }
 
 type ReviewAlbum struct {
+	AlbumID string              `json:"albumId" bson:"albumId"`
 	Name    string              `json:"name" bson:"name"`
 	Images  []*Image            `json:"images" bson:"images"`
 	Artists []*SimplifiedArtist `json:"artists" bson:"artists"`
@@ -152,36 +164,38 @@ type Tracks struct {
 }
 
 type User struct {
-	ID              *string          `json:"_id,omitempty" bson:"_id,omitempty"`
-	Country         string           `json:"country" bson:"country"`
-	DisplayName     string           `json:"displayName" bson:"displayName"`
-	Email           string           `json:"email" bson:"email"`
-	ExplicitContent *ExplicitContent `json:"explicitContent" bson:"explicitContent"`
-	ExternalUrls    *ExternalUrls    `json:"externalUrls" bson:"externalUrls"`
-	Followers       *Followers       `json:"followers" bson:"followers"`
-	Href            string           `json:"href" bson:"href"`
-	SpotifyID       string           `json:"spotifyId" bson:"spotifyId"`
-	Images          []*Image         `json:"images" bson:"images"`
-	Product         string           `json:"product" bson:"product"`
-	Type            string           `json:"type" bson:"type"`
-	URI             string           `json:"uri" bson:"uri"`
-	Tokens          *Tokens          `json:"tokens,omitempty" bson:"tokens,omitempty"`
-	Role            string           `json:"role" bson:"role"`
+	ID              *string                `json:"_id,omitempty" bson:"_id,omitempty"`
+	Country         string                 `json:"country" bson:"country"`
+	DisplayName     string                 `json:"displayName" bson:"displayName"`
+	Email           string                 `json:"email" bson:"email"`
+	ExplicitContent *ExplicitContent       `json:"explicitContent" bson:"explicitContent"`
+	ExternalUrls    *ExternalUrls          `json:"externalUrls" bson:"externalUrls"`
+	Followers       *Followers             `json:"followers" bson:"followers"`
+	Href            string                 `json:"href" bson:"href"`
+	SpotifyID       string                 `json:"spotifyId" bson:"spotifyId"`
+	Images          []*Image               `json:"images" bson:"images"`
+	Product         string                 `json:"product" bson:"product"`
+	Type            string                 `json:"type" bson:"type"`
+	URI             string                 `json:"uri" bson:"uri"`
+	Tokens          *Tokens                `json:"tokens,omitempty" bson:"tokens,omitempty"`
+	Role            string                 `json:"role" bson:"role"`
+	FavouriteAlbums []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
 }
 
 type UserResponse struct {
-	ID              string           `json:"_id" bson:"_id"`
-	Country         string           `json:"country" bson:"country"`
-	DisplayName     string           `json:"displayName" bson:"displayName"`
-	Email           string           `json:"email" bson:"email"`
-	ExplicitContent *ExplicitContent `json:"explicitContent" bson:"explicitContent"`
-	ExternalUrls    *ExternalUrls    `json:"externalUrls" bson:"externalUrls"`
-	Followers       *Followers       `json:"followers" bson:"followers"`
-	Href            string           `json:"href" bson:"href"`
-	SpotifyID       string           `json:"spotifyId" bson:"spotifyId"`
-	Images          []*Image         `json:"images" bson:"images"`
-	Product         string           `json:"product" bson:"product"`
-	Type            string           `json:"type" bson:"type"`
-	URI             string           `json:"uri" bson:"uri"`
-	Role            string           `json:"role" bson:"role"`
+	ID              string                 `json:"_id" bson:"_id"`
+	Country         string                 `json:"country" bson:"country"`
+	DisplayName     string                 `json:"displayName" bson:"displayName"`
+	Email           string                 `json:"email" bson:"email"`
+	ExplicitContent *ExplicitContent       `json:"explicitContent" bson:"explicitContent"`
+	ExternalUrls    *ExternalUrls          `json:"externalUrls" bson:"externalUrls"`
+	Followers       *Followers             `json:"followers" bson:"followers"`
+	Href            string                 `json:"href" bson:"href"`
+	SpotifyID       string                 `json:"spotifyId" bson:"spotifyId"`
+	Images          []*Image               `json:"images" bson:"images"`
+	Product         string                 `json:"product" bson:"product"`
+	Type            string                 `json:"type" bson:"type"`
+	URI             string                 `json:"uri" bson:"uri"`
+	Role            string                 `json:"role" bson:"role"`
+	FavouriteAlbums []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
 }

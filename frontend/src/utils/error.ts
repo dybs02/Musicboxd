@@ -8,7 +8,7 @@ const handleGqlError = (router: Router, error: ApolloError | null, exceptionErro
     return;
   }
 
-  if (error.message in exceptionErrorMessages) {
+  if (exceptionErrorMessages.includes(error.message)) {
     return;
   }
 
