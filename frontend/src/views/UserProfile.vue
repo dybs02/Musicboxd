@@ -39,6 +39,11 @@ const fetch_user = async () => {
 };
 
 
+const getFirstFavAlbumImageUrl = () => {
+  return user.value.favouriteAlbums.find(entry => entry.key === 1)?.album.images[0].url ?? "";
+};
+
+
 const fetch_data = async () => {
   fetch_user();
 };
@@ -50,8 +55,17 @@ watch(() => route.params, fetch_data, { immediate: true })
 
 
 <template>
-
-  <Card>
+  
+  <div class="backgroud-image-wrap">
+    <img
+    :src="getFirstFavAlbumImageUrl()"
+    class="absolute w-full overflow-hidden object-cover opacity-30 -z-10 asdasasdas"
+    />
+    <div class="left-shadow"></div>
+    <div class="right-shadow"></div>
+  </div>
+    
+  <Card class="relative z-10 -mt-4"> 
     <template #header>
       <div class="flex items-center gap-2 p-4">
         <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
@@ -85,5 +99,30 @@ watch(() => route.params, fetch_data, { immediate: true })
 </template>
 
 <style scoped>
+.backgroud-image-wrap {
+  margin: -20px 0px 0px 0px;
+  position: relative;
+  overflow: hidden;
+  height: 300px;
+}
 
+.left-shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(to right, var(--color-midnight-dark-background), transparent);
+  z-index: -5; /* Above the image but below other content */
+}
+
+.right-shadow {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100px;
+  height: 100%;
+  background: linear-gradient(to left, var(--color-midnight-dark-background), transparent);
+  z-index: -5; /* Above the image but below other content */
+}
 </style>
