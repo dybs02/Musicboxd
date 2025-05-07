@@ -186,6 +186,7 @@ const GET_USER_BY_ID = gql`
       favouriteAlbums {
         key
         album {
+          albumId
           name
           images {
             url
@@ -223,19 +224,20 @@ const SEARCH_FOR_ALBUMS = gql`
 const UPDATE_CURRENT_USER_FAVOURITE_ALBUM = gql`
   mutation UpdateCurrentUser($favouriteAlbum: FavouriteAlbumEntryInput) {
     updateCurrentUser(favouriteAlbum: $favouriteAlbum) {
-        favouriteAlbums {
-            key
-            album {
-                name
-                images {
-                    url
-                }
-                artists {
-                    id
-                    name
-                }
-            }
+      favouriteAlbums {
+        key
+        album {
+          albumId
+          name
+          images {
+            url
+          }
+          artists {
+            id
+            name
+          }
         }
+      }
     }
   }
 `

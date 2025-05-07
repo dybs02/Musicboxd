@@ -63,12 +63,14 @@ const emptySimplifiedArtist: SimplifiedArtistType = {
 
 
 type ReviewAlbumType = {
+  albumId: string;
   name: string;
   images: ImageType[];
   artists: SimplifiedArtistType[];
 }
 
 const emptyReviewAlbum: ReviewAlbumType = {
+  albumId: "",
   name: "",
   images: [emptyImage],
   artists: [emptySimplifiedArtist],

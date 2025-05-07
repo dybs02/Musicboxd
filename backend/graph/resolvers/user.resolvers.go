@@ -49,6 +49,7 @@ func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *s
 
 		// TODO not sure if updating displayName at the same time will work
 		changedValues["favouriteAlbums.$.album"] = bson.M{
+			"albumId": album.ID,
 			"name":    album.Name,
 			"images":  album.Images,
 			"artists": album.Artists,

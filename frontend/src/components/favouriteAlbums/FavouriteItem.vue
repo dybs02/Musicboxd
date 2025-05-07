@@ -1,15 +1,16 @@
 <script setup lang="ts">
+import { useAuthStore } from '@/services/authStore';
+import { UPDATE_CURRENT_USER_FAVOURITE_ALBUM } from '@/services/queries';
 import type { AlbumType } from '@/types/spotify';
+import type { FavouriteAlbumEntryType } from '@/types/user';
+import { handleGqlError } from '@/utils/error';
+import { navigateToAlbum } from '@/utils/navigate';
+import { useMutation } from '@vue/apollo-composable';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import { defineProps, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import SearchItem from './SearchItem.vue';
-import { useMutation } from '@vue/apollo-composable';
-import { UPDATE_CURRENT_USER_FAVOURITE_ALBUM } from '@/services/queries';
-import type { ReviewAlbumType } from '@/types/review';
-import type { FavouriteAlbumEntryType } from '@/types/user';
-import { handleGqlError } from '@/utils/error';
-import { useRouter } from 'vue-router';
 
 
 
@@ -21,6 +22,8 @@ const props = defineProps({
 });
 
 
+const store = useAuthStore();
+const route = useRoute();
 const router = useRouter();
 
 const visible = ref(false);
@@ -70,6 +73,10 @@ const saveFavouriteAlbum = async () => {
 }
 
 
+const isLoggedUserProfile = () => {
+  return route.params.id === store.getId();
+};
+
 </script>
 
 <template>
@@ -81,7 +88,8 @@ const saveFavouriteAlbum = async () => {
       <div v-else class="bg-gray-800 aspect-square justify-center items-center flex flex-col">
       </div>
       <div class="opacity-0 hover:opacity-100 duration-100 absolute inset-0 z-10 flex justify-center items-center text-6xl text-white font-semibold">
-        <i class="pi pi-plus plus-icon" @click="visible = true"></i>
+        <i v-if="isLoggedUserProfile()" class="pi pi-plus overlay-icon" @click="visible = true"></i>
+        <i v-else class="pi pi-link overlay-icon" @click="navigateToAlbum(router, album.album.albumId, route.params.id as string)"></i>
       </div>
     </div>
   </div>
@@ -113,7 +121,7 @@ const saveFavouriteAlbum = async () => {
 
 <style scoped>
 
-.plus-icon {
+.overlay-icon {
   font-size: 2rem;
   color: white; /* TOOD fix color */
 }
