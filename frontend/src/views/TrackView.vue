@@ -88,11 +88,8 @@ watch(() => route.params.id, fetch_data, { immediate: true })
 
 // TODO: move to separate file
 const updateComments = (comments: CommentType[]) => {
-  // idk if there is a better way to update comments & keep them reactive
-  let newReview = emptyReview
-  Object.assign(newReview, review.value.value);
-  Object.assign(newReview, { comments: comments });
-  review = computed<ReviewType>(() => newReview);
+  // idk if there is a way to update comments & keep them reactive
+  router.go(0);
 };
 
 </script>
