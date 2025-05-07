@@ -239,6 +239,27 @@ func (r *queryResolver) RecentReviews(ctx context.Context, number *int) ([]*mode
 			return nil, err
 		}
 
+		if isFieldRequested(ctx, "user") {
+			convertedID, err := primitive.ObjectIDFromHex(r.UserID)
+			if err != nil {
+				return nil, err
+			}
+
+			coll := database.GetDB().GetCollection("users")
+			user := coll.FindOne(ctx, bson.M{"_id": convertedID}) // TODO maybe there is a way to get all users at once?
+			if user.Err() != nil {
+				return nil, user.Err()
+			}
+
+			u := model.UserResponse{}
+			err = user.Decode(&u)
+			if err != nil {
+				return nil, err
+			}
+
+			r.User = &u
+		}
+
 		// comments.user field is not added
 
 		res = append(res, &r)

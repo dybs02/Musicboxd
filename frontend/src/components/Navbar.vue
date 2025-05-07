@@ -132,7 +132,7 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
   <Menubar :model="store.isModerator() ? nav_items.concat(admin_nav_items) : nav_items">
     <template #start>
       <div class="w-10 h-10">
-        <img alt="Vue logo" src="https://picsum.photos/640" />
+        <img :src="store.getAvatarUrl() as string" class="rounded-full"/>
       </div>
     </template>
     <template #end>

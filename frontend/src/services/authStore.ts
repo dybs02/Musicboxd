@@ -4,11 +4,13 @@ import { defineStore } from 'pinia'
 const LOCAL_STORAGE_KEY_ID = 'userId'
 const LOCAL_STORAGE_KEY_JWT = 'jwt'
 const LOCAL_STORAGE_KEY_ROLE = 'role'
+const LOCAL_STORAGE_KEY_AVATAR = 'avatarUrl'
 
 export const useAuthStore = defineStore('auth', () => {
   const id = ref<string | null>(null)
   const jwt = ref<string | null>(null)
   const role = ref<string | null>(null)
+  const avatarUrl = ref<string | null>(null)
 
   const setId = (newValue: string) => {
     id.value = newValue
@@ -56,6 +58,15 @@ export const useAuthStore = defineStore('auth', () => {
     return role.value === 'moderator'
   }
 
+  const setAvatarUrl = (newValue: string) => {
+    avatarUrl.value = newValue
+    localStorage.setItem(LOCAL_STORAGE_KEY_AVATAR, newValue)
+  }
+
+  const getAvatarUrl = () => {
+    return avatarUrl.value
+  }
+
   // Persist the token across page refreshes
   const idFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_ID)
   if (idFromLocalStorage) {
@@ -72,6 +83,11 @@ export const useAuthStore = defineStore('auth', () => {
     role.value = roleFromLocalStorage
   }
 
+  const avatarFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_AVATAR)
+  if (avatarFromLocalStorage) {
+    avatarUrl.value = avatarFromLocalStorage
+  }
+
   return {
     setId,
     getId,
@@ -83,5 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
     getRole,
     removeRole,
     isModerator,
+    setAvatarUrl,
+    getAvatarUrl,
   }
 })

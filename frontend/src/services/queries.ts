@@ -105,6 +105,11 @@ query RecentReviews($number: Int!) {
     title
     description
     userId
+    user {
+      images {
+        url
+      }
+    }
     album {
       name
       images {

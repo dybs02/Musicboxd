@@ -58,7 +58,7 @@ const responsiveOptions = ref([
             <div class="flex mt-4 cursor-pointer" @click="navigateToReview(router, slotProps.data.itemType, slotProps.data.itemId, slotProps.data.userId)">
               <div class="my-auto mr-2">
                 <Avatar
-                  :image="'https://picsum.photos/640'"
+                  :image="slotProps.data.user.images[0].url"
                   class=""
                   size="normal"
                   shape="circle"
