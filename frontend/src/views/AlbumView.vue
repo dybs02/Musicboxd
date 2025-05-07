@@ -125,6 +125,7 @@ const updateComments = (comments: CommentType[]) => {
             :rating="review.value"
             :title="review.title"
             :description="review.description"
+            :user="review.user"
             class="pt-4"
           />
         </div>
@@ -141,6 +142,7 @@ const updateComments = (comments: CommentType[]) => {
         :rating="review.value"
         :title="review.title"
         :description="review.description"
+        :user="review.user"
         class="pt-4"
       />
     </div>

@@ -30,6 +30,7 @@ type ReviewType = {
   title: string;
   description: string;
   userId: string;
+  user: UserType;
   comments: CommentType[];
   album: ReviewAlbumType;
 }
@@ -42,6 +43,7 @@ const emptyReview: ReviewType = {
   title: "",
   description: "",
   userId: "",
+  user: emptyUser,
   comments: [emptyComment],
   album: emptyReviewAlbum,
 }

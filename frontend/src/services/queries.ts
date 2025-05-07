@@ -43,6 +43,13 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
       value
       title
       description
+      user {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
       comments {
         _id
         text

@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
+import type { UserType } from '@/types/user';
 import { handleGqlError } from '@/utils/error';
+import { navigateToUser } from '@/utils/navigate';
 import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
+import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import FloatLabel from "primevue/floatlabel";
@@ -20,6 +23,7 @@ const props = defineProps<{
   rating:  number;
   title: string;
   description: string;
+  user: UserType;
 }>();
 
 const reviewEditable = ref(props.title == '');
@@ -81,10 +85,31 @@ const toggleEdit = () => {
   <div v-if="!reviewEditable">
     <Card>
       <template #title>
-        {{ props.title }}
+        <span class="text-sm text-neutral-500"> 
+          Review by 
+          <a @click="navigateToUser(router, props.user._id)" class="cursor-pointer">
+            {{ props.user.displayName }}
+          </a>
+        </span>
       </template>
       <template #subtitle>
-        <Rating v-model="props.rating" :stars="5" readonly></Rating>
+        <div class="flex mb-1">
+          <div class="mr-2">
+            <Avatar
+            :image="props.user.images[0].url"
+            @click="navigateToUser(router, props.user._id)"
+            class="mr-2 cursor-pointer"
+            size="large"
+            shape="circle"
+            />
+          </div>
+          <div>
+            <span class="text-2xl font-bold">
+              {{ props.title }}
+            </span>
+            <Rating v-model="props.rating" :stars="5" readonly></Rating>
+          </div>
+        </div>
       </template>
       <template #content>
         <p class="m-0">
@@ -92,7 +117,9 @@ const toggleEdit = () => {
         </p>
       </template>
       <template #footer>
-        <Button type="button" severity="secondary" label="Edit" @click="toggleEdit"/>
+        <div class="float-right">
+          <Button type="button" severity="secondary" label="Edit" @click="toggleEdit"/>
+        </div>
       </template>
     </Card>
   </div>

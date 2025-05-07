@@ -172,6 +172,27 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		return nil, err
 	}
 
+	if isFieldRequested(ctx, "user") {
+		convertedID, err := primitive.ObjectIDFromHex(res.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		coll := database.GetDB().GetCollection("users")
+		user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+		if user.Err() != nil {
+			return nil, user.Err()
+		}
+
+		u := model.UserResponse{}
+		err = user.Decode(&u)
+		if err != nil {
+			return nil, err
+		}
+
+		res.User = &u
+	}
+
 	if isFieldRequested(ctx, "comments.user") {
 		for _, comment := range res.Comments {
 			coll := database.GetDB().GetCollection("users")
