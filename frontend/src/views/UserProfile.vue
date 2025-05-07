@@ -40,7 +40,7 @@ const fetch_user = async () => {
 
 
 const getFirstFavAlbumImageUrl = () => {
-  return user.value.favouriteAlbums.find(entry => entry.key === 1)?.album.images[0].url ?? "";
+  return user.value.favouriteAlbums.find(entry => entry.key === 1)?.album?.images[0]?.url ?? "";
 };
 
 
