@@ -48,14 +48,32 @@ const emptyReview: ReviewType = {
   album: emptyReviewAlbum,
 }
 
+type RecentUserReviewsType = {
+  totalReviews: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+  reviews: ReviewType[];
+}
+
+const emptyRecentUserReviews: RecentUserReviewsType = {
+  totalReviews: 0,
+  totalPages: 0,
+  hasPreviousPage: false,
+  hasNextPage: false,
+  reviews: [],
+}
+
 export type {
   ReviewType,
   ReviewAlbumType,
   CommentType,
+  RecentUserReviewsType,
 };
 
 export { 
   emptyReview,
   emptyReviewAlbum,
   emptyComment,
+  emptyRecentUserReviews,
 };

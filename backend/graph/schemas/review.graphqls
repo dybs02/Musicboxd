@@ -30,9 +30,18 @@ type Comment {
   updatedAt: Time
 }
 
+type RecentUserReviews {
+  totalReviews: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  reviews: [Review!]!
+}
+
 extend type Query {
   review(itemId: String!, userId: String!): Review!
   recentReviews(number: Int, itemType: String!): [Review!]!
+  recentUserReviews(pageSize: Int, page: Int!, itemType: String!, userId: String!): RecentUserReviews!
 }
 
 extend type Mutation {

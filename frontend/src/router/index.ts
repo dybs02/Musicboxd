@@ -52,6 +52,11 @@ const router = createRouter({
       path: '/admin/reported',
       name: 'reported',
       component: () => import('@/views/admin/ReportedView.vue')
+    },
+    {
+      path: '/diary/:userId',
+      name: 'diary',
+      component: () => import('@/views/DiaryView.vue')
     }
   ]
 })

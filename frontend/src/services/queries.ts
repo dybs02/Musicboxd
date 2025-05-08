@@ -255,6 +255,34 @@ const UPDATE_CURRENT_USER_FAVOURITE_ALBUM = gql`
 `
 
 
+const GET_RECENT_USER_REVIEWS_PAGINATION = gql`
+  query RecentUserReviews($pageSize: Int, $page: Int!, $itemType: String!, $userId: String!) {
+    recentUserReviews(page: $page, itemType: $itemType, userId: $userId, pageSize: $pageSize) {
+      totalReviews
+      totalPages
+      hasPreviousPage
+      hasNextPage
+      reviews {
+        value
+        _id
+        itemId
+        itemType
+        title
+        userId
+        album {
+          name
+          images {
+            url
+          }
+          artists {
+            name
+          }
+        }
+      }
+    }
+  }
+`
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -267,4 +295,5 @@ export {
   GET_USER_BY_ID,
   SEARCH_FOR_ALBUMS,
   UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
+  GET_RECENT_USER_REVIEWS_PAGINATION,
 };

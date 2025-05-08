@@ -20,21 +20,28 @@ const nav_items = ref([
       label: 'Home',
       icon: 'pi pi-home',
       command: () => {
-          router.push({name: 'home'});
+        router.push({name: 'home'});
       }
   },
   {
       label: 'Profile',
       icon: 'pi pi-star',
       command: () => {
-          router.push({name: 'user', params: {id: store.getId()}});
+        router.push({name: 'user', params: {id: store.getId()}});
+      }
+  },
+  {
+      label: 'Diary',
+      icon: 'pi pi-book',
+      command: () => {
+        router.push({name: 'diary', params: {userId: store.getId()}});
       }
   },
   {
       label: 'About',
       icon: 'pi pi-envelope',
       command: () => {
-          router.push({name: 'about'});
+        router.push({name: 'about'});
       }
   },
 ]);

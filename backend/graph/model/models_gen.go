@@ -79,6 +79,14 @@ type Mutation struct {
 type Query struct {
 }
 
+type RecentUserReviews struct {
+	TotalReviews    int       `json:"totalReviews" bson:"totalReviews"`
+	TotalPages      int       `json:"totalPages" bson:"totalPages"`
+	HasPreviousPage bool      `json:"hasPreviousPage" bson:"hasPreviousPage"`
+	HasNextPage     bool      `json:"hasNextPage" bson:"hasNextPage"`
+	Reviews         []*Review `json:"reviews" bson:"reviews"`
+}
+
 type ReportedComment struct {
 	ID             *string       `json:"_id,omitempty" bson:"_id,omitempty"`
 	CommentID      string        `json:"commentId" bson:"commentId"`

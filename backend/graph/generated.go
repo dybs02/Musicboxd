@@ -122,12 +122,21 @@ type ComplexityRoot struct {
 		Album             func(childComplexity int, id string) int
 		AlbumsByIds       func(childComplexity int, ids []string) int
 		RecentReviews     func(childComplexity int, number *int, itemType string) int
+		RecentUserReviews func(childComplexity int, pageSize *int, page int, itemType string, userID string) int
 		ReportedComments  func(childComplexity int, number *int) int
 		Review            func(childComplexity int, itemID string, userID string) int
 		Search            func(childComplexity int, typeArg *string, query string) int
 		Track             func(childComplexity int, id string) int
 		UserByDisplayName func(childComplexity int, displayName string) int
 		UserByID          func(childComplexity int, id string) int
+	}
+
+	RecentUserReviews struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		Reviews         func(childComplexity int) int
+		TotalPages      func(childComplexity int) int
+		TotalReviews    func(childComplexity int) int
 	}
 
 	ReportedComment struct {
@@ -264,6 +273,7 @@ type QueryResolver interface {
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
 	RecentReviews(ctx context.Context, number *int, itemType string) ([]*model.Review, error)
+	RecentUserReviews(ctx context.Context, pageSize *int, page int, itemType string, userID string) (*model.RecentUserReviews, error)
 	Search(ctx context.Context, typeArg *string, query string) (*model.SearchResponse, error)
 	Track(ctx context.Context, id string) (*model.Track, error)
 	Album(ctx context.Context, id string) (*model.Album, error)
@@ -653,6 +663,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.RecentReviews(childComplexity, args["number"].(*int), args["itemType"].(string)), true
 
+	case "Query.recentUserReviews":
+		if e.complexity.Query.RecentUserReviews == nil {
+			break
+		}
+
+		args, err := ec.field_Query_recentUserReviews_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.RecentUserReviews(childComplexity, args["pageSize"].(*int), args["page"].(int), args["itemType"].(string), args["userId"].(string)), true
+
 	case "Query.reportedComments":
 		if e.complexity.Query.ReportedComments == nil {
 			break
@@ -724,6 +746,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.UserByID(childComplexity, args["id"].(string)), true
+
+	case "RecentUserReviews.hasNextPage":
+		if e.complexity.RecentUserReviews.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.HasNextPage(childComplexity), true
+
+	case "RecentUserReviews.hasPreviousPage":
+		if e.complexity.RecentUserReviews.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.HasPreviousPage(childComplexity), true
+
+	case "RecentUserReviews.reviews":
+		if e.complexity.RecentUserReviews.Reviews == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.Reviews(childComplexity), true
+
+	case "RecentUserReviews.totalPages":
+		if e.complexity.RecentUserReviews.TotalPages == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.TotalPages(childComplexity), true
+
+	case "RecentUserReviews.totalReviews":
+		if e.complexity.RecentUserReviews.TotalReviews == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.TotalReviews(childComplexity), true
 
 	case "ReportedComment.comment":
 		if e.complexity.ReportedComment.Comment == nil {
@@ -1877,6 +1934,83 @@ func (ec *executionContext) field_Query_recentReviews_argsItemType(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemType"))
 	if tmp, ok := rawArgs["itemType"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_recentUserReviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_recentUserReviews_argsPageSize(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pageSize"] = arg0
+	arg1, err := ec.field_Query_recentUserReviews_argsPage(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["page"] = arg1
+	arg2, err := ec.field_Query_recentUserReviews_argsItemType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["itemType"] = arg2
+	arg3, err := ec.field_Query_recentUserReviews_argsUserID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg3
+	return args, nil
+}
+func (ec *executionContext) field_Query_recentUserReviews_argsPageSize(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSize"))
+	if tmp, ok := rawArgs["pageSize"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_recentUserReviews_argsPage(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+	if tmp, ok := rawArgs["page"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_recentUserReviews_argsItemType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemType"))
+	if tmp, ok := rawArgs["itemType"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_recentUserReviews_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+	if tmp, ok := rawArgs["userId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -4438,6 +4572,73 @@ func (ec *executionContext) fieldContext_Query_recentReviews(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_recentUserReviews(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_recentUserReviews(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().RecentUserReviews(rctx, fc.Args["pageSize"].(*int), fc.Args["page"].(int), fc.Args["itemType"].(string), fc.Args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.RecentUserReviews)
+	fc.Result = res
+	return ec.marshalNRecentUserReviews2ᚖmusicboxdᚋgraphᚋmodelᚐRecentUserReviews(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_recentUserReviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalReviews":
+				return ec.fieldContext_RecentUserReviews_totalReviews(ctx, field)
+			case "totalPages":
+				return ec.fieldContext_RecentUserReviews_totalPages(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_RecentUserReviews_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_RecentUserReviews_hasNextPage(ctx, field)
+			case "reviews":
+				return ec.fieldContext_RecentUserReviews_reviews(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type RecentUserReviews", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_recentUserReviews_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_search(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_search(ctx, field)
 	if err != nil {
@@ -5052,6 +5253,248 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 				return ec.fieldContext___Schema_directives(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_totalReviews(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_totalReviews(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalReviews, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_totalReviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_totalPages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_totalPages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_hasPreviousPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPreviousPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_hasPreviousPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_hasNextPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_reviews(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_reviews(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reviews, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Review)
+	fc.Result = res
+	return ec.marshalNReview2ᚕᚖmusicboxdᚋgraphᚋmodelᚐReviewᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_reviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Review__id(ctx, field)
+			case "value":
+				return ec.fieldContext_Review_value(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
+			case "title":
+				return ec.fieldContext_Review_title(ctx, field)
+			case "description":
+				return ec.fieldContext_Review_description(ctx, field)
+			case "userId":
+				return ec.fieldContext_Review_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Review_user(ctx, field)
+			case "comments":
+				return ec.fieldContext_Review_comments(ctx, field)
+			case "album":
+				return ec.fieldContext_Review_album(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
 	}
 	return fc, nil
@@ -11759,6 +12202,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "recentUserReviews":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_recentUserReviews(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "search":
 			field := field
 
@@ -11893,6 +12358,65 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___schema(ctx, field)
 			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var recentUserReviewsImplementors = []string{"RecentUserReviews"}
+
+func (ec *executionContext) _RecentUserReviews(ctx context.Context, sel ast.SelectionSet, obj *model.RecentUserReviews) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, recentUserReviewsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RecentUserReviews")
+		case "totalReviews":
+			out.Values[i] = ec._RecentUserReviews_totalReviews(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalPages":
+			out.Values[i] = ec._RecentUserReviews_totalPages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasPreviousPage":
+			out.Values[i] = ec._RecentUserReviews_hasPreviousPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._RecentUserReviews_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "reviews":
+			out.Values[i] = ec._RecentUserReviews_reviews(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13250,6 +13774,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNRecentUserReviews2musicboxdᚋgraphᚋmodelᚐRecentUserReviews(ctx context.Context, sel ast.SelectionSet, v model.RecentUserReviews) graphql.Marshaler {
+	return ec._RecentUserReviews(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRecentUserReviews2ᚖmusicboxdᚋgraphᚋmodelᚐRecentUserReviews(ctx context.Context, sel ast.SelectionSet, v *model.RecentUserReviews) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._RecentUserReviews(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNReportedComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐReportedComment(ctx context.Context, sel ast.SelectionSet, v []*model.ReportedComment) graphql.Marshaler {

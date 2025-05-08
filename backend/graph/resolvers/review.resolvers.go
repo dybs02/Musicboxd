@@ -7,6 +7,7 @@ package resolver
 import (
 	"context"
 	"errors"
+	"math"
 	"musicboxd/database"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
@@ -264,6 +265,117 @@ func (r *queryResolver) RecentReviews(ctx context.Context, number *int, itemType
 
 		res = append(res, &r)
 	}
+
+	return res, nil
+}
+
+func (r *queryResolver) RecentUserReviews(ctx context.Context, pageSize *int, page int, itemType string, userID string) (*model.RecentUserReviews, error) {
+	// Authenticate user or no ???
+
+	filter := bson.M{}
+	if itemType != "" {
+		filter["itemType"] = itemType
+	}
+	if userID != "" {
+		convertedID, err := primitive.ObjectIDFromHex(userID)
+		if err != nil {
+			return nil, err
+		}
+		filter["userId"] = convertedID
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	res := &model.RecentUserReviews{}
+
+	currentPage := 1
+	if page > 0 {
+		currentPage = page
+	}
+
+	limit := 10
+	if pageSize != nil && *pageSize > 0 {
+		limit = min(*pageSize, 20)
+	}
+
+	skip := (currentPage - 1) * limit
+
+	if isFieldRequested(ctx, "reviews") {
+		cursor, err := coll.Find(
+			ctx,
+			filter,
+			options.Find().
+				SetSort(bson.M{"createdAt": -1}).
+				SetSkip(int64(skip)).
+				SetLimit(int64(limit)),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		defer cursor.Close(ctx)
+		var reviews []*model.Review
+		if err = cursor.All(ctx, &reviews); err != nil {
+			return nil, err
+		}
+
+		if isFieldRequested(ctx, "user") && len(reviews) > 0 {
+			// Unique user IDs
+			userIDMap := make(map[string]bool)
+			for _, review := range reviews {
+				if review.UserID != "" {
+					userIDMap[review.UserID] = true
+				}
+			}
+
+			userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
+			for id := range userIDMap {
+				objID, err := primitive.ObjectIDFromHex(id)
+				if err != nil {
+					return nil, err
+				}
+				userIDs = append(userIDs, objID)
+			}
+
+			usersColl := database.GetDB().GetCollection("users")
+			usersCursor, err := usersColl.Find(
+				ctx,
+				bson.M{"_id": bson.M{"$in": userIDs}},
+			)
+			if err != nil {
+				return nil, err
+			}
+			defer usersCursor.Close(ctx)
+
+			var users []*model.UserResponse
+			if err = usersCursor.All(ctx, &users); err != nil {
+				return nil, err
+			}
+
+			userMap := make(map[string]*model.UserResponse)
+			for _, user := range users {
+				userMap[user.ID] = user
+			}
+
+			for _, review := range reviews {
+				if user, ok := userMap[review.UserID]; ok {
+					review.User = user
+				}
+			}
+		}
+
+		res.Reviews = reviews
+
+	}
+
+	total, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	res.TotalReviews = int(total)
+	res.TotalPages = int(math.Ceil(float64(total) / float64(limit)))
+	res.HasNextPage = currentPage < res.TotalPages
+	res.HasPreviousPage = currentPage > 1
 
 	return res, nil
 }
