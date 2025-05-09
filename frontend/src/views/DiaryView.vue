@@ -6,8 +6,9 @@ import { emptyRecentUserReviews, type RecentUserReviewsType } from '@/types/revi
 import { handleGqlError } from '@/utils/error';
 import { useQuery } from '@vue/apollo-composable';
 import Card from 'primevue/card';
+import Paginator, { type PageState } from 'primevue/paginator';
 import ProgressSpinner from 'primevue/progressspinner';
-import { computed, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -17,16 +18,18 @@ const route = useRoute();
 const router = useRouter();
 
 
+const pageSize = 10;
 let userReviews = ref<RecentUserReviewsType>(emptyRecentUserReviews);
 let userReviewsLoading = ref(true);
 
 
 
 const fetch_user_reviews = async () => {
-  const { loading, error, result } = useQuery(
+  // TODO use this approach everywhere
+  const { loading, onError, onResult } = useQuery(
     GET_RECENT_USER_REVIEWS_PAGINATION,
     {
-      pageSize: 10,
+      pageSize: pageSize,
       page: 1,
       itemType: '',
       userId: route.params.userId ?? store.getId(),
@@ -35,11 +38,43 @@ const fetch_user_reviews = async () => {
 
   userReviewsLoading = loading;
 
-  watch(error, (err) => {
+  onError((err) => {
     handleGqlError(router, err);
   });
 
-  userReviews = computed<RecentUserReviewsType>(() => result?.value?.recentUserReviews ?? emptyRecentUserReviews);
+  onResult((res: any) => {
+    if (res.loading) {
+      return;
+    }
+
+    userReviews.value = res?.data?.recentUserReviews;
+  })
+};
+
+
+
+const change_page = async (event: PageState) => {
+  const { onError, onResult } = useQuery(
+    GET_RECENT_USER_REVIEWS_PAGINATION,
+    {
+      pageSize: pageSize,
+      page: event.page + 1,
+      itemType: '',
+      userId: route.params.userId ?? store.getId(),
+    },
+  );
+
+  onError((err) => {
+    handleGqlError(router, err);
+  });
+
+  onResult((res: any) => {
+    if (res.loading) {
+      return;
+    }
+
+    userReviews.value = res?.data?.recentUserReviews;
+  })
 };
 
 
@@ -63,6 +98,15 @@ watch(() => route.params, fetch_data, { immediate: true })
         <DiaryReviewsList
           :reviews="userReviews.reviews"
         />
+      </template>
+      <template #footer>
+        <Paginator
+          :rows="pageSize"
+          :totalRecords="userReviews.totalReviews"
+          :first="0"
+          @page="change_page($event)"
+        >
+        </Paginator>
       </template>
     </Card>
   </div>
