@@ -8,7 +8,7 @@ import Card from 'primevue/card';
 import { useMediaQuery } from '@vueuse/core';
 import { navigateToReview } from '@/utils/navigate';
 import { useRouter } from 'vue-router';
-
+import Button from 'primevue/button';
 
 const props = defineProps({
   reviews: {
@@ -49,12 +49,17 @@ const getSeverity = (itemType: string) => {
     </template>
     <Column header="Date" class="w-24">
       <template #body="slotProps">
-        <div class="text-xs text-neutral-500 flex flex-col">
-          <span class="mx-auto">
-            2nd May
+        <div class="flex flex-col">
+          <span class="text-xs text-neutral-500 mx-auto">
+            {{ new Intl.DateTimeFormat('en-US', {
+              month: 'short',
+              day: 'numeric',
+            }).format(new Date(slotProps.data.createdAt)) }}
           </span>
-          <span class="mx-auto">
-            2023
+          <span class="text-sm text-neutral-500 mx-auto">
+            {{ new Intl.DateTimeFormat('en-US', {
+              year: 'numeric',
+            }).format(new Date(slotProps.data.createdAt)) }}
           </span>
         </div>
       </template>

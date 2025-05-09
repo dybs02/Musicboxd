@@ -59,13 +59,15 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 		bson.M{"itemId": itemID, "userId": cc.UserID, "itemType": itemType},
 		bson.M{
 			"$setOnInsert": bson.M{
-				"comments": []interface{}{},
+				"comments":  []interface{}{},
+				"createdAt": time.Now(),
 			},
 			"$set": bson.M{
 				"title":       title,
 				"description": description,
 				"value":       value,
 				"album":       dbAlbum,
+				"updatedAt":   time.Now(),
 			}},
 		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
 	)

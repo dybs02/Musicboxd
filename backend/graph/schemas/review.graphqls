@@ -9,6 +9,8 @@ type Review {
   description: String!
   userId: ID!
   user: UserResponse
+  createdAt: Time!
+  updatedAt: Time
   comments: [Comment!]
   album: ReviewAlbum
 }

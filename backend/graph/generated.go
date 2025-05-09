@@ -155,11 +155,13 @@ type ComplexityRoot struct {
 	Review struct {
 		Album       func(childComplexity int) int
 		Comments    func(childComplexity int) int
+		CreatedAt   func(childComplexity int) int
 		Description func(childComplexity int) int
 		ID          func(childComplexity int) int
 		ItemID      func(childComplexity int) int
 		ItemType    func(childComplexity int) int
 		Title       func(childComplexity int) int
+		UpdatedAt   func(childComplexity int) int
 		User        func(childComplexity int) int
 		UserID      func(childComplexity int) int
 		Value       func(childComplexity int) int
@@ -866,6 +868,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Review.Comments(childComplexity), true
 
+	case "Review.createdAt":
+		if e.complexity.Review.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Review.CreatedAt(childComplexity), true
+
 	case "Review.description":
 		if e.complexity.Review.Description == nil {
 			break
@@ -900,6 +909,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Review.Title(childComplexity), true
+
+	case "Review.updatedAt":
+		if e.complexity.Review.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Review.UpdatedAt(childComplexity), true
 
 	case "Review.user":
 		if e.complexity.Review.User == nil {
@@ -4164,6 +4180,10 @@ func (ec *executionContext) fieldContext_Mutation_createOrUpdateReview(ctx conte
 				return ec.fieldContext_Review_userId(ctx, field)
 			case "user":
 				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
 			case "album":
@@ -4473,6 +4493,10 @@ func (ec *executionContext) fieldContext_Query_review(ctx context.Context, field
 				return ec.fieldContext_Review_userId(ctx, field)
 			case "user":
 				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
 			case "album":
@@ -4550,6 +4574,10 @@ func (ec *executionContext) fieldContext_Query_recentReviews(ctx context.Context
 				return ec.fieldContext_Review_userId(ctx, field)
 			case "user":
 				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
 			case "album":
@@ -5489,6 +5517,10 @@ func (ec *executionContext) fieldContext_RecentUserReviews_reviews(_ context.Con
 				return ec.fieldContext_Review_userId(ctx, field)
 			case "user":
 				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
 			case "album":
@@ -6343,6 +6375,91 @@ func (ec *executionContext) fieldContext_Review_user(_ context.Context, field gr
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Review_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Review_createdAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	fc.Result = res
+	return ec.marshalNTime2timeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Review_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Review_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Review_updatedAt(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UpdatedAt, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*time.Time)
+	fc.Result = res
+	return ec.marshalOTime2ᚖtimeᚐTime(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Review_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Time does not have child fields")
 		},
 	}
 	return fc, nil
@@ -12551,6 +12668,13 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "user":
 			out.Values[i] = ec._Review_user(ctx, field, obj)
+		case "createdAt":
+			out.Values[i] = ec._Review_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Review_updatedAt(ctx, field, obj)
 		case "comments":
 			out.Values[i] = ec._Review_comments(ctx, field, obj)
 		case "album":

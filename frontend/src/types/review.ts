@@ -31,6 +31,8 @@ type ReviewType = {
   description: string;
   userId: string;
   user: UserType;
+  createdAt: string;
+  updatedAt: string;
   comments: CommentType[];
   album: ReviewAlbumType;
 }
@@ -44,6 +46,8 @@ const emptyReview: ReviewType = {
   description: "",
   userId: "",
   user: emptyUser,
+  createdAt: "",
+  updatedAt: "",
   comments: [emptyComment],
   album: emptyReviewAlbum,
 }

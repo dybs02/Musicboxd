@@ -109,6 +109,8 @@ type Review struct {
 	Description string        `json:"description" bson:"description"`
 	UserID      string        `json:"userId" bson:"userId"`
 	User        *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	CreatedAt   time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt   *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
 	Comments    []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
 	Album       *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
 }
