@@ -10,6 +10,7 @@ import Paginator, { type PageState } from 'primevue/paginator';
 import ProgressSpinner from 'primevue/progressspinner';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import SelectButton from 'primevue/selectbutton';
 
 
 
@@ -19,6 +20,13 @@ const router = useRouter();
 
 
 const pageSize = 10;
+const filter = ref({ name: 'All', value: '' });
+const filterOptions = ref([
+  { name: 'All',    value: '' },
+  { name: 'Albums', value: 'album' },
+  { name: 'Tracks', value: 'track' },
+]);
+
 let userReviews = ref<RecentUserReviewsType>(emptyRecentUserReviews);
 let userReviewsLoading = ref(true);
 
@@ -31,7 +39,7 @@ const fetch_user_reviews = async () => {
     {
       pageSize: pageSize,
       page: 1,
-      itemType: '',
+      itemType: filter.value.value,
       userId: route.params.userId ?? store.getId(),
     }
   );
@@ -59,7 +67,7 @@ const change_page = async (event: PageState) => {
     {
       pageSize: pageSize,
       page: event.page + 1,
-      itemType: '',
+      itemType: filter.value.value,
       userId: route.params.userId ?? store.getId(),
     },
   );
@@ -84,6 +92,7 @@ const fetch_data = async () => {
 };
 
 watch(() => route.params, fetch_data, { immediate: true })
+watch(filter, (newValue) => {fetch_user_reviews();}, { immediate: true });
 
 </script>
 
@@ -94,6 +103,16 @@ watch(() => route.params, fetch_data, { immediate: true })
 
   <div v-else>
     <Card>
+      <template #header>
+        <div class="flex flex-wrap items-center justify-between mx-6 mt-6">
+          <span class="text-xl font-bold">Your reviews</span>
+          <SelectButton
+            v-model="filter"
+            :options="filterOptions"
+            optionLabel="name"
+          />
+        </div>
+      </template>
       <template #content>
         <DiaryReviewsList
           :reviews="userReviews.reviews"
@@ -105,6 +124,7 @@ watch(() => route.params, fetch_data, { immediate: true })
           :totalRecords="userReviews.totalReviews"
           :first="0"
           @page="change_page($event)"
+          class="mt-4"
         >
         </Paginator>
       </template>

@@ -43,9 +43,6 @@ const getSeverity = (itemType: string) => {
 
   <DataTable :value="reviews">
     <template #header>
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <span class="text-xl font-bold">Your reviews</span>
-      </div>
     </template>
     <Column header="Date" class="w-24">
       <template #body="slotProps">
