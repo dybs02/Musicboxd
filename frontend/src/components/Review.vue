@@ -14,6 +14,7 @@ import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import LikesDislikes from './likes-dislikes/LikesDislikes.vue';
 
 
 const route = useRoute();
@@ -81,32 +82,6 @@ const toggleEdit = () => {
 };
 
 
-const addReaction = (reaction: string) => {
-  const { mutate: addLikeDislike, onError: onErrorAddLikeDislike, onDone: onDoneAddLikeDislike } = useMutation(
-    ADD_LIKE_OR_DISLIKE,
-    () => ({
-      variables: {
-        itemId: props.itemId,
-        action: reaction, // TODO add like/dislike button
-      },
-    }
-  ));
-  
-  onErrorAddLikeDislike((err) => {
-    handleGqlError(router, err);
-  });
-  
-  onDoneAddLikeDislike((res: any) => {
-    if (res.loading) {
-      return;
-    }
-  
-    console.log(res.data);
-  })
-
-  addLikeDislike();
-};
-
 </script>
 
 <template>
@@ -147,19 +122,13 @@ const addReaction = (reaction: string) => {
       </template>
       <template #footer>
         <div class="flex justify-between mt-2">
-          <div class="flex my-auto text-neutral-500">
-            <div class="cursor-pointer" @click="addReaction('like')">
-              <i v-if="props.review.userReaction==='like'" class="pi pi-thumbs-up-fill like-dislike-selected"></i>
-              <i v-else class="pi pi-thumbs-up like-dislike"></i>
-              <span class="ml-1 like-dislike">{{ props.review.likesCount }}</span>
-            </div>
-            <div class="ml-4 cursor-pointer" @click="addReaction('dislike')">
-              <!-- TODO mutation 4 options: add like, add dislike, remove, swap -->
-              <i v-if="props.review.userReaction==='dislike'" class="pi pi-thumbs-down-fill like-dislike-selected"></i>
-              <i v-else class="pi pi-thumbs-down like-dislike"></i>
-              <span class="ml-1 like-dislike">{{ props.review.dislikesCount }}</span>
-            </div>
-          </div>
+          <LikesDislikes
+            :itemId="props.itemId"
+            :userReaction="props.review.userReaction"
+            :likesCount="props.review.likesCount"
+            :dislikesCount="props.review.dislikesCount"
+            :fontRemSize="1.3"
+          />
           <Button type="button" severity="secondary" label="Edit" @click="toggleEdit"/>
         </div>
       </template>
@@ -191,14 +160,5 @@ const addReaction = (reaction: string) => {
 </template>
 
 <style>
-
-.like-dislike {
-  font-size: 1.2rem;
-}
-
-.like-dislike-selected {
-  color: var(--p-rating-icon-active-color);;
-  font-size: 1.2rem;
-}
 
 </style>
