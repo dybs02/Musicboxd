@@ -12,6 +12,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -106,4 +107,40 @@ func GetPreloadString(prefix, name string) string {
 func isFieldRequested(ctx context.Context, fieldName string) bool {
 	fields := GetPreloads(ctx)
 	return slices.Contains(fields, fieldName)
+}
+
+func GetReviewProjection(userID primitive.ObjectID) *bson.M {
+	return &bson.M{
+		// Calculate fields
+		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
+		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
+		"userReaction": bson.M{
+			"$cond": bson.A{
+				bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}}},
+				"like",
+				bson.M{
+					"$cond": bson.A{
+						bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}}},
+						"dislike",
+						"",
+					},
+				},
+			},
+		},
+		// Include most fields
+		"value":       1,
+		"itemId":      1,
+		"itemType":    1,
+		"title":       1,
+		"description": 1,
+		"userId":      1,
+		"user":        1,
+		"createdAt":   1,
+		"updatedAt":   1,
+		"comments":    1,
+		"album":       1,
+		// Exclude likes and dislikes
+		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
+		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
+	}
 }

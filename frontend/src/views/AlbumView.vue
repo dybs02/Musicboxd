@@ -120,12 +120,9 @@ const updateComments = (comments: CommentType[]) => {
             class="mt-4"
           />
           <Review
+            :review="review"
             :item-id="route.params.albumId as string"
             :item-type="'album'"
-            :rating="review.value"
-            :title="review.title"
-            :description="review.description"
-            :user="review.user"
             class="pt-4"
           />
         </div>
@@ -137,12 +134,9 @@ const updateComments = (comments: CommentType[]) => {
         class="mt-4"
       />
       <Review
+        :review="review"
         :item-id="route.params.albumId as string"
         :item-type="'album'"
-        :rating="review.value"
-        :title="review.title"
-        :description="review.description"
-        :user="review.user"
         class="pt-4"
       />
     </div>

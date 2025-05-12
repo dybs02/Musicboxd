@@ -101,18 +101,23 @@ type ReportedComment struct {
 }
 
 type Review struct {
-	ID          *string       `json:"_id,omitempty" bson:"_id,omitempty"`
-	Value       int           `json:"value" bson:"value"`
-	ItemID      string        `json:"itemId" bson:"itemId"`
-	ItemType    string        `json:"itemType" bson:"itemType"`
-	Title       string        `json:"title" bson:"title"`
-	Description string        `json:"description" bson:"description"`
-	UserID      string        `json:"userId" bson:"userId"`
-	User        *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
-	CreatedAt   time.Time     `json:"createdAt" bson:"createdAt"`
-	UpdatedAt   *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
-	Comments    []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
-	Album       *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
+	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	Value         int           `json:"value" bson:"value"`
+	ItemID        string        `json:"itemId" bson:"itemId"`
+	ItemType      string        `json:"itemType" bson:"itemType"`
+	Title         string        `json:"title" bson:"title"`
+	Description   string        `json:"description" bson:"description"`
+	UserID        string        `json:"userId" bson:"userId"`
+	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	CreatedAt     time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
+	Album         *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
+	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
+	LikesCount    int           `json:"likesCount" bson:"likesCount"`
+	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
+	DislikesCount int           `json:"dislikesCount" bson:"dislikesCount"`
+	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
 }
 
 type ReviewAlbum struct {

@@ -136,12 +136,9 @@ const updateComments = (comments: CommentType[]) => {
         </Card>
         <div v-if="!isMdScreen" >
           <Review
+            :review="review"
             :item-id="route.params.trackId as string"
             :item-type="'track'"
-            :rating="review.value"
-            :title="review.title"
-            :description="review.description"
-            :user="review.user"
             class="pt-4"
           />
         </div>
@@ -150,12 +147,9 @@ const updateComments = (comments: CommentType[]) => {
 
     <div v-if="isMdScreen" class="sm:px-4 sm:pt-4">
       <Review
+        :review="review"
         :item-id="route.params.trackId as string"
         :item-type="'track'"
-        :rating="review.value"
-        :title="review.title"
-        :description="review.description"
-        :user="review.user"
         class="pt-4"
       />
     </div>

@@ -61,6 +61,8 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 			"$setOnInsert": bson.M{
 				"comments":  []interface{}{},
 				"createdAt": time.Now(),
+				"likes":     []interface{}{},
+				"dislikes":  []interface{}{},
 			},
 			"$set": bson.M{
 				"title":       title,
@@ -69,7 +71,10 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 				"album":       dbAlbum,
 				"updatedAt":   time.Now(),
 			}},
-		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+		options.FindOneAndUpdate().
+			SetUpsert(true).
+			SetReturnDocument(options.After).
+			SetProjection(GetReviewProjection(cc.UserID)),
 	)
 	if review.Err() != nil {
 		return nil, review.Err()
@@ -152,8 +157,53 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 	return res.Comments, nil
 }
 
+func (r *mutationResolver) AddLikeDislike(ctx context.Context, itemID string, action string) (*model.Review, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if action != "like" && action != "dislike" {
+		return nil, errors.New("invalid action")
+	}
+
+	action += "s"
+	oppositeAction := "likes"
+	if action == "likes" {
+		oppositeAction = "dislikes"
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	review := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"itemId": itemID, "userId": cc.UserID},
+		bson.M{
+			"$addToSet": bson.M{
+				action: cc.UserID,
+			},
+			"$pull": bson.M{
+				oppositeAction: cc.UserID,
+			},
+		},
+		options.FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(GetReviewProjection(cc.UserID)),
+	)
+	if review.Err() != nil {
+		return nil, review.Err()
+	}
+
+	res := model.Review{}
+	err = review.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (r *queryResolver) Review(ctx context.Context, itemID string, userID string) (*model.Review, error) {
-	_, err := ValidateJWT(ctx)
+	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -164,7 +214,12 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 	}
 
 	coll := database.GetDB().GetCollection("reviews")
-	review := coll.FindOne(ctx, bson.M{"itemId": itemID, "userId": convertedID})
+	review := coll.FindOne(
+		ctx,
+		bson.M{"itemId": itemID, "userId": convertedID},
+		options.FindOne().
+			SetProjection(GetReviewProjection(cc.UserID)),
+	)
 	if review.Err() != nil {
 		return nil, review.Err()
 	}

@@ -35,6 +35,9 @@ type ReviewType = {
   updatedAt: string;
   comments: CommentType[];
   album: ReviewAlbumType;
+  likesCount: number;
+  dislikesCount: number;
+  userReaction: string;
 }
 
 const emptyReview: ReviewType = {
@@ -50,6 +53,9 @@ const emptyReview: ReviewType = {
   updatedAt: "",
   comments: [emptyComment],
   album: emptyReviewAlbum,
+  likesCount: 0,
+  dislikesCount: 0,
+  userReaction: "",
 }
 
 type RecentUserReviewsType = {

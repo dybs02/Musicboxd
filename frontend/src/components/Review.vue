@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
+import { ADD_LIKE_OR_DISLIKE, CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
+import type { ReviewType } from '@/types/review';
 import type { UserType } from '@/types/user';
 import { handleGqlError } from '@/utils/error';
 import { navigateToUser } from '@/utils/navigate';
@@ -18,21 +19,18 @@ import { useRoute, useRouter } from 'vue-router';
 const route = useRoute();
 const router = useRouter();
 const props = defineProps<{
+  review: ReviewType;
   itemId: string;
   itemType: string;
-  rating:  number;
-  title: string;
-  description: string;
-  user: UserType;
 }>();
 
-const reviewEditable = ref(props.title == '');
+const reviewEditable = ref(props.review.title == '');
 let review = ref({
   itemId: props.itemId,
   itemType: props.itemType,
-  rating: props.rating,
-  title: props.title,
-  description: props.description,
+  value: props.review.value,
+  title: props.review.title,
+  description: props.review.description,
 });
 
 
@@ -42,7 +40,7 @@ const { mutate: updateReview, error: updateReviewError, onDone: updateReviewOnDo
     variables: {
       itemId: review.value.itemId,
       itemType: review.value.itemType,
-      value: review.value.rating,
+      value: review.value.value,
       title: review.value.title,
       description: review.value.description,
     },
@@ -61,12 +59,16 @@ updateReviewOnDone(() => {
 
 const submitReview = () => {
   console.log(review.value);
-  if (review.value.title == '' || review.value.description == '' || review.value.rating == 0) {
+  if (review.value.title == '' || review.value.description == '' || review.value.value == 0) {
     // TODO add toast component - not updated
     return;
   }
 
-  if (props.title == review.value.title && props.description == review.value.description && props.rating == review.value.rating) {
+  if (
+    props.review.title == review.value.title &&
+    props.review.description == review.value.description &&
+    props.review.value == review.value.value
+  ) {
     toggleEdit();
     return;
   }
@@ -78,6 +80,33 @@ const toggleEdit = () => {
   reviewEditable.value = !reviewEditable.value;
 };
 
+
+const addReaction = (reaction: string) => {
+  const { mutate: addLikeDislike, onError: onErrorAddLikeDislike, onDone: onDoneAddLikeDislike } = useMutation(
+    ADD_LIKE_OR_DISLIKE,
+    () => ({
+      variables: {
+        itemId: props.itemId,
+        action: reaction, // TODO add like/dislike button
+      },
+    }
+  ));
+  
+  onErrorAddLikeDislike((err) => {
+    handleGqlError(router, err);
+  });
+  
+  onDoneAddLikeDislike((res: any) => {
+    if (res.loading) {
+      return;
+    }
+  
+    console.log(res.data);
+  })
+
+  addLikeDislike();
+};
+
 </script>
 
 <template>
@@ -87,8 +116,8 @@ const toggleEdit = () => {
       <template #title>
         <span class="text-sm text-neutral-500"> 
           Review by 
-          <a @click="navigateToUser(router, props.user._id)" class="cursor-pointer">
-            {{ props.user.displayName }}
+          <a @click="navigateToUser(router, props.review.user._id)" class="cursor-pointer">
+            {{ props.review.user.displayName }}
           </a>
         </span>
       </template>
@@ -96,8 +125,8 @@ const toggleEdit = () => {
         <div class="flex mb-1">
           <div class="mr-2">
             <Avatar
-            :image="props.user.images[0].url"
-            @click="navigateToUser(router, props.user._id)"
+            :image="props.review.user.images[0].url"
+            @click="navigateToUser(router, props.review.user._id)"
             class="mr-2 cursor-pointer"
             size="large"
             shape="circle"
@@ -105,19 +134,32 @@ const toggleEdit = () => {
           </div>
           <div>
             <span class="text-2xl font-bold">
-              {{ props.title }}
+              {{ props.review.title }}
             </span>
-            <Rating v-model="props.rating" :stars="5" readonly></Rating>
+            <Rating v-model="props.review.value" :stars="5" readonly></Rating>
           </div>
         </div>
       </template>
       <template #content>
         <p class="m-0">
-            {{ props.description }}
+            {{ props.review.description }}
         </p>
       </template>
       <template #footer>
-        <div class="float-right">
+        <div class="flex justify-between mt-2">
+          <div class="flex my-auto text-neutral-500">
+            <div class="cursor-pointer" @click="addReaction('like')">
+              <i v-if="props.review.userReaction==='like'" class="pi pi-thumbs-up-fill like-dislike-selected"></i>
+              <i v-else class="pi pi-thumbs-up like-dislike"></i>
+              <span class="ml-1 like-dislike">{{ props.review.likesCount }}</span>
+            </div>
+            <div class="ml-4 cursor-pointer" @click="addReaction('dislike')">
+              <!-- TODO mutation 4 options: add like, add dislike, remove, swap -->
+              <i v-if="props.review.userReaction==='dislike'" class="pi pi-thumbs-down-fill like-dislike-selected"></i>
+              <i v-else class="pi pi-thumbs-down like-dislike"></i>
+              <span class="ml-1 like-dislike">{{ props.review.dislikesCount }}</span>
+            </div>
+          </div>
           <Button type="button" severity="secondary" label="Edit" @click="toggleEdit"/>
         </div>
       </template>
@@ -132,7 +174,7 @@ const toggleEdit = () => {
             <Textarea v-model="review.title" id="over_label" rows="1" class="w-full" />
             <label for="on_label">Rewiew title</label>
           </FloatLabel>
-          <Rating v-model="review.rating" :stars="5" class="mt-3"></Rating>
+          <Rating v-model="review.value" :stars="5" class="mt-3"></Rating>
           <FloatLabel variant="on" class="mt-4">
             <Textarea v-model="review.description" id="over_label" rows="5" class="w-full" />
             <label for="on_label">Rewiew description</label>
@@ -149,5 +191,14 @@ const toggleEdit = () => {
 </template>
 
 <style>
+
+.like-dislike {
+  font-size: 1.2rem;
+}
+
+.like-dislike-selected {
+  color: var(--p-rating-icon-active-color);;
+  font-size: 1.2rem;
+}
 
 </style>

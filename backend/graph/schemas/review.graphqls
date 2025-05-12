@@ -13,6 +13,11 @@ type Review {
   updatedAt: Time
   comments: [Comment!]
   album: ReviewAlbum
+  likes: [ID]
+  likesCount: Int!
+  dislikes: [ID]
+  dislikesCount: Int!
+  userReaction: String
 }
 
 type ReviewAlbum {
@@ -49,4 +54,5 @@ extend type Query {
 extend type Mutation {
   createOrUpdateReview(itemId: String!, itemType: String!, title: String, description: String, value: Int): Review!
   addComment(itemId: String!, reviewId: String!, text: String!): [Comment!]!
+  addLikeDislike(itemId: String!, action: String!): Review!
 }

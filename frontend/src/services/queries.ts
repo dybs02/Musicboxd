@@ -43,6 +43,9 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
       value
       title
       description
+      likesCount
+      dislikesCount
+      userReaction
       user {
         _id
         displayName
@@ -284,6 +287,18 @@ const GET_RECENT_USER_REVIEWS_PAGINATION = gql`
   }
 `
 
+
+const ADD_LIKE_OR_DISLIKE = gql`
+  mutation AddLikeDislike($itemId: String!, $action: String!) {
+    addLikeDislike(itemId: $itemId, action: $action) {
+      likesCount
+      dislikesCount
+      userReaction
+    }
+  }
+`
+
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -297,4 +312,5 @@ export {
   SEARCH_FOR_ALBUMS,
   UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
   GET_RECENT_USER_REVIEWS_PAGINATION,
+  ADD_LIKE_OR_DISLIKE,
 };
