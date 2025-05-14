@@ -26,7 +26,8 @@ const props = defineProps<{
 }>();
 
 
-const pageSize = 10;
+const paginatorFirst = ref(0);
+const pageSize = 3;
 let commentsPage = ref<CommentsPageType>(emptyCommentsPage);
 let commentsPageLoading = ref(true);
 
@@ -66,6 +67,9 @@ const change_page = async (event: PageState) => {
       reviewId: route.params.userId,
       pageSize: pageSize,
       page: event.page + 1,
+    },
+    {
+      fetchPolicy: 'no-cache',
     }
   );
 
@@ -86,7 +90,7 @@ const change_page = async (event: PageState) => {
 
 
 
-const submitComment = () => {
+const submitComment = async () => {
   if (newComment.value.text == '') {
     // TODO add toast component
     return;
@@ -107,8 +111,18 @@ const submitComment = () => {
     handleGqlError(router, err);
   });
 
-  addCommentOnDone((result) => {
-    // TODO find and replace the comment in the list
+  addCommentOnDone(async (result) => {
+    const newTotalPages = Math.ceil((commentsPage.value.totalComments + 1) / pageSize)
+    const fakePageState: PageState = {
+      page: newTotalPages - 1,
+      first: 0,
+      rows: 0,
+      pageCount: 0,
+    }
+
+    await change_page(fakePageState);
+
+    paginatorFirst.value = pageSize * Math.floor(commentsPage.value.totalComments/pageSize);
     newComment.value.text = '';
   });
 
@@ -141,9 +155,10 @@ watch(() => route.params, fetch_data, { immediate: true })
 
         <div>
           <Paginator
+            v-if="commentsPage.totalComments > 0"
             :rows="pageSize"
             :totalRecords="commentsPage.totalComments"
-            :first="0"
+            :first="paginatorFirst"
             @page="change_page($event)"
             class="mt-4"
           >
