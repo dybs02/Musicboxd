@@ -34,13 +34,19 @@ type Albums struct {
 }
 
 type Comment struct {
-	ID        *string       `json:"_id,omitempty" bson:"_id,omitempty"`
-	ReviewID  *string       `json:"reviewId,omitempty" bson:"reviewId,omitempty"`
-	UserID    *string       `json:"userId,omitempty" bson:"userId,omitempty"`
-	User      *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
-	Text      *string       `json:"text,omitempty" bson:"text,omitempty"`
-	CreatedAt *time.Time    `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
-	UpdatedAt *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	ItemID        string        `json:"itemId" bson:"itemId"`
+	ReviewID      *string       `json:"reviewId,omitempty" bson:"reviewId,omitempty"`
+	UserID        *string       `json:"userId,omitempty" bson:"userId,omitempty"`
+	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	Text          *string       `json:"text,omitempty" bson:"text,omitempty"`
+	CreatedAt     *time.Time    `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
+	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
+	LikesCount    int           `json:"likesCount" bson:"likesCount"`
+	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
+	DislikesCount int           `json:"dislikesCount" bson:"dislikesCount"`
+	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
 }
 
 type ExplicitContent struct {
@@ -111,7 +117,7 @@ type Review struct {
 	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
 	CreatedAt     time.Time     `json:"createdAt" bson:"createdAt"`
 	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
-	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
+	Comments      []*Comment    `json:"comments" bson:"comments"`
 	Album         *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
 	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
 	LikesCount    int           `json:"likesCount" bson:"likesCount"`

@@ -89,7 +89,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	return &res, nil
 }
 
-func (r *mutationResolver) AddComment(ctx context.Context, itemID string, reviewID string, text string) ([]*model.Comment, error) {
+func (r *mutationResolver) AddComment(ctx context.Context, itemID string, reviewID string, text string) (*model.Comment, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -100,61 +100,82 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 		return nil, err
 	}
 
-	coll := database.GetDB().GetCollection("reviews")
+	coll := database.GetDB().GetCollection("comments")
 	comment := coll.FindOneAndUpdate(
 		ctx,
 		bson.M{"itemId": itemID, "userId": convertedReviewID},
 		bson.M{
-			"$push": bson.M{
-				"comments": bson.M{
-					"_id":       primitive.NewObjectID(),
-					"reviewId":  reviewID, // why would i need it here?
-					"userId":    cc.UserID,
-					"text":      text,
-					"createdAt": time.Now(), // TODO check if timezone independent - utc+0?
-					"updatedAt": time.Now(),
-				},
+			"$setOnInsert": bson.M{
+				"createdAt": time.Now(),
+				"likes":     []interface{}{},
+				"dislikes":  []interface{}{},
 			},
-		},
-		options.FindOneAndUpdate().SetReturnDocument(options.After),
+			"$set": bson.M{
+				"itemId":    itemID,
+				"reviewId":  convertedReviewID,
+				"userId":    cc.UserID,
+				"text":      text,
+				"updatedAt": time.Now(),
+			}},
+		options.FindOneAndUpdate().
+			SetUpsert(true).
+			SetReturnDocument(options.After),
 	)
 
 	if comment.Err() != nil {
 		return nil, comment.Err()
 	}
 
-	res := model.Review{}
+	res := model.Comment{}
 	err = comment.Decode(&res)
 	if err != nil {
 		return nil, err
 	}
 
-	if isFieldRequested(ctx, "user") {
-		for _, comment := range res.Comments {
-			coll := database.GetDB().GetCollection("users")
-
-			convertedID, err := primitive.ObjectIDFromHex(*comment.UserID)
-			if err != nil {
-				return nil, err
-			}
-
-			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
-			if user.Err() != nil {
-				return nil, user.Err()
-			}
-
-			u := model.UserResponse{}
-			err = user.Decode(&u)
-			if err != nil {
-				return nil, err
-			}
-
-			comment.User = &u
-		}
+	convertedCommentID, err := primitive.ObjectIDFromHex(*res.ID)
+	if err != nil {
+		return nil, err
 	}
 
-	// TODO return only the added comment?
-	return res.Comments, nil
+	coll = database.GetDB().GetCollection("reviews")
+	review := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"itemId": itemID, "userId": convertedReviewID},
+		bson.M{
+			"$push": bson.M{
+				"comments": convertedCommentID,
+			},
+		},
+		options.FindOneAndUpdate().
+			SetReturnDocument(options.After),
+	)
+
+	if review.Err() != nil {
+		return nil, comment.Err()
+	}
+
+	if isFieldRequested(ctx, "user") {
+		convertedID, err := primitive.ObjectIDFromHex(*res.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		coll := database.GetDB().GetCollection("users")
+		user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+		if user.Err() != nil {
+			return nil, user.Err()
+		}
+
+		u := model.UserResponse{}
+		err = user.Decode(&u)
+		if err != nil {
+			return nil, err
+		}
+
+		res.User = &u
+	}
+
+	return &res, nil
 }
 
 func (r *mutationResolver) AddLikeDislike(ctx context.Context, itemID string, action string) (*model.Review, error) {
