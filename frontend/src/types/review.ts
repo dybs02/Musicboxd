@@ -1,25 +1,6 @@
+import { emptyComment, type CommentType } from "./comments";
 import { emptyReviewAlbum, type ReviewAlbumType } from "./common";
 import { emptyUser, type UserType } from "./user";
-
-type CommentType = {
-  _id: string;
-  reviewId: string;
-  userId: string;
-  user: UserType;
-  text: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const emptyComment: CommentType = {
-  _id: "",
-  reviewId: "",
-  userId: "",
-  user: emptyUser,
-  text: "",
-  createdAt: "",
-  updatedAt: "",
-}
 
 
 type ReviewType = {
@@ -77,13 +58,11 @@ const emptyRecentUserReviews: RecentUserReviewsType = {
 export type {
   ReviewType,
   ReviewAlbumType,
-  CommentType,
   RecentUserReviewsType,
 };
 
 export { 
   emptyReview,
   emptyReviewAlbum,
-  emptyComment,
   emptyRecentUserReviews,
 };

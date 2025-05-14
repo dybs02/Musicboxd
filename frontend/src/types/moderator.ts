@@ -1,4 +1,4 @@
-import { emptyComment, type CommentType } from "./review"
+import { emptyComment, type CommentType } from "./comments"
 import { emptyUser, type UserType } from "./user"
 
 

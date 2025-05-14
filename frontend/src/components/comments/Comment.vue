@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { REPORT_COMMENT } from '@/services/queries';
-import type { CommentType } from '@/types/review';
+import type { CommentType } from '@/types/comments';
 import { navigateToUser } from '@/utils/navigate';
 import { useMutation } from '@vue/apollo-composable';
 import Avatar from 'primevue/avatar';

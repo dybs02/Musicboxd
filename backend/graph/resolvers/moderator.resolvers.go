@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"musicboxd/database"
-	"musicboxd/graph"
 	"musicboxd/graph/model"
 	"time"
 
@@ -269,10 +268,3 @@ func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*m
 
 	return res, nil
 }
-
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

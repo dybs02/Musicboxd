@@ -53,19 +53,6 @@ const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
           url
         }
       }
-      comments {
-        _id
-        text
-        createdAt
-        updatedAt
-        user {
-          _id
-          displayName
-          images {
-            url
-          }
-        }
-      }
     }
   }
 `;
@@ -299,6 +286,48 @@ const ADD_LIKE_OR_DISLIKE = gql`
 `
 
 
+const GET_COMMENTS_BY_ITEM_ID_REVIEW_ID = gql`
+  query commentsPage(
+    $itemId: String!
+    $reviewId: String!
+    $pageSize: Int
+    $page: Int!
+  ) {
+    commentsPage(
+      itemId: $itemId
+      reviewId: $reviewId
+      pageSize: $pageSize
+      page: $page
+    ) {
+      totalComments
+      totalPages
+      hasPreviousPage
+      hasNextPage
+      comments {
+        _id
+        text
+        createdAt
+        updatedAt
+        user {
+          _id
+          displayName
+          images {
+            url
+          }
+        }
+        likes
+        likesCount
+        dislikes
+        dislikesCount
+        userReaction
+      }
+    }
+  }
+
+`
+
+
+
 export { 
   GET_ALBUM_BY_ID,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
@@ -313,4 +342,5 @@ export {
   UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
   GET_RECENT_USER_REVIEWS_PAGINATION,
   ADD_LIKE_OR_DISLIKE,
+  GET_COMMENTS_BY_ITEM_ID_REVIEW_ID,
 };

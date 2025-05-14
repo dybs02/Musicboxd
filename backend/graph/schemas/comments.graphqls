@@ -1,0 +1,31 @@
+type Comment {
+  _id: ID
+  itemId: String!
+  reviewId: ID
+  userId: String
+  user: UserResponse
+  text: String
+  createdAt: Time
+  updatedAt: Time
+  likes: [ID]
+  likesCount: Int!
+  dislikes: [ID]
+  dislikesCount: Int!
+  userReaction: String
+}
+
+type CommentsPage {
+  totalComments: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  comments: [Comment!]!
+}
+
+extend type Query {
+  commentsPage(itemId: String!, reviewId: String!, pageSize: Int, page: Int!): CommentsPage!
+}
+
+extend type Mutation {
+  addComment(itemId: String!, reviewId: String!, text: String!): Comment!
+}

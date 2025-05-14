@@ -49,6 +49,14 @@ type Comment struct {
 	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
 }
 
+type CommentsPage struct {
+	TotalComments   int        `json:"totalComments" bson:"totalComments"`
+	TotalPages      int        `json:"totalPages" bson:"totalPages"`
+	HasPreviousPage bool       `json:"hasPreviousPage" bson:"hasPreviousPage"`
+	HasNextPage     bool       `json:"hasNextPage" bson:"hasNextPage"`
+	Comments        []*Comment `json:"comments" bson:"comments"`
+}
+
 type ExplicitContent struct {
 	FilterEnabled bool `json:"filterEnabled" bson:"filterEnabled"`
 	FilterLocked  bool `json:"filterLocked" bson:"filterLocked"`
@@ -117,7 +125,8 @@ type Review struct {
 	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
 	CreatedAt     time.Time     `json:"createdAt" bson:"createdAt"`
 	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
-	Comments      []*Comment    `json:"comments" bson:"comments"`
+	CommentIds    []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
+	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
 	Album         *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
 	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
 	LikesCount    int           `json:"likesCount" bson:"likesCount"`

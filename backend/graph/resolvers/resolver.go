@@ -137,8 +137,9 @@ func GetReviewProjection(userID primitive.ObjectID) *bson.M {
 		"user":        1,
 		"createdAt":   1,
 		"updatedAt":   1,
-		"comments":    1,
-		"album":       1,
+		// TODO Add this as a function parameter to not query if not needed
+		"commentIds": 1,
+		"album":      1,
 		// Exclude likes and dislikes
 		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
 		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array

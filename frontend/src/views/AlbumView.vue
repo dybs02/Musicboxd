@@ -5,7 +5,8 @@ import ReviewComments from '@/components/comments/ReviewComments.vue';
 import Review from "@/components/Review.vue";
 import { useAuthStore } from "@/services/authStore";
 import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
-import { emptyReview, type CommentType, type ReviewType } from '@/types/review';
+import { type CommentType } from "@/types/comments";
+import { emptyReview, type ReviewType } from "@/types/review";
 import { emptyAlbum, type AlbumType } from '@/types/spotify';
 import { handleGqlError } from '@/utils/error';
 import { navigateToAlbum } from '@/utils/navigate';
@@ -87,12 +88,6 @@ const fetch_data = async () => {
 
 watch(() => route.params, fetch_data, { immediate: true })
 
-
-const updateComments = (comments: CommentType[]) => {
-  // idk if there is a way to update comments & keep them reactive
-  router.go(0);
-};
-
 </script>
 
 <template>
@@ -142,11 +137,9 @@ const updateComments = (comments: CommentType[]) => {
     </div>
 
     <ReviewComments
+      class="sm:px-4 mt-4"
       v-if="review !== emptyReview"
       :item-id="route.params.albumId as string"
-      :comments="review.comments"
-      @update-comments="updateComments"
-      class="sm:px-4 mt-4"
     />
   </div>
 
