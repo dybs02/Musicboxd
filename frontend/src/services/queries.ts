@@ -37,6 +37,39 @@ const GET_ALBUM_BY_ID = gql`
   }
 `;
 
+const SEARCH = gql`
+  query Search($type: String, $query: String!) {
+    search(type: $type, query: $query) {
+      tracks {
+        items {
+          album {
+            images {
+              url
+            }
+          }
+          artists {
+            name
+          }
+          name
+          id
+        }
+      }
+      albums {
+        items {
+          images {
+            url
+          }
+          artists {
+            name
+          }
+          name
+          id
+        }
+      }
+    }
+  }
+`;
+
 const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
   query Rewiew($itemId: String!, $userId: String!) {
     review(itemId: $itemId, userId: $userId) {
@@ -330,6 +363,7 @@ const GET_COMMENTS_BY_ITEM_ID_REVIEW_ID = gql`
 
 export { 
   GET_ALBUM_BY_ID,
+  SEARCH,
   GET_REWIEW_BY_ITEM_ID_USER_ID,
   CREATE_UPDATE_REWIEW_BY_ITEM_ID,
   ADD_COMMENT,

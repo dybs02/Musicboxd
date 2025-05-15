@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { useAuthStore } from "@/services/authStore";
+import { SEARCH } from "@/services/queries";
+import { handleGqlError } from "@/utils/error";
 import { navigateToAlbum, navigateToTrack } from "@/utils/navigate";
+import { extractSearchResults } from "@/utils/searchResults";
 import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
 import Cookies from "js-cookie";
@@ -58,60 +61,27 @@ const suggest_items = ref([]);
 const search_type = ref('Track');
 const search_options = ref(['Track', 'Album']);
 
-const suggest_search = async (event: any) => {
+const suggest_search = async () => {
   // TODO query more fields and pass selected item to View so as not to make another query?
-  const { loading, result } = useQuery(gql`
-    query Search {
-      search(query: "${search_value.value}", type: "${search_type.value.toLowerCase()}") {
-        tracks {
-          items {
-            album {
-              images {
-                url
-              }
-            }
-            artists {
-              name
-            }
-            name
-            id
-          }
-        }
-        albums {
-          items {
-            images {
-              url
-            }
-            artists {
-              name
-            }
-            name
-            id
-          }
-        }
-      }
-    }`
+  const { loading, onError, onResult } = useQuery(
+    SEARCH,
+    {
+      type: search_type.value.toLowerCase(),
+      query: search_value.value,
+    }
   )
 
-  while (loading.value) {
-    await new Promise(resolve => setTimeout(resolve, 100))
-  }
+  onError((err) => {
+    handleGqlError(router, err);
+  });
 
-  let search_res = []
-  if (search_type.value === 'Track') {
-    search_res = (result.value?.search.tracks?.items ?? []).map((track: any) => {
-      return {
-        name: track.name,
-        id: track.id,
-        artists: track.artists,
-        images: track.album.images
-      }
-    })
-  } else if (search_type.value === 'Album') {
-    search_res = result.value?.search.albums?.items ?? []
-  }
+  onResult((res: any) => {
+    if (res.loading) {
+      return;
+    }
 
-  suggest_items.value = search_res
+    suggest_items.value = extractSearchResults(search_type.value, res.data);
+  })
 }
 
 const login = () => {
