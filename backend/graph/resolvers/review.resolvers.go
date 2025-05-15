@@ -89,7 +89,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	return &res, nil
 }
 
-func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, itemID string, userID string, action string) (*model.Review, error) {
+func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, reviewID string, action string) (*model.Review, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, itemID stri
 		oppositeAction = "dislikes"
 	}
 
-	convertedUserID, err := primitive.ObjectIDFromHex(userID)
+	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
 	if err != nil {
 		return nil, err
 	}
@@ -113,7 +113,7 @@ func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, itemID stri
 	coll := database.GetDB().GetCollection("reviews")
 	review := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"itemId": itemID, "userId": convertedUserID},
+		bson.M{"_id": convertedReviewID},
 		bson.M{
 			"$addToSet": bson.M{
 				action: cc.UserID,
@@ -167,6 +167,60 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		return nil, err
 	}
 
+	if isFieldRequested(ctx, "user") {
+		convertedID, err := primitive.ObjectIDFromHex(res.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		coll := database.GetDB().GetCollection("users")
+		user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+		if user.Err() != nil {
+			return nil, user.Err()
+		}
+
+		u := model.UserResponse{}
+		err = user.Decode(&u)
+		if err != nil {
+			return nil, err
+		}
+
+		res.User = &u
+	}
+
+	return &res, nil
+}
+
+func (r *queryResolver) ReviewByID(ctx context.Context, reviewID string) (*model.Review, error) {
+	// TODO allow not logged in users to see reviews
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	review := coll.FindOne(
+		ctx,
+		bson.M{"_id": convertedReviewID},
+		options.FindOne().
+			SetProjection(GetReviewProjection(cc.UserID)),
+	)
+	if review.Err() != nil {
+		return nil, review.Err()
+	}
+
+	res := model.Review{}
+	err = review.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO make a separate function for this
 	if isFieldRequested(ctx, "user") {
 		convertedID, err := primitive.ObjectIDFromHex(res.UserID)
 		if err != nil {
@@ -287,7 +341,7 @@ func (r *queryResolver) RecentUserReviews(ctx context.Context, pageSize *int, pa
 		}
 
 		if isFieldRequested(ctx, "user") && len(reviews) > 0 {
-			// Unique user IDs
+			// TODO extract this to a separate function, also used in moderator
 			userIDMap := make(map[string]bool)
 			for _, review := range reviews {
 				if review.UserID != "" {

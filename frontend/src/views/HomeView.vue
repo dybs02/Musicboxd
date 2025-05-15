@@ -21,8 +21,9 @@ let recentAlbumReviewsLoading = ref(true);
 let recentTrackReviews = ref<ReviewType[]>(emptyRecentReviews);
 let recentTrackReviewsLoading = ref(true);
 
+// TODO should be moved to the ReviewPanel
 const fetch_recent_album_reviews = async () => {
-  const { loading, error, result } = useQuery(
+  const { onError, onResult } = useQuery(
     RECENT_REVIEWS,
     { 
       number: recentReviewsNumber,
@@ -33,17 +34,24 @@ const fetch_recent_album_reviews = async () => {
     }
   );
 
-  recentAlbumReviewsLoading = loading;
+  recentAlbumReviewsLoading.value = true;
 
-  watch(error, (err) => {
+  onError((err) => {
     handleGqlError(router, err);
   });
 
-  recentAlbumReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+
+    recentAlbumReviews.value = res?.data?.recentReviews;
+    recentAlbumReviewsLoading.value = false;
+  });
 };
 
 const fetch_recent_track_reviews = async () => {
-  const { loading, error, result } = useQuery(
+  const { onError, onResult } = useQuery(
     RECENT_REVIEWS,
     { 
       number: recentReviewsNumber,
@@ -54,13 +62,20 @@ const fetch_recent_track_reviews = async () => {
     }
   );
 
-  recentTrackReviewsLoading = loading;
+  recentTrackReviewsLoading.value = true;
 
-  watch(error, (err) => {
+  onError((err) => {
     handleGqlError(router, err);
   });
 
-  recentTrackReviews = computed<ReviewType[]>(() => result?.value?.recentReviews ?? emptyRecentReviews);
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+
+    recentTrackReviews.value = res?.data?.recentReviews;
+    recentTrackReviewsLoading.value = false;
+  });
 };
 
 const fetch_data = async () => {

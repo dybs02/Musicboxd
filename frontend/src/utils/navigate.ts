@@ -9,8 +9,8 @@ const navigateToUser = (router: Router, userId: string) => {
 }
 
 
-const navigateToAlbum = (router: Router, albumId: string, userId: string | null) => {
-  if (userId === null) {
+const navigateToAlbum = (router: Router, albumId: string) => {
+  if (albumId === null) {
     // TODO navigate to error page
     console.error('User ID is required to navigate to album');
     return;
@@ -19,14 +19,13 @@ const navigateToAlbum = (router: Router, albumId: string, userId: string | null)
   router.push({ 
     name: 'album',
     params: { 
-      albumId: albumId,
-      userId: userId
+      id: albumId,
     }
   });
 }
 
-const navigateToTrack = (router: Router, trackId: string, userId: string | null) => {
-  if (userId === null) {
+const navigateToTrack = (router: Router, trackId: string) => {
+  if (trackId === null) {
     // TODO navigate to error page
     console.error('User ID is required to navigate to album');
     return;
@@ -35,35 +34,24 @@ const navigateToTrack = (router: Router, trackId: string, userId: string | null)
   router.push({ 
     name: 'track',
     params: { 
-      trackId: trackId,
-      userId: userId
+      id: trackId,
     }
   });
 }
 
-const navigateToReview = (router: Router, itemType: string, itemId: string, userId: string | null) => {
-  if (userId === null) {
+const navigateToReview = (router: Router, reviewId: string) => {
+  if (reviewId === null) {
     // TODO navigate to error page
     console.error('User ID is required to navigate to review');
     return;
   }
 
-  if (itemType !== 'album' && itemType !== 'track') {
-    // TODO navigate to error page
-    console.error('Item type must be either album or track');
-    return;
-  }
-
-  if (itemType === 'album') {
-    console.log('navigating to album');
-    navigateToAlbum(router, itemId, userId);
-    return;
-  }
-
-  if (itemType === 'track') {
-    navigateToTrack(router, itemId, userId);
-    return;
-  }
+  router.push({ 
+    name: 'review',
+    params: { 
+      id: reviewId
+    }
+  });
 }
 
 export {

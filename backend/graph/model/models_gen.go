@@ -35,7 +35,6 @@ type Albums struct {
 
 type Comment struct {
 	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
-	ItemID        string        `json:"itemId" bson:"itemId"`
 	ReviewID      *string       `json:"reviewId,omitempty" bson:"reviewId,omitempty"`
 	UserID        *string       `json:"userId,omitempty" bson:"userId,omitempty"`
 	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`

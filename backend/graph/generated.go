@@ -80,7 +80,6 @@ type ComplexityRoot struct {
 		Dislikes      func(childComplexity int) int
 		DislikesCount func(childComplexity int) int
 		ID            func(childComplexity int) int
-		ItemID        func(childComplexity int) int
 		Likes         func(childComplexity int) int
 		LikesCount    func(childComplexity int) int
 		ReviewID      func(childComplexity int) int
@@ -125,8 +124,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddComment           func(childComplexity int, itemID string, reviewID string, text string) int
-		AddLikeDislikeReview func(childComplexity int, itemID string, userID string, action string) int
+		AddComment           func(childComplexity int, reviewID string, text string) int
+		AddLikeDislikeReview func(childComplexity int, reviewID string, action string) int
 		CreateOrUpdateReview func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
 		ReportComment        func(childComplexity int, id string) int
 		ResolveComment       func(childComplexity int, id string, status string, notes *string) int
@@ -136,11 +135,12 @@ type ComplexityRoot struct {
 	Query struct {
 		Album             func(childComplexity int, id string) int
 		AlbumsByIds       func(childComplexity int, ids []string) int
-		CommentsPage      func(childComplexity int, itemID string, reviewID string, pageSize *int, page int) int
+		CommentsPage      func(childComplexity int, reviewID string, pageSize *int, page int) int
 		RecentReviews     func(childComplexity int, number *int, itemType string) int
 		RecentUserReviews func(childComplexity int, pageSize *int, page int, itemType string, userID string) int
 		ReportedComments  func(childComplexity int, number *int) int
 		Review            func(childComplexity int, itemID string, userID string) int
+		ReviewByID        func(childComplexity int, reviewID string) int
 		Search            func(childComplexity int, typeArg *string, query string) int
 		Track             func(childComplexity int, id string) int
 		UserByDisplayName func(childComplexity int, displayName string) int
@@ -287,17 +287,18 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	AddComment(ctx context.Context, itemID string, reviewID string, text string) (*model.Comment, error)
+	AddComment(ctx context.Context, reviewID string, text string) (*model.Comment, error)
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
 	CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error)
-	AddLikeDislikeReview(ctx context.Context, itemID string, userID string, action string) (*model.Review, error)
+	AddLikeDislikeReview(ctx context.Context, reviewID string, action string) (*model.Review, error)
 	UpdateCurrentUser(ctx context.Context, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) (*model.UserResponse, error)
 }
 type QueryResolver interface {
-	CommentsPage(ctx context.Context, itemID string, reviewID string, pageSize *int, page int) (*model.CommentsPage, error)
+	CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error)
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
+	ReviewByID(ctx context.Context, reviewID string) (*model.Review, error)
 	RecentReviews(ctx context.Context, number *int, itemType string) ([]*model.Review, error)
 	RecentUserReviews(ctx context.Context, pageSize *int, page int, itemType string, userID string) (*model.RecentUserReviews, error)
 	Search(ctx context.Context, typeArg *string, query string) (*model.SearchResponse, error)
@@ -502,13 +503,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.ID(childComplexity), true
 
-	case "Comment.itemId":
-		if e.complexity.Comment.ItemID == nil {
-			break
-		}
-
-		return e.complexity.Comment.ItemID(childComplexity), true
-
 	case "Comment.likes":
 		if e.complexity.Comment.Likes == nil {
 			break
@@ -680,7 +674,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddComment(childComplexity, args["itemId"].(string), args["reviewId"].(string), args["text"].(string)), true
+		return e.complexity.Mutation.AddComment(childComplexity, args["reviewId"].(string), args["text"].(string)), true
 
 	case "Mutation.addLikeDislikeReview":
 		if e.complexity.Mutation.AddLikeDislikeReview == nil {
@@ -692,7 +686,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddLikeDislikeReview(childComplexity, args["itemId"].(string), args["userId"].(string), args["action"].(string)), true
+		return e.complexity.Mutation.AddLikeDislikeReview(childComplexity, args["reviewId"].(string), args["action"].(string)), true
 
 	case "Mutation.createOrUpdateReview":
 		if e.complexity.Mutation.CreateOrUpdateReview == nil {
@@ -776,7 +770,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CommentsPage(childComplexity, args["itemId"].(string), args["reviewId"].(string), args["pageSize"].(*int), args["page"].(int)), true
+		return e.complexity.Query.CommentsPage(childComplexity, args["reviewId"].(string), args["pageSize"].(*int), args["page"].(int)), true
 
 	case "Query.recentReviews":
 		if e.complexity.Query.RecentReviews == nil {
@@ -825,6 +819,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Review(childComplexity, args["itemId"].(string), args["userId"].(string)), true
+
+	case "Query.reviewById":
+		if e.complexity.Query.ReviewByID == nil {
+			break
+		}
+
+		args, err := ec.field_Query_reviewById_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReviewByID(childComplexity, args["reviewId"].(string)), true
 
 	case "Query.search":
 		if e.complexity.Query.Search == nil {
@@ -1741,36 +1747,18 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_addComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addComment_argsItemID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addComment_argsReviewID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["itemId"] = arg0
-	arg1, err := ec.field_Mutation_addComment_argsReviewID(ctx, rawArgs)
+	args["reviewId"] = arg0
+	arg1, err := ec.field_Mutation_addComment_argsText(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["reviewId"] = arg1
-	arg2, err := ec.field_Mutation_addComment_argsText(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["text"] = arg2
+	args["text"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addComment_argsItemID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
-	if tmp, ok := rawArgs["itemId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Mutation_addComment_argsReviewID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
@@ -1800,42 +1788,24 @@ func (ec *executionContext) field_Mutation_addComment_argsText(
 func (ec *executionContext) field_Mutation_addLikeDislikeReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addLikeDislikeReview_argsItemID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addLikeDislikeReview_argsReviewID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["itemId"] = arg0
-	arg1, err := ec.field_Mutation_addLikeDislikeReview_argsUserID(ctx, rawArgs)
+	args["reviewId"] = arg0
+	arg1, err := ec.field_Mutation_addLikeDislikeReview_argsAction(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["userId"] = arg1
-	arg2, err := ec.field_Mutation_addLikeDislikeReview_argsAction(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["action"] = arg2
+	args["action"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsItemID(
+func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsReviewID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
-	if tmp, ok := rawArgs["itemId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsUserID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
-	if tmp, ok := rawArgs["userId"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reviewId"))
+	if tmp, ok := rawArgs["reviewId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -2146,41 +2116,23 @@ func (ec *executionContext) field_Query_albumsByIds_argsIds(
 func (ec *executionContext) field_Query_commentsPage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_commentsPage_argsItemID(ctx, rawArgs)
+	arg0, err := ec.field_Query_commentsPage_argsReviewID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["itemId"] = arg0
-	arg1, err := ec.field_Query_commentsPage_argsReviewID(ctx, rawArgs)
+	args["reviewId"] = arg0
+	arg1, err := ec.field_Query_commentsPage_argsPageSize(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["reviewId"] = arg1
-	arg2, err := ec.field_Query_commentsPage_argsPageSize(ctx, rawArgs)
+	args["pageSize"] = arg1
+	arg2, err := ec.field_Query_commentsPage_argsPage(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["pageSize"] = arg2
-	arg3, err := ec.field_Query_commentsPage_argsPage(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["page"] = arg3
+	args["page"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Query_commentsPage_argsItemID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
-	if tmp, ok := rawArgs["itemId"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Query_commentsPage_argsReviewID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
@@ -2358,6 +2310,29 @@ func (ec *executionContext) field_Query_reportedComments_argsNumber(
 	}
 
 	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_reviewById_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_reviewById_argsReviewID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["reviewId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_reviewById_argsReviewID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reviewId"))
+	if tmp, ok := rawArgs["reviewId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -3603,50 +3578,6 @@ func (ec *executionContext) fieldContext_Comment__id(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Comment_itemId(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Comment_itemId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ItemID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Comment_itemId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Comment_reviewId(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Comment_reviewId(ctx, field)
 	if err != nil {
@@ -4353,8 +4284,6 @@ func (ec *executionContext) fieldContext_CommentsPage_comments(_ context.Context
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "itemId":
-				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "reviewId":
 				return ec.fieldContext_Comment_reviewId(ctx, field)
 			case "userId":
@@ -4836,7 +4765,7 @@ func (ec *executionContext) _Mutation_addComment(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["itemId"].(string), fc.Args["reviewId"].(string), fc.Args["text"].(string))
+		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["reviewId"].(string), fc.Args["text"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4863,8 +4792,6 @@ func (ec *executionContext) fieldContext_Mutation_addComment(ctx context.Context
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "itemId":
-				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "reviewId":
 				return ec.fieldContext_Comment_reviewId(ctx, field)
 			case "userId":
@@ -5122,7 +5049,7 @@ func (ec *executionContext) _Mutation_addLikeDislikeReview(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddLikeDislikeReview(rctx, fc.Args["itemId"].(string), fc.Args["userId"].(string), fc.Args["action"].(string))
+		return ec.resolvers.Mutation().AddLikeDislikeReview(rctx, fc.Args["reviewId"].(string), fc.Args["action"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5299,7 +5226,7 @@ func (ec *executionContext) _Query_commentsPage(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CommentsPage(rctx, fc.Args["itemId"].(string), fc.Args["reviewId"].(string), fc.Args["pageSize"].(*int), fc.Args["page"].(int))
+		return ec.resolvers.Query().CommentsPage(rctx, fc.Args["reviewId"].(string), fc.Args["pageSize"].(*int), fc.Args["page"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5516,6 +5443,99 @@ func (ec *executionContext) fieldContext_Query_review(ctx context.Context, field
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_review_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_reviewById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_reviewById(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ReviewByID(rctx, fc.Args["reviewId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Review)
+	fc.Result = res
+	return ec.marshalNReview2ᚖmusicboxdᚋgraphᚋmodelᚐReview(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_reviewById(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Review__id(ctx, field)
+			case "value":
+				return ec.fieldContext_Review_value(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
+			case "title":
+				return ec.fieldContext_Review_title(ctx, field)
+			case "description":
+				return ec.fieldContext_Review_description(ctx, field)
+			case "userId":
+				return ec.fieldContext_Review_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
+			case "commentIds":
+				return ec.fieldContext_Review_commentIds(ctx, field)
+			case "comments":
+				return ec.fieldContext_Review_comments(ctx, field)
+			case "album":
+				return ec.fieldContext_Review_album(ctx, field)
+			case "likes":
+				return ec.fieldContext_Review_likes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Review_likesCount(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Review_dislikes(ctx, field)
+			case "dislikesCount":
+				return ec.fieldContext_Review_dislikesCount(ctx, field)
+			case "userReaction":
+				return ec.fieldContext_Review_userReaction(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_reviewById_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6682,8 +6702,6 @@ func (ec *executionContext) fieldContext_ReportedComment_comment(_ context.Conte
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "itemId":
-				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "reviewId":
 				return ec.fieldContext_Comment_reviewId(ctx, field)
 			case "userId":
@@ -7583,8 +7601,6 @@ func (ec *executionContext) fieldContext_Review_comments(_ context.Context, fiel
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "itemId":
-				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "reviewId":
 				return ec.fieldContext_Comment_reviewId(ctx, field)
 			case "userId":
@@ -13220,11 +13236,6 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Comment")
 		case "_id":
 			out.Values[i] = ec._Comment__id(ctx, field, obj)
-		case "itemId":
-			out.Values[i] = ec._Comment_itemId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		case "reviewId":
 			out.Values[i] = ec._Comment_reviewId(ctx, field, obj)
 		case "userId":
@@ -13697,6 +13708,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_review(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "reviewById":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_reviewById(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

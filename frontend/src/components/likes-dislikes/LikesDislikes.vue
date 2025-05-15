@@ -1,18 +1,8 @@
 <script setup lang="ts">
-import { ADD_LIKE_OR_DISLIKE, CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
-import type { ReviewType } from '@/types/review';
-import type { UserType } from '@/types/user';
+import { ADD_LIKE_OR_DISLIKE } from '@/services/queries';
 import { handleGqlError } from '@/utils/error';
-import { navigateToUser } from '@/utils/navigate';
-import { Form } from '@primevue/forms';
 import { useMutation } from '@vue/apollo-composable';
-import Avatar from 'primevue/avatar';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import FloatLabel from "primevue/floatlabel";
-import Rating from 'primevue/rating';
-import Textarea from 'primevue/textarea';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -40,8 +30,7 @@ const addReaction = (reaction: string) => {
     ADD_LIKE_OR_DISLIKE,
     () => ({
       variables: {
-        itemId: props.itemId,
-        userId: route.params.userId,
+        reviewId: route.params.id,
         action: reaction,
       },
     }

@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) AddComment(ctx context.Context, itemID string, reviewID string, text string) (*model.Comment, error) {
+func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text string) (*model.Comment, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -35,7 +35,6 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 			"createdAt": time.Now(),
 			"likes":     []interface{}{},
 			"dislikes":  []interface{}{},
-			"itemId":    itemID,
 			"reviewId":  convertedReviewID,
 			"userId":    cc.UserID,
 			"text":      text,
@@ -61,7 +60,7 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 	coll = database.GetDB().GetCollection("reviews")
 	review := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"itemId": itemID, "userId": convertedReviewID},
+		bson.M{"_id": convertedReviewID},
 		bson.M{
 			"$push": bson.M{
 				"commentIds": convertedCommentID,
@@ -99,14 +98,13 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 	return &res, nil
 }
 
-func (r *queryResolver) CommentsPage(ctx context.Context, itemID string, reviewID string, pageSize *int, page int) (*model.CommentsPage, error) {
+func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error) {
 	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
 	if err != nil {
 		return nil, err
 	}
 
 	filter := bson.M{
-		"itemId":   itemID,
 		"reviewId": convertedReviewID,
 	}
 	coll := database.GetDB().GetCollection("comments")

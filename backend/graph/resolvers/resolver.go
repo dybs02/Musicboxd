@@ -128,6 +128,7 @@ func GetReviewProjection(userID primitive.ObjectID) *bson.M {
 			},
 		},
 		// Include most fields
+		"_id":         1,
 		"value":       1,
 		"itemId":      1,
 		"itemType":    1,

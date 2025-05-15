@@ -52,14 +52,16 @@ watch(updateReviewError, (err) => {
   handleGqlError(router, err);
 });
 
-updateReviewOnDone(() => {
-  // TODO refetch review data in parent, reload component and add toast component
-  // or just update values here
-  router.go(0);
+updateReviewOnDone((res) => {
+  router.push({
+    name: 'review',
+    params: {
+      id: res?.data?.createOrUpdateReview._id,
+    },
+  });
 });
 
 const submitReview = () => {
-  console.log(review.value);
   if (review.value.title == '' || review.value.description == '' || review.value.value == 0) {
     // TODO add toast component - not updated
     return;

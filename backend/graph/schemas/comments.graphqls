@@ -1,6 +1,5 @@
 type Comment {
   _id: ID
-  itemId: String!
   reviewId: ID
   userId: String
   user: UserResponse
@@ -23,9 +22,9 @@ type CommentsPage {
 }
 
 extend type Query {
-  commentsPage(itemId: String!, reviewId: String!, pageSize: Int, page: Int!): CommentsPage!
+  commentsPage(reviewId: String!, pageSize: Int, page: Int!): CommentsPage!
 }
 
 extend type Mutation {
-  addComment(itemId: String!, reviewId: String!, text: String!): Comment!
+  addComment(reviewId: String!, text: String!): Comment!
 }

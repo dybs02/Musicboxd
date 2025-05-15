@@ -9,12 +9,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/album/:albumId/review/:userId',
+      path: '/album/:id',
       name: 'album',
       component: () => import('@/views/AlbumView.vue')
     },
     {
-      path: '/track/:trackId/review/:userId',
+      path: '/track/:id',
       name: 'track',
       component: () => import('@/views/TrackView.vue')
     },

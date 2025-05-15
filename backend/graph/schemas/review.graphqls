@@ -38,6 +38,7 @@ type RecentUserReviews {
 
 extend type Query {
   review(itemId: String!, userId: String!): Review!
+  reviewById(reviewId: String!): Review!
   recentReviews(number: Int, itemType: String!): [Review!]!
   recentUserReviews(pageSize: Int, page: Int!, itemType: String!, userId: String!): RecentUserReviews!
 }
@@ -45,5 +46,5 @@ extend type Query {
 extend type Mutation {
   createOrUpdateReview(itemId: String!, itemType: String!, title: String, description: String, value: Int): Review!
   # TODO reviews should be handled via their IDs
-  addLikeDislikeReview(itemId: String!, userId: String!, action: String!): Review!
+  addLikeDislikeReview(reviewId: String!, action: String!): Review!
 }

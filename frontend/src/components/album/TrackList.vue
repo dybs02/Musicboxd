@@ -33,7 +33,7 @@ const props = defineProps<{
           </AccordionHeader>
           <AccordionContent unstyled class="bg-neutral-800 rounded-md p-2">
             <div v-for="track in props.track_list" class="m-0">
-              <a @click="navigateToTrack(router, track.id, store.getId())" class="cursor-pointer">
+              <a @click="navigateToTrack(router, track.id)" class="cursor-pointer">
                 {{ track.name }}
               </a>
             </div>

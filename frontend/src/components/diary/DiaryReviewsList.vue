@@ -80,7 +80,7 @@ const getSeverity = (itemType: string) => {
     </Column>
     <Column v-if="!isMdScreen" field="rating" header="Reviews" class="w-2">
       <template #body="slotProps">
-        <div class="flex" @click="navigateToReview(router, slotProps.data.itemType, slotProps.data.itemId, slotProps.data.userId)">
+        <div class="flex" @click="navigateToReview(router, slotProps.data._id)">
           <Rating :modelValue="slotProps.data.value" readonly/>
           <i class="pi pi-external-link ml-4 cursor-pointer"></i>
         </div>
@@ -88,7 +88,7 @@ const getSeverity = (itemType: string) => {
     </Column>
     <Column v-if="isMdScreen" header="Review" class="">
       <template #body="slotProps">
-        <div class="flex flex-col" @click="navigateToReview(router, slotProps.data.itemType, slotProps.data.itemId, slotProps.data.userId)">
+        <div class="flex flex-col" @click="navigateToReview(router, slotProps.data._id)">
           <div class="mx-auto">
             <div class="flex">
               <Tag :value="slotProps.data.itemType" :severity="getSeverity(slotProps.data.itemType)" />

@@ -96,9 +96,9 @@ const login = () => {
 
 const select_track = (event: AutoCompleteOptionSelectEvent) => {
   if (search_type.value === 'Track')
-    navigateToTrack(router, event.value.id, store.getId())
+    navigateToTrack(router, event.value.id)
   else if (search_type.value === 'Album')
-    navigateToAlbum(router, event.value.id, store.getId())
+    navigateToAlbum(router, event.value.id)
 
   search_value.value = ''
 }
