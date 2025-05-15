@@ -89,7 +89,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	return &res, nil
 }
 
-func (r *mutationResolver) AddLikeDislike(ctx context.Context, itemID string, action string) (*model.Review, error) {
+func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, itemID string, userID string, action string) (*model.Review, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -105,10 +105,15 @@ func (r *mutationResolver) AddLikeDislike(ctx context.Context, itemID string, ac
 		oppositeAction = "dislikes"
 	}
 
+	convertedUserID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
 	coll := database.GetDB().GetCollection("reviews")
 	review := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"itemId": itemID, "userId": cc.UserID},
+		bson.M{"itemId": itemID, "userId": convertedUserID},
 		bson.M{
 			"$addToSet": bson.M{
 				action: cc.UserID,

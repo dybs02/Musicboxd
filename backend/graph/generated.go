@@ -126,7 +126,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AddComment           func(childComplexity int, itemID string, reviewID string, text string) int
-		AddLikeDislike       func(childComplexity int, itemID string, action string) int
+		AddLikeDislikeReview func(childComplexity int, itemID string, userID string, action string) int
 		CreateOrUpdateReview func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
 		ReportComment        func(childComplexity int, id string) int
 		ResolveComment       func(childComplexity int, id string, status string, notes *string) int
@@ -291,7 +291,7 @@ type MutationResolver interface {
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
 	CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error)
-	AddLikeDislike(ctx context.Context, itemID string, action string) (*model.Review, error)
+	AddLikeDislikeReview(ctx context.Context, itemID string, userID string, action string) (*model.Review, error)
 	UpdateCurrentUser(ctx context.Context, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) (*model.UserResponse, error)
 }
 type QueryResolver interface {
@@ -682,17 +682,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.AddComment(childComplexity, args["itemId"].(string), args["reviewId"].(string), args["text"].(string)), true
 
-	case "Mutation.addLikeDislike":
-		if e.complexity.Mutation.AddLikeDislike == nil {
+	case "Mutation.addLikeDislikeReview":
+		if e.complexity.Mutation.AddLikeDislikeReview == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_addLikeDislike_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_addLikeDislikeReview_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddLikeDislike(childComplexity, args["itemId"].(string), args["action"].(string)), true
+		return e.complexity.Mutation.AddLikeDislikeReview(childComplexity, args["itemId"].(string), args["userId"].(string), args["action"].(string)), true
 
 	case "Mutation.createOrUpdateReview":
 		if e.complexity.Mutation.CreateOrUpdateReview == nil {
@@ -1797,22 +1797,27 @@ func (ec *executionContext) field_Mutation_addComment_argsText(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_addLikeDislike_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_addLikeDislikeReview_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addLikeDislike_argsItemID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addLikeDislikeReview_argsItemID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["itemId"] = arg0
-	arg1, err := ec.field_Mutation_addLikeDislike_argsAction(ctx, rawArgs)
+	arg1, err := ec.field_Mutation_addLikeDislikeReview_argsUserID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["action"] = arg1
+	args["userId"] = arg1
+	arg2, err := ec.field_Mutation_addLikeDislikeReview_argsAction(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["action"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addLikeDislike_argsItemID(
+func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsItemID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -1825,7 +1830,20 @@ func (ec *executionContext) field_Mutation_addLikeDislike_argsItemID(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_addLikeDislike_argsAction(
+func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+	if tmp, ok := rawArgs["userId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addLikeDislikeReview_argsAction(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -5090,8 +5108,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrUpdateReview(ctx conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_addLikeDislike(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_addLikeDislike(ctx, field)
+func (ec *executionContext) _Mutation_addLikeDislikeReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addLikeDislikeReview(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -5104,7 +5122,7 @@ func (ec *executionContext) _Mutation_addLikeDislike(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddLikeDislike(rctx, fc.Args["itemId"].(string), fc.Args["action"].(string))
+		return ec.resolvers.Mutation().AddLikeDislikeReview(rctx, fc.Args["itemId"].(string), fc.Args["userId"].(string), fc.Args["action"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5121,7 +5139,7 @@ func (ec *executionContext) _Mutation_addLikeDislike(ctx context.Context, field 
 	return ec.marshalNReview2ᚖmusicboxdᚋgraphᚋmodelᚐReview(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_addLikeDislike(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_addLikeDislikeReview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -5176,7 +5194,7 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislike(ctx context.Con
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addLikeDislike_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_addLikeDislikeReview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -13572,9 +13590,9 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "addLikeDislike":
+		case "addLikeDislikeReview":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addLikeDislike(ctx, field)
+				return ec._Mutation_addLikeDislikeReview(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

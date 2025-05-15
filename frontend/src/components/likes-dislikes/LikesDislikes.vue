@@ -41,6 +41,7 @@ const addReaction = (reaction: string) => {
     () => ({
       variables: {
         itemId: props.itemId,
+        userId: route.params.userId,
         action: reaction,
       },
     }
@@ -55,9 +56,9 @@ const addReaction = (reaction: string) => {
       return;
     }
   
-    likesCount.value = res.data.addLikeDislike.likesCount;
-    dislikesCount.value = res.data.addLikeDislike.dislikesCount;
-    userReaction.value = res.data.addLikeDislike.userReaction;
+    likesCount.value = res.data.addLikeDislikeReview.likesCount;
+    dislikesCount.value = res.data.addLikeDislikeReview.dislikesCount;
+    userReaction.value = res.data.addLikeDislikeReview.userReaction;
   })
 
   addLikeDislike();

@@ -276,8 +276,8 @@ const GET_RECENT_USER_REVIEWS_PAGINATION = gql`
 
 
 const ADD_LIKE_OR_DISLIKE = gql`
-  mutation AddLikeDislike($itemId: String!, $action: String!) {
-    addLikeDislike(itemId: $itemId, action: $action) {
+  mutation AddLikeDislikeReview($itemId: String!, $userId: String!, $action: String!) {
+    addLikeDislikeReview(itemId: $itemId, userId: $userId, action: $action) {
       likesCount
       dislikesCount
       userReaction
