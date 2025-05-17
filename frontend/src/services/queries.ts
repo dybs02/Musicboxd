@@ -33,6 +33,8 @@ const GET_ALBUM_BY_ID = gql`
           }
         }
       }
+      averageRating
+      ratingCount
     }
   }
 `;
@@ -199,6 +201,8 @@ const GET_TRACK_BY_ID = gql`
           spotify
         }
       }
+      averageRating
+      ratingCount
     }
   }
 `;

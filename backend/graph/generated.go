@@ -52,11 +52,13 @@ type ComplexityRoot struct {
 		AlbumType            func(childComplexity int) int
 		Artists              func(childComplexity int) int
 		AvailableMarkets     func(childComplexity int) int
+		AverageRating        func(childComplexity int) int
 		ExternalUrls         func(childComplexity int) int
 		Href                 func(childComplexity int) int
 		ID                   func(childComplexity int) int
 		Images               func(childComplexity int) int
 		Name                 func(childComplexity int) int
+		RatingCount          func(childComplexity int) int
 		ReleaseDate          func(childComplexity int) int
 		ReleaseDatePrecision func(childComplexity int) int
 		TotalTracks          func(childComplexity int) int
@@ -223,6 +225,7 @@ type ComplexityRoot struct {
 		Album            func(childComplexity int) int
 		Artists          func(childComplexity int) int
 		AvailableMarkets func(childComplexity int) int
+		AverageRating    func(childComplexity int) int
 		DiscNumber       func(childComplexity int) int
 		DurationMs       func(childComplexity int) int
 		Explicit         func(childComplexity int) int
@@ -234,6 +237,7 @@ type ComplexityRoot struct {
 		Name             func(childComplexity int) int
 		Popularity       func(childComplexity int) int
 		PreviewURL       func(childComplexity int) int
+		RatingCount      func(childComplexity int) int
 		TrackNumber      func(childComplexity int) int
 		Type             func(childComplexity int) int
 		URI              func(childComplexity int) int
@@ -351,6 +355,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Album.AvailableMarkets(childComplexity), true
 
+	case "Album.averageRating":
+		if e.complexity.Album.AverageRating == nil {
+			break
+		}
+
+		return e.complexity.Album.AverageRating(childComplexity), true
+
 	case "Album.external_urls":
 		if e.complexity.Album.ExternalUrls == nil {
 			break
@@ -385,6 +396,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Album.Name(childComplexity), true
+
+	case "Album.ratingCount":
+		if e.complexity.Album.RatingCount == nil {
+			break
+		}
+
+		return e.complexity.Album.RatingCount(childComplexity), true
 
 	case "Album.release_date":
 		if e.complexity.Album.ReleaseDate == nil {
@@ -1265,6 +1283,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Track.AvailableMarkets(childComplexity), true
 
+	case "Track.averageRating":
+		if e.complexity.Track.AverageRating == nil {
+			break
+		}
+
+		return e.complexity.Track.AverageRating(childComplexity), true
+
 	case "Track.disc_number":
 		if e.complexity.Track.DiscNumber == nil {
 			break
@@ -1341,6 +1366,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Track.PreviewURL(childComplexity), true
+
+	case "Track.ratingCount":
+		if e.complexity.Track.RatingCount == nil {
+			break
+		}
+
+		return e.complexity.Track.RatingCount(childComplexity), true
 
 	case "Track.track_number":
 		if e.complexity.Track.TrackNumber == nil {
@@ -3254,6 +3286,88 @@ func (ec *executionContext) fieldContext_Album_tracks(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Album_averageRating(ctx context.Context, field graphql.CollectedField, obj *model.Album) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Album_averageRating(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AverageRating, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Album_averageRating(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Album",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Album_ratingCount(ctx context.Context, field graphql.CollectedField, obj *model.Album) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Album_ratingCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RatingCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Album_ratingCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Album",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Albums_href(ctx context.Context, field graphql.CollectedField, obj *model.Albums) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Albums_href(ctx, field)
 	if err != nil {
@@ -3585,6 +3699,10 @@ func (ec *executionContext) fieldContext_Albums_items(_ context.Context, field g
 				return ec.fieldContext_Album_artists(ctx, field)
 			case "tracks":
 				return ec.fieldContext_Album_tracks(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Album_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Album_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -5972,6 +6090,10 @@ func (ec *executionContext) fieldContext_Query_track(ctx context.Context, field 
 				return ec.fieldContext_Track_uri(ctx, field)
 			case "is_local":
 				return ec.fieldContext_Track_is_local(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Track_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Track_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Track", field.Name)
 		},
@@ -6057,6 +6179,10 @@ func (ec *executionContext) fieldContext_Query_album(ctx context.Context, field 
 				return ec.fieldContext_Album_artists(ctx, field)
 			case "tracks":
 				return ec.fieldContext_Album_tracks(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Album_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Album_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -6142,6 +6268,10 @@ func (ec *executionContext) fieldContext_Query_albumsByIds(ctx context.Context, 
 				return ec.fieldContext_Album_artists(ctx, field)
 			case "tracks":
 				return ec.fieldContext_Album_tracks(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Album_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Album_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -8880,6 +9010,10 @@ func (ec *executionContext) fieldContext_Track_album(_ context.Context, field gr
 				return ec.fieldContext_Album_artists(ctx, field)
 			case "tracks":
 				return ec.fieldContext_Album_tracks(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Album_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Album_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Album", field.Name)
 		},
@@ -9606,6 +9740,88 @@ func (ec *executionContext) fieldContext_Track_is_local(_ context.Context, field
 	return fc, nil
 }
 
+func (ec *executionContext) _Track_averageRating(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Track_averageRating(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AverageRating, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*float64)
+	fc.Result = res
+	return ec.marshalOFloat2ᚖfloat64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Track_averageRating(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Track_ratingCount(ctx context.Context, field graphql.CollectedField, obj *model.Track) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Track_ratingCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RatingCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Track_ratingCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Track",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Tracks_href(ctx context.Context, field graphql.CollectedField, obj *model.Tracks) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Tracks_href(ctx, field)
 	if err != nil {
@@ -9934,6 +10150,10 @@ func (ec *executionContext) fieldContext_Tracks_items(_ context.Context, field g
 				return ec.fieldContext_Track_uri(ctx, field)
 			case "is_local":
 				return ec.fieldContext_Track_is_local(ctx, field)
+			case "averageRating":
+				return ec.fieldContext_Track_averageRating(ctx, field)
+			case "ratingCount":
+				return ec.fieldContext_Track_ratingCount(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Track", field.Name)
 		},
@@ -13267,6 +13487,10 @@ func (ec *executionContext) _Album(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "averageRating":
+			out.Values[i] = ec._Album_averageRating(ctx, field, obj)
+		case "ratingCount":
+			out.Values[i] = ec._Album_ratingCount(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -14601,6 +14825,10 @@ func (ec *executionContext) _Track(ctx context.Context, sel ast.SelectionSet, ob
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "averageRating":
+			out.Values[i] = ec._Track_averageRating(ctx, field, obj)
+		case "ratingCount":
+			out.Values[i] = ec._Track_ratingCount(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16179,6 +16407,22 @@ func (ec *executionContext) unmarshalOFavouriteAlbumEntryInput2ᚖmusicboxdᚋgr
 	}
 	res, err := ec.unmarshalInputFavouriteAlbumEntryInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOFloat2ᚖfloat64(ctx context.Context, v interface{}) (*float64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOFloat2ᚖfloat64(ctx context.Context, sel ast.SelectionSet, v *float64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalFloatContext(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalOID2ᚕᚖstring(ctx context.Context, v interface{}) ([]*string, error) {

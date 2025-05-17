@@ -21,6 +21,8 @@ type Album struct {
 	URI                  string              `json:"uri" bson:"uri"`
 	Artists              []*SimplifiedArtist `json:"artists" bson:"artists"`
 	Tracks               *Tracks             `json:"tracks" bson:"tracks"`
+	AverageRating        *float64            `json:"averageRating,omitempty" bson:"averageRating,omitempty"`
+	RatingCount          *int                `json:"ratingCount,omitempty" bson:"ratingCount,omitempty"`
 }
 
 type Albums struct {
@@ -181,6 +183,8 @@ type Track struct {
 	Type             string              `json:"type" bson:"type"`
 	URI              string              `json:"uri" bson:"uri"`
 	IsLocal          bool                `json:"is_local" bson:"is_local"`
+	AverageRating    *float64            `json:"averageRating,omitempty" bson:"averageRating,omitempty"`
+	RatingCount      *int                `json:"ratingCount,omitempty" bson:"ratingCount,omitempty"`
 }
 
 type Tracks struct {

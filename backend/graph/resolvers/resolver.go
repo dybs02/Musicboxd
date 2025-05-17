@@ -24,6 +24,11 @@ import (
 
 type Resolver struct{}
 
+type AverageRating struct {
+	AverageRating float64 `bson:"averageValue"`
+	Count         int     `bson:"count"`
+}
+
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
 	ginContext := ctx.Value(middleware.GinContextKey)
 	if ginContext == nil {
@@ -229,4 +234,48 @@ func AddLikeDislike(ctx context.Context, userID primitive.ObjectID, itemID strin
 	}
 
 	return result, nil
+}
+
+func GetAverageRaiting(ctx context.Context, itemID string) (*AverageRating, error) {
+	pipeline := []bson.M{
+		{
+			"$match": bson.M{
+				"itemId": itemID,
+			},
+		},
+		{
+			"$group": bson.M{
+				"_id": nil,
+				"averageValue": bson.M{
+					"$avg": "$value",
+				},
+				"count": bson.M{
+					"$sum": 1,
+				},
+			},
+		},
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	cursor, err := coll.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(context.Background())
+
+	result := AverageRating{
+		AverageRating: 0,
+		Count:         0,
+	}
+
+	if !cursor.Next(context.Background()) {
+		return &result, nil
+	}
+
+	if err := cursor.Decode(&result); err != nil {
+		return nil, fmt.Errorf("failed to decode result: %w", err)
+	}
+
+	return &result, nil
 }

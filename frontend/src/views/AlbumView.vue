@@ -11,7 +11,7 @@ import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 

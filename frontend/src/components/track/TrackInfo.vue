@@ -1,17 +1,22 @@
 <script setup lang="ts">
-import type { AlbumType } from '@/types/spotify';
+import type { AlbumType, TrackType } from '@/types/spotify';
 import Card from 'primevue/card';
 import Divider from 'primevue/divider';
+import { navigateToAlbum } from "@/utils/navigate";
 import Rating from 'primevue/rating';
+import { useRouter } from 'vue-router';
+
+
+const router = useRouter();
 
 
 const props = defineProps<{
-  album: AlbumType;
+  track: TrackType;
 }>();
 
 
-const avgRating = Math.round(props.album.averageRating);
-const avgRatingFormated = props.album.averageRating.toFixed(2);
+const avgRating = Math.round(props.track.averageRating);
+const avgRatingFormated = props.track.averageRating.toFixed(2);
 
 </script>
 
@@ -20,19 +25,24 @@ const avgRatingFormated = props.album.averageRating.toFixed(2);
   <Card>
     <template #content>
       <div class="text-3xl sm:text-5xl font-bold">
-        <a :href="props.album.external_urls.spotify" target="_blank">
-          {{ props.album.name }}
-        </a>
-        <a class="text-slate-500">
-          ({{ props.album.release_date.split("-")[0] }})
+        <a :href="track.external_urls.spotify" target="_blank">
+          {{ track.name }}
         </a>
       </div>
       <Divider />
       <div class="flex flex-col sm:flex-row">
-        <div class="sm:text-2xl pb-1 sm:w-2/3">
-          <div v-for="(artist, index) in props.album.artists" class="inline">
-            <a :href="artist.external_urls.spotify" target="_blank">
-              {{ artist.name }}{{ index < props.album.artists.length - 1 ? ',  ' : '' }}
+        <div class="sm:w-2/3">
+          <div class="sm:text-2xl pb-1">
+            <a :href="track.artists[0].external_urls.spotify" target="_blank">
+              {{ track.artists[0].name }}
+            </a>
+          </div>
+          <div class="text-sm sm:text-xl">
+            <a @click="navigateToAlbum(router, track.album.id)" class="cursor-pointer">
+              {{ track.album.name }}
+            </a>
+            <a class="text-slate-500">
+              ({{ track.album.release_date.split("-")[0] }})
             </a>
           </div>
         </div>
@@ -50,15 +60,9 @@ const avgRatingFormated = props.album.averageRating.toFixed(2);
             Rated by:
           </span>
           <span class="text-xl">
-            {{ props.album.ratingCount }} users
+            {{ props.track.ratingCount }} users
           </span>
         </div>
-      </div>
-      <div class="pt-8">
-      </div>
-      <div class="flex">
-        
-
       </div>
     </template>
   </Card>
