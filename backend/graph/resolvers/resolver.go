@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"musicboxd/api/middleware"
 	"musicboxd/database"
@@ -13,6 +14,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 //go:generate go run github.com/99designs/gqlgen generate
@@ -145,4 +148,85 @@ func GetReviewProjection(userID primitive.ObjectID) *bson.M {
 		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
 		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
 	}
+}
+
+func GetCommentProjection(userID primitive.ObjectID) *bson.M {
+	return &bson.M{
+		// Calculate fields
+		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
+		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
+		"userReaction": bson.M{
+			"$cond": bson.A{
+				bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}}},
+				"like",
+				bson.M{
+					"$cond": bson.A{
+						bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}}},
+						"dislike",
+						"",
+					},
+				},
+			},
+		},
+		// Include most fields
+		"_id":       1,
+		"reviewId":  1,
+		"userId":    1,
+		"text":      1,
+		"createdAt": 1,
+		"updatedAt": 1,
+		// Exclude likes and dislikes
+		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
+		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
+	}
+}
+
+func AddLikeDislike(ctx context.Context, userID primitive.ObjectID, itemID string, action string, collection string) (*mongo.SingleResult, error) {
+	if action != "like" && action != "dislike" {
+		return nil, errors.New("invalid action")
+	}
+
+	action += "s"
+	oppositeAction := "likes"
+	if action == "likes" {
+		oppositeAction = "dislikes"
+	}
+
+	convertedItemID, err := primitive.ObjectIDFromHex(itemID)
+	if err != nil {
+		return nil, err
+	}
+
+	var projection *bson.M
+	if collection == "reviews" {
+		projection = GetReviewProjection(userID)
+	}
+	if collection == "comments" {
+		projection = GetCommentProjection(userID)
+	}
+	if projection == nil {
+		return nil, errors.New("invalid collection")
+	}
+
+	coll := database.GetDB().GetCollection(collection)
+	result := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": convertedItemID},
+		bson.M{
+			"$addToSet": bson.M{
+				action: userID,
+			},
+			"$pull": bson.M{
+				oppositeAction: userID,
+			},
+		},
+		options.FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(projection),
+	)
+	if result.Err() != nil {
+		return nil, result.Err()
+	}
+
+	return result, nil
 }

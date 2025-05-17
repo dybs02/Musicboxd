@@ -84,7 +84,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 
 
     <Review
-      class="pt-4"
+      class="py-4"
       :review="review"
       :item-id="review.itemId"
       :item-type="review.itemType"
@@ -92,7 +92,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 
 
     <ReviewComments
-      class="sm:px-4 pt-4"
+      class="sm:px-4"
       :item-id="route.params.albumId as string"
     />
   </div>

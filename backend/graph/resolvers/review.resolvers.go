@@ -95,39 +95,9 @@ func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, reviewID st
 		return nil, err
 	}
 
-	if action != "like" && action != "dislike" {
-		return nil, errors.New("invalid action")
-	}
-
-	action += "s"
-	oppositeAction := "likes"
-	if action == "likes" {
-		oppositeAction = "dislikes"
-	}
-
-	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
+	review, err := AddLikeDislike(ctx, cc.UserID, reviewID, action, "reviews")
 	if err != nil {
 		return nil, err
-	}
-
-	coll := database.GetDB().GetCollection("reviews")
-	review := coll.FindOneAndUpdate(
-		ctx,
-		bson.M{"_id": convertedReviewID},
-		bson.M{
-			"$addToSet": bson.M{
-				action: cc.UserID,
-			},
-			"$pull": bson.M{
-				oppositeAction: cc.UserID,
-			},
-		},
-		options.FindOneAndUpdate().
-			SetReturnDocument(options.After).
-			SetProjection(GetReviewProjection(cc.UserID)),
-	)
-	if review.Err() != nil {
-		return nil, review.Err()
 	}
 
 	res := model.Review{}

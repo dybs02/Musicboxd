@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ADD_LIKE_OR_DISLIKE } from '@/services/queries';
+import { ADD_LIKE_OR_DISLIKE_COMMENT, ADD_LIKE_OR_DISLIKE_REVIEW } from '@/services/queries';
 import { handleGqlError } from '@/utils/error';
 import { useMutation } from '@vue/apollo-composable';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -11,7 +11,8 @@ const router = useRouter();
 
 
 const props = defineProps<{
-  itemId: string;
+  id: string;
+  idType: string;
   userReaction: string;
   likesCount: number;
   dislikesCount: number;
@@ -25,12 +26,12 @@ var dislikesCount = ref(props.dislikesCount);
 var fontRemSize = ref(props.fontRemSize + 'rem');
 
 
-const addReaction = (reaction: string) => {
+const addReactionReview = (reaction: string) => {
   const { mutate: addLikeDislike, onError: onErrorAddLikeDislike, onDone: onDoneAddLikeDislike } = useMutation(
-    ADD_LIKE_OR_DISLIKE,
+    ADD_LIKE_OR_DISLIKE_REVIEW,
     () => ({
       variables: {
-        reviewId: route.params.id,
+        reviewId: props.id,
         action: reaction,
       },
     }
@@ -52,6 +53,50 @@ const addReaction = (reaction: string) => {
 
   addLikeDislike();
 };
+
+const addReactionComment = (reaction: string) => {
+  const { mutate: addLikeDislike, onError: onErrorAddLikeDislike, onDone: onDoneAddLikeDislike } = useMutation(
+    ADD_LIKE_OR_DISLIKE_COMMENT,
+    () => ({
+      variables: {
+        commentId: props.id,
+        action: reaction,
+      },
+    }
+  ));
+  
+  onErrorAddLikeDislike((err) => {
+    handleGqlError(router, err);
+  });
+  
+  onDoneAddLikeDislike((res: any) => {
+    if (res.loading) {
+      return;
+    }
+  
+    likesCount.value = res.data.addLikeDislikeComment.likesCount;
+    dislikesCount.value = res.data.addLikeDislikeComment.dislikesCount;
+    userReaction.value = res.data.addLikeDislikeComment.userReaction;
+  })
+
+  addLikeDislike();
+};
+
+const addReaction = (reaction: string) => {
+  if (props.idType === 'review') {
+    addReactionReview(reaction);
+  }
+  if (props.idType === 'comment') {
+    addReactionComment(reaction);
+  }
+};
+
+watch(props, (newProps) => {
+  userReaction.value = newProps.userReaction;
+  likesCount.value = newProps.likesCount;
+  dislikesCount.value = newProps.dislikesCount;
+  fontRemSize.value = newProps.fontRemSize + 'rem';
+}, { immediate: true });
 
 </script>
 

@@ -124,12 +124,13 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddComment           func(childComplexity int, reviewID string, text string) int
-		AddLikeDislikeReview func(childComplexity int, reviewID string, action string) int
-		CreateOrUpdateReview func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
-		ReportComment        func(childComplexity int, id string) int
-		ResolveComment       func(childComplexity int, id string, status string, notes *string) int
-		UpdateCurrentUser    func(childComplexity int, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) int
+		AddComment            func(childComplexity int, reviewID string, text string) int
+		AddLikeDislikeComment func(childComplexity int, commentID string, action string) int
+		AddLikeDislikeReview  func(childComplexity int, reviewID string, action string) int
+		CreateOrUpdateReview  func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
+		ReportComment         func(childComplexity int, id string) int
+		ResolveComment        func(childComplexity int, id string, status string, notes *string) int
+		UpdateCurrentUser     func(childComplexity int, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) int
 	}
 
 	Query struct {
@@ -288,6 +289,7 @@ type ComplexityRoot struct {
 
 type MutationResolver interface {
 	AddComment(ctx context.Context, reviewID string, text string) (*model.Comment, error)
+	AddLikeDislikeComment(ctx context.Context, commentID string, action string) (*model.Comment, error)
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
 	CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error)
@@ -675,6 +677,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddComment(childComplexity, args["reviewId"].(string), args["text"].(string)), true
+
+	case "Mutation.addLikeDislikeComment":
+		if e.complexity.Mutation.AddLikeDislikeComment == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addLikeDislikeComment_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddLikeDislikeComment(childComplexity, args["commentId"].(string), args["action"].(string)), true
 
 	case "Mutation.addLikeDislikeReview":
 		if e.complexity.Mutation.AddLikeDislikeReview == nil {
@@ -1778,6 +1792,47 @@ func (ec *executionContext) field_Mutation_addComment_argsText(
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 	if tmp, ok := rawArgs["text"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addLikeDislikeComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addLikeDislikeComment_argsCommentID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["commentId"] = arg0
+	arg1, err := ec.field_Mutation_addLikeDislikeComment_argsAction(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["action"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addLikeDislikeComment_argsCommentID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("commentId"))
+	if tmp, ok := rawArgs["commentId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addLikeDislikeComment_argsAction(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("action"))
+	if tmp, ok := rawArgs["action"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -4826,6 +4881,87 @@ func (ec *executionContext) fieldContext_Mutation_addComment(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addComment_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addLikeDislikeComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addLikeDislikeComment(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddLikeDislikeComment(rctx, fc.Args["commentId"].(string), fc.Args["action"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addLikeDislikeComment(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Comment__id(ctx, field)
+			case "reviewId":
+				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "userId":
+				return ec.fieldContext_Comment_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Comment_user(ctx, field)
+			case "text":
+				return ec.fieldContext_Comment_text(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Comment_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Comment_updatedAt(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Comment_likesCount(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "dislikesCount":
+				return ec.fieldContext_Comment_dislikesCount(ctx, field)
+			case "userReaction":
+				return ec.fieldContext_Comment_userReaction(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addLikeDislikeComment_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -13576,6 +13712,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addComment":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addComment(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "addLikeDislikeComment":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addLikeDislikeComment(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++

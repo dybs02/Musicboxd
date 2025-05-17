@@ -98,7 +98,32 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 	return &res, nil
 }
 
+func (r *mutationResolver) AddLikeDislikeComment(ctx context.Context, commentID string, action string) (*model.Comment, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	comment, err := AddLikeDislike(ctx, cc.UserID, commentID, action, "comments")
+	if err != nil {
+		return nil, err
+	}
+
+	res := model.Comment{}
+	err = comment.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
 func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
 	if err != nil {
 		return nil, err
@@ -130,7 +155,8 @@ func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageS
 			options.Find().
 				SetSort(bson.M{"createdAt": 1}).
 				SetSkip(int64(skip)).
-				SetLimit(int64(limit)),
+				SetLimit(int64(limit)).
+				SetProjection(GetCommentProjection(cc.UserID)),
 		)
 		if err != nil {
 			return nil, err

@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ADD_LIKE_OR_DISLIKE, CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
+import { CREATE_UPDATE_REWIEW_BY_ITEM_ID } from '@/services/queries';
 import type { ReviewType } from '@/types/review';
-import type { UserType } from '@/types/user';
 import { handleGqlError } from '@/utils/error';
 import { navigateToUser } from '@/utils/navigate';
 import { Form } from '@primevue/forms';
@@ -14,7 +13,7 @@ import Rating from 'primevue/rating';
 import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import LikesDislikes from './likes-dislikes/LikesDislikes.vue';
+import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
 
 
 const route = useRoute();
@@ -125,7 +124,8 @@ const toggleEdit = () => {
       <template #footer>
         <div class="flex justify-between mt-2">
           <LikesDislikes
-            :itemId="props.itemId"
+            :id="props.review._id"
+            :idType="'review'"
             :userReaction="props.review.userReaction"
             :likesCount="props.review.likesCount"
             :dislikesCount="props.review.dislikesCount"

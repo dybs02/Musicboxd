@@ -10,6 +10,8 @@ import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
 import { useRouter } from 'vue-router';
+import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
+
 
 const props = defineProps({
   comment: {
@@ -99,6 +101,18 @@ const confirmReport = (event: any, commentID: string) => {
     <template #content>
       <div style="white-space: pre;">
         {{ props.comment.text }}
+      </div>
+    </template>
+    <template #footer>
+      <div class="flex justify-content-between pt-4">
+        <LikesDislikes
+          :id="props.comment._id"
+          :idType="'comment'"
+          :userReaction="props.comment.userReaction"
+          :likesCount="props.comment.likesCount"
+          :dislikesCount="props.comment.dislikesCount"
+          :fontRemSize="0.7"
+        />
       </div>
     </template>
   </Card>

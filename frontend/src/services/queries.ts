@@ -311,9 +311,20 @@ const GET_RECENT_USER_REVIEWS_PAGINATION = gql`
 `
 
 
-const ADD_LIKE_OR_DISLIKE = gql`
+const ADD_LIKE_OR_DISLIKE_REVIEW = gql`
   mutation AddLikeDislikeReview($reviewId: String!, $action: String!) {
     addLikeDislikeReview(reviewId: $reviewId, action: $action) {
+      likesCount
+      dislikesCount
+      userReaction
+    }
+  }
+`
+
+
+const ADD_LIKE_OR_DISLIKE_COMMENT = gql`
+  mutation AddLikeDislikeComment($commentId: String!, $action: String!) {
+    addLikeDislikeComment(commentId: $commentId, action: $action) {
       likesCount
       dislikesCount
       userReaction
@@ -399,7 +410,8 @@ export {
   SEARCH_FOR_ALBUMS,
   UPDATE_CURRENT_USER_FAVOURITE_ALBUM,
   GET_RECENT_USER_REVIEWS_PAGINATION,
-  ADD_LIKE_OR_DISLIKE,
+  ADD_LIKE_OR_DISLIKE_REVIEW,
+  ADD_LIKE_OR_DISLIKE_COMMENT,
   GET_COMMENTS_BY_REVIEW_ID,
   GET_REWIEW_BY_ID,
 };
