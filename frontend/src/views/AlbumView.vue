@@ -3,8 +3,8 @@ import AlbumInfo from '@/components/album/AlbumInfo.vue';
 import TrackList from "@/components/album/TrackList.vue";
 import Review from "@/components/Review.vue";
 import { useAuthStore } from "@/services/authStore";
-import { GET_ALBUM_BY_ID } from "@/services/queries";
-import { emptyReview } from '@/types/review';
+import { GET_ALBUM_BY_ID, GET_REWIEW_ID_BY_ITEM_ID_USER_ID } from "@/services/queries";
+import { emptyReview, type ReviewType } from '@/types/review';
 import { emptyAlbum, type AlbumType } from '@/types/spotify';
 import { handleGqlError } from '@/utils/error';
 import { useQuery } from '@vue/apollo-composable';
@@ -28,6 +28,7 @@ const props = defineProps<{
 
 let album = ref<AlbumType>(emptyAlbum);
 let albumLoading = ref(true);
+let reviewLoading = ref(true);
 
 const albumId = computed(() => {
   return props.itemId ?? route.params.id;
@@ -58,9 +59,42 @@ const fetch_album = async () => {
   });
 };
 
+const fetch_rewiew = async () => {
+  const { onError, onResult } = useQuery(
+    GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
+    {
+      itemId: albumId.value,
+      userId: store.getId(),
+    }
+  );
+
+  reviewLoading.value = true;
+
+  onError((err) => {
+    handleGqlError(router, err, ["mongo: no documents in result"]);
+  });
+  
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+    
+    if (res?.data?.review) {
+      router.push({
+        name: 'review',
+        params: {
+          id: res?.data?.review._id,
+        },
+      });
+      return;
+    }
+  });
+};
+
 
 const fetch_data = async () => {
   fetch_album();
+  fetch_rewiew();
 };
 
 

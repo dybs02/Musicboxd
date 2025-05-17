@@ -2,7 +2,7 @@
 import Review from "@/components/Review.vue";
 import TrackInfo from "@/components/track/TrackInfo.vue";
 import { useAuthStore } from '@/services/authStore';
-import { GET_TRACK_BY_ID } from "@/services/queries";
+import { GET_REWIEW_ID_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
 import { emptyReview } from "@/types/review";
 import { emptyTrack, type TrackType } from "@/types/spotify";
 import { handleGqlError } from "@/utils/error";
@@ -30,6 +30,7 @@ const props = defineProps<{
 
 let track = ref<TrackType>(emptyTrack);
 let trackLoading = ref(true);
+let reviewLoading = ref(true);
 
 const trackId = computed(() => {
   console.log('trackId', props.itemId, route.params.id);
@@ -61,9 +62,42 @@ const fetch_track = async () => {
   });
 };
 
+const fetch_rewiew = async () => {
+  const { onError, onResult } = useQuery(
+    GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
+    {
+      itemId: trackId.value,
+      userId: store.getId(),
+    }
+  );
+
+  reviewLoading.value = true;
+
+  onError((err) => {
+    handleGqlError(router, err, ["mongo: no documents in result"]);
+  });
+  
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+    
+    if (res?.data?.review) {
+      router.push({
+        name: 'review',
+        params: {
+          id: res?.data?.review._id,
+        },
+      });
+      return;
+    }
+  });
+};
+
 
 const fetch_data = async () => {
   fetch_track();
+  fetch_rewiew();
 };
 
 

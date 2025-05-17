@@ -72,24 +72,10 @@ const SEARCH = gql`
   }
 `;
 
-const GET_REWIEW_BY_ITEM_ID_USER_ID = gql`
+const GET_REWIEW_ID_BY_ITEM_ID_USER_ID = gql`
   query Rewiew($itemId: String!, $userId: String!) {
     review(itemId: $itemId, userId: $userId) {
       _id
-      itemId
-      value
-      title
-      description
-      likesCount
-      dislikesCount
-      userReaction
-      user {
-        _id
-        displayName
-        images {
-          url
-        }
-      }
     }
   }
 `;
@@ -403,7 +389,7 @@ const GET_REWIEW_BY_ID = gql`
 export { 
   GET_ALBUM_BY_ID,
   SEARCH,
-  GET_REWIEW_BY_ITEM_ID_USER_ID,
+  GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
   CREATE_UPDATE_REWIEW_BY_ITEM_ID,
   ADD_COMMENT,
   RECENT_REVIEWS,
