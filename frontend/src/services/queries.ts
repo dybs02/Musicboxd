@@ -124,6 +124,9 @@ query RecentReviews($number: Int!, $itemType: String!) {
         url
       }
     }
+    track {
+      name
+    }
     album {
       name
       images {

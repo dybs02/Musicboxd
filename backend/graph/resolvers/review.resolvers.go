@@ -30,6 +30,11 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	}
 
 	var album *model.Album
+	dbTrack := map[string]interface{}{
+		"trackId": "",
+		"name":    "",
+		"artists": "",
+	}
 
 	if itemType == "track" {
 		track, err := hlp.SpotifyGetTrack(itemID, accessToken)
@@ -37,6 +42,13 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 			return nil, err
 		}
 		album = track.Album
+
+		dbTrack = map[string]interface{}{
+			"trackId": track.ID,
+			"name":    track.Name,
+			"artists": track.Artists,
+		}
+
 	} else if itemType == "album" {
 		album, err = hlp.SpotifyGetAlbum(itemID, accessToken)
 		if err != nil {
@@ -69,6 +81,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 				"description": description,
 				"value":       value,
 				"album":       dbAlbum,
+				"track":       dbTrack,
 				"updatedAt":   time.Now(),
 			}},
 		options.FindOneAndUpdate().

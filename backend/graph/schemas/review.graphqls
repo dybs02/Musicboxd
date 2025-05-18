@@ -13,6 +13,7 @@ type Review {
   updatedAt: Time
   commentIds: [ID]
   comments: [Comment]
+  track: ReviewTrack
   album: ReviewAlbum
   likes: [ID]
   likesCount: Int!
@@ -25,6 +26,12 @@ type ReviewAlbum {
   albumId: String!
   name: String!
   images: [Image!]!
+  artists: [SimplifiedArtist!]!
+}
+
+type ReviewTrack {
+  trackId: String!
+  name: String!
   artists: [SimplifiedArtist!]!
 }
 

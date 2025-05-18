@@ -185,6 +185,7 @@ type ComplexityRoot struct {
 		Likes         func(childComplexity int) int
 		LikesCount    func(childComplexity int) int
 		Title         func(childComplexity int) int
+		Track         func(childComplexity int) int
 		UpdatedAt     func(childComplexity int) int
 		User          func(childComplexity int) int
 		UserID        func(childComplexity int) int
@@ -197,6 +198,12 @@ type ComplexityRoot struct {
 		Artists func(childComplexity int) int
 		Images  func(childComplexity int) int
 		Name    func(childComplexity int) int
+	}
+
+	ReviewTrack struct {
+		Artists func(childComplexity int) int
+		Name    func(childComplexity int) int
+		TrackID func(childComplexity int) int
 	}
 
 	SearchResponse struct {
@@ -1108,6 +1115,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Review.Title(childComplexity), true
 
+	case "Review.track":
+		if e.complexity.Review.Track == nil {
+			break
+		}
+
+		return e.complexity.Review.Track(childComplexity), true
+
 	case "Review.updatedAt":
 		if e.complexity.Review.UpdatedAt == nil {
 			break
@@ -1170,6 +1184,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ReviewAlbum.Name(childComplexity), true
+
+	case "ReviewTrack.artists":
+		if e.complexity.ReviewTrack.Artists == nil {
+			break
+		}
+
+		return e.complexity.ReviewTrack.Artists(childComplexity), true
+
+	case "ReviewTrack.name":
+		if e.complexity.ReviewTrack.Name == nil {
+			break
+		}
+
+		return e.complexity.ReviewTrack.Name(childComplexity), true
+
+	case "ReviewTrack.trackId":
+		if e.complexity.ReviewTrack.TrackID == nil {
+			break
+		}
+
+		return e.complexity.ReviewTrack.TrackID(childComplexity), true
 
 	case "SearchResponse.albums":
 		if e.complexity.SearchResponse.Albums == nil {
@@ -5259,6 +5294,8 @@ func (ec *executionContext) fieldContext_Mutation_createOrUpdateReview(ctx conte
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -5352,6 +5389,8 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislikeReview(ctx conte
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -5673,6 +5712,8 @@ func (ec *executionContext) fieldContext_Query_review(ctx context.Context, field
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -5766,6 +5807,8 @@ func (ec *executionContext) fieldContext_Query_reviewById(ctx context.Context, f
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -5859,6 +5902,8 @@ func (ec *executionContext) fieldContext_Query_recentReviews(ctx context.Context
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -6826,6 +6871,8 @@ func (ec *executionContext) fieldContext_RecentUserReviews_reviews(_ context.Con
 				return ec.fieldContext_Review_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
 			case "album":
 				return ec.fieldContext_Review_album(ctx, field)
 			case "likes":
@@ -7896,6 +7943,55 @@ func (ec *executionContext) fieldContext_Review_comments(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Review_track(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Review_track(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Track, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.ReviewTrack)
+	fc.Result = res
+	return ec.marshalOReviewTrack2ᚖmusicboxdᚋgraphᚋmodelᚐReviewTrack(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Review_track(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Review",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "trackId":
+				return ec.fieldContext_ReviewTrack_trackId(ctx, field)
+			case "name":
+				return ec.fieldContext_ReviewTrack_name(ctx, field)
+			case "artists":
+				return ec.fieldContext_ReviewTrack_artists(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ReviewTrack", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Review_album(ctx context.Context, field graphql.CollectedField, obj *model.Review) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Review_album(ctx, field)
 	if err != nil {
@@ -8332,6 +8428,152 @@ func (ec *executionContext) _ReviewAlbum_artists(ctx context.Context, field grap
 func (ec *executionContext) fieldContext_ReviewAlbum_artists(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "ReviewAlbum",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "external_urls":
+				return ec.fieldContext_SimplifiedArtist_external_urls(ctx, field)
+			case "href":
+				return ec.fieldContext_SimplifiedArtist_href(ctx, field)
+			case "id":
+				return ec.fieldContext_SimplifiedArtist_id(ctx, field)
+			case "name":
+				return ec.fieldContext_SimplifiedArtist_name(ctx, field)
+			case "type":
+				return ec.fieldContext_SimplifiedArtist_type(ctx, field)
+			case "uri":
+				return ec.fieldContext_SimplifiedArtist_uri(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SimplifiedArtist", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewTrack_trackId(ctx context.Context, field graphql.CollectedField, obj *model.ReviewTrack) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReviewTrack_trackId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TrackID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReviewTrack_trackId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewTrack",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewTrack_name(ctx context.Context, field graphql.CollectedField, obj *model.ReviewTrack) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReviewTrack_name(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReviewTrack_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewTrack",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ReviewTrack_artists(ctx context.Context, field graphql.CollectedField, obj *model.ReviewTrack) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ReviewTrack_artists(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Artists, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.SimplifiedArtist)
+	fc.Result = res
+	return ec.marshalNSimplifiedArtist2ᚕᚖmusicboxdᚋgraphᚋmodelᚐSimplifiedArtistᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ReviewTrack_artists(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ReviewTrack",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -14491,6 +14733,8 @@ func (ec *executionContext) _Review(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = ec._Review_commentIds(ctx, field, obj)
 		case "comments":
 			out.Values[i] = ec._Review_comments(ctx, field, obj)
+		case "track":
+			out.Values[i] = ec._Review_track(ctx, field, obj)
 		case "album":
 			out.Values[i] = ec._Review_album(ctx, field, obj)
 		case "likes":
@@ -14560,6 +14804,55 @@ func (ec *executionContext) _ReviewAlbum(ctx context.Context, sel ast.SelectionS
 			}
 		case "artists":
 			out.Values[i] = ec._ReviewAlbum_artists(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var reviewTrackImplementors = []string{"ReviewTrack"}
+
+func (ec *executionContext) _ReviewTrack(ctx context.Context, sel ast.SelectionSet, obj *model.ReviewTrack) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, reviewTrackImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReviewTrack")
+		case "trackId":
+			out.Values[i] = ec._ReviewTrack_trackId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._ReviewTrack_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "artists":
+			out.Values[i] = ec._ReviewTrack_artists(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -16501,6 +16794,13 @@ func (ec *executionContext) marshalOReviewAlbum2ᚖmusicboxdᚋgraphᚋmodelᚐR
 		return graphql.Null
 	}
 	return ec._ReviewAlbum(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOReviewTrack2ᚖmusicboxdᚋgraphᚋmodelᚐReviewTrack(ctx context.Context, sel ast.SelectionSet, v *model.ReviewTrack) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ReviewTrack(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

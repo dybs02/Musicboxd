@@ -128,6 +128,7 @@ type Review struct {
 	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
 	CommentIds    []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
 	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
+	Track         *ReviewTrack  `json:"track,omitempty" bson:"track,omitempty"`
 	Album         *ReviewAlbum  `json:"album,omitempty" bson:"album,omitempty"`
 	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
 	LikesCount    int           `json:"likesCount" bson:"likesCount"`
@@ -140,6 +141,12 @@ type ReviewAlbum struct {
 	AlbumID string              `json:"albumId" bson:"albumId"`
 	Name    string              `json:"name" bson:"name"`
 	Images  []*Image            `json:"images" bson:"images"`
+	Artists []*SimplifiedArtist `json:"artists" bson:"artists"`
+}
+
+type ReviewTrack struct {
+	TrackID string              `json:"trackId" bson:"trackId"`
+	Name    string              `json:"name" bson:"name"`
 	Artists []*SimplifiedArtist `json:"artists" bson:"artists"`
 }
 

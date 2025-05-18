@@ -53,7 +53,8 @@ const responsiveOptions = ref([
                   <img :src="slotProps.data.album.images[0].url" :alt="slotProps.data.album.name" class="w-full" />
                 </div>
               </div>
-              <div class="mb-1 font-bold text-lg truncate">{{ slotProps.data.album.name }}</div>
+              <div v-if="slotProps.data.itemType === 'album'" class="mb-1 font-bold text-lg truncate">{{ slotProps.data.album.name }}</div>
+              <div v-if="slotProps.data.itemType === 'track'" class="mb-1 font-bold text-lg truncate">{{ slotProps.data.track.name }}</div>
               <div class="mb-1 font-small">{{ slotProps.data.album.artists[0].name }}</div>
             </div>
             <div class="flex mt-4 cursor-pointer" @click="navigateToReview(router, slotProps.data._id)">
