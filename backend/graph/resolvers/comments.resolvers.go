@@ -17,7 +17,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text string) (*model.Comment, error) {
+func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text string, replyingToID *string) (*model.Comment, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -28,18 +28,31 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 		return nil, err
 	}
 
+	comment := bson.M{
+		"createdAt":  time.Now(),
+		"likes":      []interface{}{},
+		"dislikes":   []interface{}{},
+		"repliesIds": []interface{}{},
+		"reviewId":   convertedReviewID,
+		"userId":     cc.UserID,
+		"text":       text,
+		"updatedAt":  time.Now(),
+	}
+
+	var convertedReplyingToID primitive.ObjectID
+	if replyingToID != nil && *replyingToID != "" {
+		convertedReplyingToID, err = primitive.ObjectIDFromHex(*replyingToID)
+		if err != nil {
+			return nil, err
+		}
+
+		comment["replyingToId"] = convertedReplyingToID
+	}
+
 	coll := database.GetDB().GetCollection("comments")
 	result, err := coll.InsertOne(
 		ctx,
-		bson.M{
-			"createdAt": time.Now(),
-			"likes":     []interface{}{},
-			"dislikes":  []interface{}{},
-			"reviewId":  convertedReviewID,
-			"userId":    cc.UserID,
-			"text":      text,
-			"updatedAt": time.Now(),
-		},
+		comment,
 	)
 
 	if err != nil {
@@ -72,6 +85,25 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 
 	if review.Err() != nil {
 		return nil, review.Err()
+	}
+
+	if replyingToID != nil && *replyingToID != "" {
+		coll := database.GetDB().GetCollection("comments")
+		result := coll.FindOneAndUpdate(
+			ctx,
+			bson.M{"_id": convertedReplyingToID},
+			bson.M{
+				"$push": bson.M{
+					"repliesIds": convertedCommentID,
+				},
+			},
+			options.FindOneAndUpdate().
+				SetReturnDocument(options.After).
+				SetProjection(bson.M{"_id": 1}),
+		)
+		if result.Err() != nil {
+			return nil, result.Err()
+		}
 	}
 
 	if isFieldRequested(ctx, "user") {

@@ -43,11 +43,15 @@ type Comment struct {
 	Text          *string       `json:"text,omitempty" bson:"text,omitempty"`
 	CreatedAt     *time.Time    `json:"createdAt,omitempty" bson:"createdAt,omitempty"`
 	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
-	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
 	LikesCount    int           `json:"likesCount" bson:"likesCount"`
-	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
 	DislikesCount int           `json:"dislikesCount" bson:"dislikesCount"`
 	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
+	ReplyingToID  *string       `json:"replyingToId,omitempty" bson:"replyingToId,omitempty"`
+	RepliesCount  int           `json:"repliesCount" bson:"repliesCount"`
+	Replies       []*Comment    `json:"replies" bson:"replies"`
+	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
+	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
+	RepliesIds    []*string     `json:"repliesIds,omitempty" bson:"repliesIds,omitempty"`
 }
 
 type CommentsPage struct {

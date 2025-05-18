@@ -92,8 +92,8 @@ const CREATE_UPDATE_REWIEW_BY_ITEM_ID = gql`
 `;
 
 const ADD_COMMENT = gql`
-  mutation AddComment($reviewId: String!, $text: String!) {
-    addComment(reviewId: $reviewId, text: $text) {
+  mutation AddComment($reviewId: String!, $text: String!, $replyingToId: String) {
+    addComment(reviewId: $reviewId, text: $text, replyingToId: $replyingToId) {
       _id
       text
       createdAt

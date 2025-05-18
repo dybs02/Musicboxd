@@ -84,6 +84,10 @@ type ComplexityRoot struct {
 		ID            func(childComplexity int) int
 		Likes         func(childComplexity int) int
 		LikesCount    func(childComplexity int) int
+		Replies       func(childComplexity int) int
+		RepliesCount  func(childComplexity int) int
+		RepliesIds    func(childComplexity int) int
+		ReplyingToID  func(childComplexity int) int
 		ReviewID      func(childComplexity int) int
 		Text          func(childComplexity int) int
 		UpdatedAt     func(childComplexity int) int
@@ -126,7 +130,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddComment            func(childComplexity int, reviewID string, text string) int
+		AddComment            func(childComplexity int, reviewID string, text string, replyingToID *string) int
 		AddLikeDislikeComment func(childComplexity int, commentID string, action string) int
 		AddLikeDislikeReview  func(childComplexity int, reviewID string, action string) int
 		CreateOrUpdateReview  func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
@@ -299,7 +303,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	AddComment(ctx context.Context, reviewID string, text string) (*model.Comment, error)
+	AddComment(ctx context.Context, reviewID string, text string, replyingToID *string) (*model.Comment, error)
 	AddLikeDislikeComment(ctx context.Context, commentID string, action string) (*model.Comment, error)
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
@@ -544,6 +548,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.LikesCount(childComplexity), true
 
+	case "Comment.replies":
+		if e.complexity.Comment.Replies == nil {
+			break
+		}
+
+		return e.complexity.Comment.Replies(childComplexity), true
+
+	case "Comment.repliesCount":
+		if e.complexity.Comment.RepliesCount == nil {
+			break
+		}
+
+		return e.complexity.Comment.RepliesCount(childComplexity), true
+
+	case "Comment.repliesIds":
+		if e.complexity.Comment.RepliesIds == nil {
+			break
+		}
+
+		return e.complexity.Comment.RepliesIds(childComplexity), true
+
+	case "Comment.replyingToId":
+		if e.complexity.Comment.ReplyingToID == nil {
+			break
+		}
+
+		return e.complexity.Comment.ReplyingToID(childComplexity), true
+
 	case "Comment.reviewId":
 		if e.complexity.Comment.ReviewID == nil {
 			break
@@ -701,7 +733,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddComment(childComplexity, args["reviewId"].(string), args["text"].(string)), true
+		return e.complexity.Mutation.AddComment(childComplexity, args["reviewId"].(string), args["text"].(string), args["replyingToId"].(*string)), true
 
 	case "Mutation.addLikeDislikeComment":
 		if e.complexity.Mutation.AddLikeDislikeComment == nil {
@@ -1838,6 +1870,11 @@ func (ec *executionContext) field_Mutation_addComment_args(ctx context.Context, 
 		return nil, err
 	}
 	args["text"] = arg1
+	arg2, err := ec.field_Mutation_addComment_argsReplyingToID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["replyingToId"] = arg2
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_addComment_argsReviewID(
@@ -1863,6 +1900,19 @@ func (ec *executionContext) field_Mutation_addComment_argsText(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addComment_argsReplyingToID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("replyingToId"))
+	if tmp, ok := rawArgs["replyingToId"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -4064,47 +4114,6 @@ func (ec *executionContext) fieldContext_Comment_updatedAt(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Comment_likes(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Comment_likes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Likes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*string)
-	fc.Result = res
-	return ec.marshalOID2ᚕᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Comment_likes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Comment_likesCount(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Comment_likesCount(ctx, field)
 	if err != nil {
@@ -4144,47 +4153,6 @@ func (ec *executionContext) fieldContext_Comment_likesCount(_ context.Context, f
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Comment_dislikes(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Comment_dislikes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Dislikes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*string)
-	fc.Result = res
-	return ec.marshalOID2ᚕᚖstring(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Comment_dislikes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Comment",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4270,6 +4238,292 @@ func (ec *executionContext) fieldContext_Comment_userReaction(_ context.Context,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_replyingToId(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_replyingToId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ReplyingToID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_replyingToId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_repliesCount(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_repliesCount(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RepliesCount, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_repliesCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_replies(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_replies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Replies, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_replies(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Comment__id(ctx, field)
+			case "reviewId":
+				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "userId":
+				return ec.fieldContext_Comment_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Comment_user(ctx, field)
+			case "text":
+				return ec.fieldContext_Comment_text(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Comment_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Comment_updatedAt(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Comment_likesCount(ctx, field)
+			case "dislikesCount":
+				return ec.fieldContext_Comment_dislikesCount(ctx, field)
+			case "userReaction":
+				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_likes(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_likes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Likes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOID2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_likes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_dislikes(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_dislikes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Dislikes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOID2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_dislikes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Comment_repliesIds(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_repliesIds(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RepliesIds, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*string)
+	fc.Result = res
+	return ec.marshalOID2ᚕᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Comment_repliesIds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Comment",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
 		},
 	}
 	return fc, nil
@@ -4504,16 +4758,24 @@ func (ec *executionContext) fieldContext_CommentsPage_comments(_ context.Context
 				return ec.fieldContext_Comment_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Comment_updatedAt(ctx, field)
-			case "likes":
-				return ec.fieldContext_Comment_likes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Comment_likesCount(ctx, field)
-			case "dislikes":
-				return ec.fieldContext_Comment_dislikes(ctx, field)
 			case "dislikesCount":
 				return ec.fieldContext_Comment_dislikesCount(ctx, field)
 			case "userReaction":
 				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
@@ -4973,7 +5235,7 @@ func (ec *executionContext) _Mutation_addComment(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["reviewId"].(string), fc.Args["text"].(string))
+		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["reviewId"].(string), fc.Args["text"].(string), fc.Args["replyingToId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5012,16 +5274,24 @@ func (ec *executionContext) fieldContext_Mutation_addComment(ctx context.Context
 				return ec.fieldContext_Comment_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Comment_updatedAt(ctx, field)
-			case "likes":
-				return ec.fieldContext_Comment_likes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Comment_likesCount(ctx, field)
-			case "dislikes":
-				return ec.fieldContext_Comment_dislikes(ctx, field)
 			case "dislikesCount":
 				return ec.fieldContext_Comment_dislikesCount(ctx, field)
 			case "userReaction":
 				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
@@ -5093,16 +5363,24 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislikeComment(ctx cont
 				return ec.fieldContext_Comment_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Comment_updatedAt(ctx, field)
-			case "likes":
-				return ec.fieldContext_Comment_likes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Comment_likesCount(ctx, field)
-			case "dislikes":
-				return ec.fieldContext_Comment_dislikes(ctx, field)
 			case "dislikesCount":
 				return ec.fieldContext_Comment_dislikesCount(ctx, field)
 			case "userReaction":
 				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
@@ -7027,16 +7305,24 @@ func (ec *executionContext) fieldContext_ReportedComment_comment(_ context.Conte
 				return ec.fieldContext_Comment_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Comment_updatedAt(ctx, field)
-			case "likes":
-				return ec.fieldContext_Comment_likes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Comment_likesCount(ctx, field)
-			case "dislikes":
-				return ec.fieldContext_Comment_dislikes(ctx, field)
 			case "dislikesCount":
 				return ec.fieldContext_Comment_dislikesCount(ctx, field)
 			case "userReaction":
 				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
@@ -7926,16 +8212,24 @@ func (ec *executionContext) fieldContext_Review_comments(_ context.Context, fiel
 				return ec.fieldContext_Comment_createdAt(ctx, field)
 			case "updatedAt":
 				return ec.fieldContext_Comment_updatedAt(ctx, field)
-			case "likes":
-				return ec.fieldContext_Comment_likes(ctx, field)
 			case "likesCount":
 				return ec.fieldContext_Comment_likesCount(ctx, field)
-			case "dislikes":
-				return ec.fieldContext_Comment_dislikes(ctx, field)
 			case "dislikesCount":
 				return ec.fieldContext_Comment_dislikesCount(ctx, field)
 			case "userReaction":
 				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 		},
@@ -13850,15 +14144,11 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._Comment_createdAt(ctx, field, obj)
 		case "updatedAt":
 			out.Values[i] = ec._Comment_updatedAt(ctx, field, obj)
-		case "likes":
-			out.Values[i] = ec._Comment_likes(ctx, field, obj)
 		case "likesCount":
 			out.Values[i] = ec._Comment_likesCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "dislikes":
-			out.Values[i] = ec._Comment_dislikes(ctx, field, obj)
 		case "dislikesCount":
 			out.Values[i] = ec._Comment_dislikesCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -13866,6 +14156,24 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "userReaction":
 			out.Values[i] = ec._Comment_userReaction(ctx, field, obj)
+		case "replyingToId":
+			out.Values[i] = ec._Comment_replyingToId(ctx, field, obj)
+		case "repliesCount":
+			out.Values[i] = ec._Comment_repliesCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "replies":
+			out.Values[i] = ec._Comment_replies(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "likes":
+			out.Values[i] = ec._Comment_likes(ctx, field, obj)
+		case "dislikes":
+			out.Values[i] = ec._Comment_dislikes(ctx, field, obj)
+		case "repliesIds":
+			out.Values[i] = ec._Comment_repliesIds(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15823,6 +16131,44 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 
 func (ec *executionContext) marshalNComment2musicboxdᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v model.Comment) graphql.Marshaler {
 	return ec._Comment(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v []*model.Comment) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOComment2ᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
 }
 
 func (ec *executionContext) marshalNComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐCommentᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Comment) graphql.Marshaler {

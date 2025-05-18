@@ -2,7 +2,7 @@
 import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
 import { ADD_COMMENT, GET_COMMENTS_BY_REVIEW_ID } from '@/services/queries';
-import { emptyCommentsPage, type CommentsPageType, type CommentType } from '@/types/comments';
+import { emptyComment, emptyCommentsPage, type CommentsPageType, type CommentType } from '@/types/comments';
 import { handleGqlError } from '@/utils/error';
 import { Form } from '@primevue/forms';
 import { useMutation, useQuery } from '@vue/apollo-composable';
@@ -13,6 +13,8 @@ import Paginator, { type PageState } from 'primevue/paginator';
 import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import Divider from 'primevue/divider';
+
 
 const store = useAuthStore();
 const route = useRoute();
@@ -30,7 +32,8 @@ const paginatorFirst = ref(0);
 const pageSize = 3;
 let commentsPage = ref<CommentsPageType>(emptyCommentsPage);
 let commentsPageLoading = ref(true);
-
+let replyingToCommentId = ref('');
+let replyingToComment = ref<CommentType>(emptyComment);
 
 
 const fetch_comments = async () => {
@@ -100,6 +103,7 @@ const submitComment = async () => {
       variables: {
         reviewId: route.params.id,
         text: newComment.value.text,
+        replyingToId: replyingToCommentId.value,
       },
     }
   ));
@@ -121,10 +125,31 @@ const submitComment = async () => {
 
     paginatorFirst.value = pageSize * Math.floor(commentsPage.value.totalComments/pageSize);
     newComment.value.text = '';
+    replyingToCommentId.value = '';
+    replyingToComment.value = emptyComment;
   });
 
   addComment();
 }
+
+
+const reply = (commentID: string) => {
+  replyingToCommentId.value = commentID;
+  const comment = commentsPage.value.comments.find((c) => c._id === commentID);
+
+  if (comment) {
+    replyingToComment.value = comment;
+    newComment.value.text = `@${comment?.user.displayName} `;
+  } else {
+    console.error('Comment not found');
+    replyingToCommentId.value = '';
+  }
+};
+
+const closeReply = () => {
+  replyingToCommentId.value = '';
+  replyingToComment.value = emptyComment;
+};
 
 
 const fetch_data = async () => {
@@ -147,7 +172,10 @@ watch(() => route.params, fetch_data, { immediate: true })
       </template>
       <template #content>
         <div v-for="c in commentsPage.comments" class="mb-2">
-          <Comment :comment="c" />
+          <Comment
+            :comment="c"
+            @replyToComment="reply"
+          />
         </div>
 
         <div>
@@ -166,6 +194,30 @@ watch(() => route.params, fetch_data, { immediate: true })
       <template #footer>
         <div>
           <Card class="bg-comment">
+            <template #header>
+              <div v-if="replyingToCommentId !== ''" class="px-4 pt-4">
+                <div class="flex">
+                  <div class="text-slate-500 ml-2">
+                    Replying to:
+                  </div>
+                  <Button
+                    class="ml-auto"
+                    @click="closeReply"
+                    v-tooltip.bottom="`Close reply`" 
+                    icon="pi pi-times"
+                    aria-label="Save"
+                    severity="secondary"
+                    size="small"
+                  />
+                </div>
+                <Comment
+                  :comment="replyingToComment"
+                  :showReportButton="false"
+                  :showLikes="false"
+                />
+                <Divider />
+              </div>
+            </template>
             <template #content>
               <Form class="flex">
                 <FloatLabel variant="on" class="w-full">

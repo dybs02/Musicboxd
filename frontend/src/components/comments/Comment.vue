@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
 import { REPORT_COMMENT } from '@/services/queries';
 import type { CommentType } from '@/types/comments';
 import { navigateToUser } from '@/utils/navigate';
@@ -9,8 +10,8 @@ import Card from 'primevue/card';
 import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import { defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
-import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
 
 
 const props = defineProps({
@@ -23,8 +24,16 @@ const props = defineProps({
     default: true,
     required: false
   },
+  showLikes: {
+    type: Boolean,
+    default: true,
+    required: false
+  },
 });
 
+const emit = defineEmits<{
+  replyToComment: [id: string]
+}>()
 
 
 const router = useRouter();
@@ -67,6 +76,10 @@ const confirmReport = (event: any, commentID: string) => {
   });
 };
 
+const reply = (event: any, commentID: string) => {
+  emit('replyToComment', commentID);
+};
+
 </script>
 
 <template>
@@ -94,7 +107,23 @@ const confirmReport = (event: any, commentID: string) => {
         </div>
         <div class="ml-auto" v-if="props.showReportButton">
           <ConfirmPopup></ConfirmPopup>
-          <Button @click="confirmReport($event, props.comment._id)" icon="pi pi-flag-fill" aria-label="Save" severity="secondary" size="small" />
+          <Button
+            class="mr-2"
+            @click="reply($event, props.comment._id)"
+            v-tooltip.bottom="`Reply to comment`" 
+            icon="pi pi-reply"
+            aria-label="Save"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            @click="confirmReport($event, props.comment._id)"
+            v-tooltip.bottom="`Report comment`" 
+            icon="pi pi-flag-fill"
+            aria-label="Save"
+            severity="secondary"
+            size="small"
+          />
         </div>
       </div>
     </template>
@@ -104,7 +133,7 @@ const confirmReport = (event: any, commentID: string) => {
       </div>
     </template>
     <template #footer>
-      <div class="flex justify-content-between pt-4">
+      <div v-if="props.showLikes" class="flex justify-content-between pt-4">
         <LikesDislikes
           :id="props.comment._id"
           :idType="'comment'"
