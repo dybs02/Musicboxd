@@ -30,11 +30,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	}
 
 	var album *model.Album
-	dbTrack := map[string]interface{}{
-		"trackId": "",
-		"name":    "",
-		"artists": "",
-	}
+	dbTrack := map[string]interface{}{}
 
 	if itemType == "track" {
 		track, err := hlp.SpotifyGetTrack(itemID, accessToken)
