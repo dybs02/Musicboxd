@@ -145,6 +145,7 @@ type ComplexityRoot struct {
 		CommentsPage      func(childComplexity int, reviewID string, pageSize *int, page int) int
 		RecentReviews     func(childComplexity int, number *int, itemType string) int
 		RecentUserReviews func(childComplexity int, pageSize *int, page int, itemType string, userID string) int
+		Replies           func(childComplexity int, commentID string, repliesLength *int) int
 		ReportedComments  func(childComplexity int, number *int) int
 		Review            func(childComplexity int, itemID string, userID string) int
 		ReviewByID        func(childComplexity int, reviewID string) int
@@ -313,6 +314,7 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error)
+	Replies(ctx context.Context, commentID string, repliesLength *int) ([]*model.Comment, error)
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
 	ReviewByID(ctx context.Context, reviewID string) (*model.Review, error)
@@ -866,6 +868,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.RecentUserReviews(childComplexity, args["pageSize"].(*int), args["page"].(int), args["itemType"].(string), args["userId"].(string)), true
+
+	case "Query.replies":
+		if e.complexity.Query.Replies == nil {
+			break
+		}
+
+		args, err := ec.field_Query_replies_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Replies(childComplexity, args["commentId"].(string), args["repliesLength"].(*int)), true
 
 	case "Query.reportedComments":
 		if e.complexity.Query.ReportedComments == nil {
@@ -2459,6 +2473,47 @@ func (ec *executionContext) field_Query_recentUserReviews_argsUserID(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_replies_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_replies_argsCommentID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["commentId"] = arg0
+	arg1, err := ec.field_Query_replies_argsRepliesLength(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["repliesLength"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Query_replies_argsCommentID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("commentId"))
+	if tmp, ok := rawArgs["commentId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_replies_argsRepliesLength(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("repliesLength"))
+	if tmp, ok := rawArgs["repliesLength"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
 	return zeroVal, nil
 }
 
@@ -5844,6 +5899,95 @@ func (ec *executionContext) fieldContext_Query_commentsPage(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_commentsPage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_replies(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_replies(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Replies(rctx, fc.Args["commentId"].(string), fc.Args["repliesLength"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Comment)
+	fc.Result = res
+	return ec.marshalNComment2ᚕᚖmusicboxdᚋgraphᚋmodelᚐComment(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_replies(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Comment__id(ctx, field)
+			case "reviewId":
+				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "userId":
+				return ec.fieldContext_Comment_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Comment_user(ctx, field)
+			case "text":
+				return ec.fieldContext_Comment_text(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Comment_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Comment_updatedAt(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Comment_likesCount(ctx, field)
+			case "dislikesCount":
+				return ec.fieldContext_Comment_dislikesCount(ctx, field)
+			case "userReaction":
+				return ec.fieldContext_Comment_userReaction(ctx, field)
+			case "replyingToId":
+				return ec.fieldContext_Comment_replyingToId(ctx, field)
+			case "repliesCount":
+				return ec.fieldContext_Comment_repliesCount(ctx, field)
+			case "replies":
+				return ec.fieldContext_Comment_replies(ctx, field)
+			case "likes":
+				return ec.fieldContext_Comment_likes(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Comment_dislikes(ctx, field)
+			case "repliesIds":
+				return ec.fieldContext_Comment_repliesIds(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_replies_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -14581,6 +14725,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_commentsPage(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "replies":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_replies(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}

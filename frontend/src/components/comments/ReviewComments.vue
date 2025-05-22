@@ -11,14 +11,17 @@ import Card from 'primevue/card';
 import FloatLabel from "primevue/floatlabel";
 import Paginator, { type PageState } from 'primevue/paginator';
 import Textarea from 'primevue/textarea';
-import { ref, watch } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Divider from 'primevue/divider';
+import mitt from 'mitt';
 
 
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+const emitter = inject<ReturnType<typeof mitt>>('emitter')
+
 const newComment = ref({
   text: '',
 });
@@ -133,9 +136,11 @@ const submitComment = async () => {
 }
 
 
-const reply = (commentID: string) => {
-  replyingToCommentId.value = commentID;
-  const comment = commentsPage.value.comments.find((c) => c._id === commentID);
+emitter?.on('replyToComment', (e: any) => {
+  const comment = e.comment;
+  console.log('replyToComment', comment);
+
+  replyingToCommentId.value = comment._id;
 
   if (comment) {
     replyingToComment.value = comment;
@@ -144,7 +149,7 @@ const reply = (commentID: string) => {
     console.error('Comment not found');
     replyingToCommentId.value = '';
   }
-};
+})
 
 const closeReply = () => {
   replyingToCommentId.value = '';
@@ -174,7 +179,6 @@ watch(() => route.params, fetch_data, { immediate: true })
         <div v-for="c in commentsPage.comments" class="mb-2">
           <Comment
             :comment="c"
-            @replyToComment="reply"
           />
         </div>
 

@@ -158,6 +158,7 @@ func GetReviewProjection(userID primitive.ObjectID) *bson.M {
 func GetCommentProjection(userID primitive.ObjectID) *bson.M {
 	return &bson.M{
 		// Calculate fields
+		"repliesCount":  bson.M{"$size": bson.M{"$ifNull": bson.A{"$repliesIds", bson.A{}}}},
 		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
 		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
 		"userReaction": bson.M{
@@ -278,4 +279,55 @@ func GetAverageRaiting(ctx context.Context, itemID string) (*AverageRating, erro
 	}
 
 	return &result, nil
+}
+
+func FillCommentUsers(ctx context.Context, comments []*model.Comment) error {
+	if len(comments) == 0 {
+		return nil
+	}
+
+	// Unique user IDs
+	userIDMap := make(map[string]bool)
+	for _, comment := range comments {
+		if comment.UserID != nil && *comment.UserID != "" {
+			userIDMap[*comment.UserID] = true
+		}
+	}
+
+	userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
+	for id := range userIDMap {
+		objID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return err
+		}
+		userIDs = append(userIDs, objID)
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	usersCursor, err := coll.Find(
+		ctx,
+		bson.M{"_id": bson.M{"$in": userIDs}},
+	)
+	if err != nil {
+		return err
+	}
+	defer usersCursor.Close(ctx)
+
+	var users []*model.UserResponse
+	if err = usersCursor.All(ctx, &users); err != nil {
+		return err
+	}
+
+	userMap := make(map[string]*model.UserResponse)
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
+	for _, comment := range comments {
+		if user, ok := userMap[*comment.UserID]; ok {
+			comment.User = user
+		}
+	}
+
+	return nil
 }

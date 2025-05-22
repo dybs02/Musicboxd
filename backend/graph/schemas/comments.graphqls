@@ -28,6 +28,7 @@ type CommentsPage {
 
 extend type Query {
   commentsPage(reviewId: String!, pageSize: Int, page: Int!): CommentsPage!
+  replies(commentId: String!, repliesLength: Int): [Comment]!
 }
 
 extend type Mutation {

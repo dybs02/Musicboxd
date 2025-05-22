@@ -162,7 +162,8 @@ func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageS
 	}
 
 	filter := bson.M{
-		"reviewId": convertedReviewID,
+		"reviewId":     convertedReviewID,
+		"replyingToId": nil,
 	}
 	coll := database.GetDB().GetCollection("comments")
 	res := model.CommentsPage{}
@@ -201,48 +202,7 @@ func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageS
 		}
 
 		if isFieldRequested(ctx, "comments.user") && len(comments) > 0 {
-			// Unique user IDs
-			userIDMap := make(map[string]bool)
-			for _, comment := range comments {
-				if comment.UserID != nil && *comment.UserID != "" {
-					userIDMap[*comment.UserID] = true
-				}
-			}
-
-			userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
-			for id := range userIDMap {
-				objID, err := primitive.ObjectIDFromHex(id)
-				if err != nil {
-					return nil, err
-				}
-				userIDs = append(userIDs, objID)
-			}
-
-			usersColl := database.GetDB().GetCollection("users")
-			usersCursor, err := usersColl.Find(
-				ctx,
-				bson.M{"_id": bson.M{"$in": userIDs}},
-			)
-			if err != nil {
-				return nil, err
-			}
-			defer usersCursor.Close(ctx)
-
-			var users []*model.UserResponse
-			if err = usersCursor.All(ctx, &users); err != nil {
-				return nil, err
-			}
-
-			userMap := make(map[string]*model.UserResponse)
-			for _, user := range users {
-				userMap[user.ID] = user
-			}
-
-			for _, comment := range comments {
-				if user, ok := userMap[*comment.UserID]; ok {
-					comment.User = user
-				}
-			}
+			FillCommentUsers(ctx, comments)
 		}
 
 		res.Comments = comments
@@ -259,6 +219,52 @@ func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageS
 	res.HasPreviousPage = currentPage > 1
 
 	return &res, nil
+}
+
+func (r *queryResolver) Replies(ctx context.Context, commentID string, repliesLength *int) ([]*model.Comment, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedCommentID, err := primitive.ObjectIDFromHex(commentID)
+	if err != nil {
+		return nil, err
+	}
+
+	filter := bson.M{
+		"replyingToId": convertedCommentID,
+	}
+
+	limit := 10
+	if repliesLength != nil && *repliesLength > 0 {
+		limit = min(*repliesLength, 20)
+	}
+
+	coll := database.GetDB().GetCollection("comments")
+	comments, err := coll.Find(
+		ctx,
+		filter,
+		options.Find().
+			SetSort(bson.M{"createdAt": 1}).
+			SetLimit(int64(limit)).
+			SetProjection(GetCommentProjection(cc.UserID)),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	var res []*model.Comment
+	err = comments.All(ctx, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	if isFieldRequested(ctx, "user") && len(res) > 0 {
+		FillCommentUsers(ctx, res)
+	}
+
+	return res, nil
 }
 
 func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }

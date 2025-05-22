@@ -14,6 +14,7 @@ type CommentType = {
   dislikesCount: number;
   userReaction: string;
   replyingToId: string;
+  repliesCount: number;
 }
 
 const emptyComment: CommentType = {
@@ -29,6 +30,7 @@ const emptyComment: CommentType = {
   dislikesCount: 0,
   userReaction: "",
   replyingToId: "",
+  repliesCount: 0,
 }
 
 type CommentsPageType = {

@@ -358,6 +358,7 @@ const GET_COMMENTS_BY_REVIEW_ID = gql`
         dislikes
         dislikesCount
         userReaction
+        repliesCount
       }
     }
   }
@@ -388,6 +389,31 @@ const GET_REWIEW_BY_ID = gql`
 `;
 
 
+const GET_COMMENT_REPLIES = gql`
+  query Replies($commentId: String!, $repliesLength: Int) {
+    replies(commentId: $commentId, repliesLength: $repliesLength) {
+      _id
+      text
+      createdAt
+      updatedAt
+      user {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
+      likes
+      likesCount
+      dislikes
+      dislikesCount
+      userReaction
+      repliesCount
+    }
+}
+`;
+
+
 
 export { 
   GET_ALBUM_BY_ID,
@@ -407,4 +433,5 @@ export {
   ADD_LIKE_OR_DISLIKE_COMMENT,
   GET_COMMENTS_BY_REVIEW_ID,
   GET_REWIEW_BY_ID,
+  GET_COMMENT_REPLIES,
 };

@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
-import { REPORT_COMMENT } from '@/services/queries';
-import type { CommentType } from '@/types/comments';
+import { GET_COMMENT_REPLIES, REPORT_COMMENT } from '@/services/queries';
+import { emptyComment, type CommentType } from '@/types/comments';
+import { handleGqlError } from '@/utils/error';
 import { navigateToUser } from '@/utils/navigate';
-import { useMutation } from '@vue/apollo-composable';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import mitt from 'mitt';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { defineEmits } from 'vue';
+import { defineEmits, inject, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 
@@ -29,16 +31,19 @@ const props = defineProps({
     default: true,
     required: false
   },
+  nestedLevel: {
+    type: Number,
+    default: 0,
+    required: false
+  }
 });
-
-const emit = defineEmits<{
-  replyToComment: [id: string]
-}>()
-
 
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
+const emitter = inject<ReturnType<typeof mitt>>('emitter')
+
+let replies = ref<CommentType[]>([]);
 
 
 
@@ -76,8 +81,29 @@ const confirmReport = (event: any, commentID: string) => {
   });
 };
 
-const reply = (event: any, commentID: string) => {
-  emit('replyToComment', commentID);
+const reply = () => {
+  emitter?.emit('replyToComment', { comment: props.comment });
+};
+
+const fetchReplies = () => {
+  const { onError, onResult } = useQuery(
+    GET_COMMENT_REPLIES,
+    {
+      commentId: props.comment._id,
+    }
+  );
+
+  onError((err) => {
+    handleGqlError(router, err);
+  });
+
+  onResult((res: any) => {
+    if (res.loading) {
+      return;
+    } 
+
+    replies.value = res?.data?.replies;
+  })
 };
 
 </script>
@@ -109,7 +135,7 @@ const reply = (event: any, commentID: string) => {
           <ConfirmPopup></ConfirmPopup>
           <Button
             class="mr-2"
-            @click="reply($event, props.comment._id)"
+            @click="reply()"
             v-tooltip.bottom="`Reply to comment`" 
             icon="pi pi-reply"
             aria-label="Save"
@@ -131,8 +157,6 @@ const reply = (event: any, commentID: string) => {
       <div style="white-space: pre;">
         {{ props.comment.text }}
       </div>
-    </template>
-    <template #footer>
       <div v-if="props.showLikes" class="flex justify-content-between pt-4">
         <LikesDislikes
           :id="props.comment._id"
@@ -142,13 +166,32 @@ const reply = (event: any, commentID: string) => {
           :dislikesCount="props.comment.dislikesCount"
           :fontRemSize="0.7"
         />
+        <div class="text-xs text-neutral-500 ml-4">
+          {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? 'reply' : 'replies' }}
+        </div>
+      </div>
+    </template>
+    <template #footer>
+      <div v-if="props.comment.repliesCount > 0 && replies.length == 0" class="mt-2">
+        <span class="text-neutral-500 cursor-pointer" @click="fetchReplies">
+          View {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? 'reply' : 'replies' }}
+        </span>
+      </div>
+      <div v-if="replies.length > 0" class="mt-2">
+        <div v-for="reply in replies" :key="reply._id" class="nested-comment mb-2">
+          <Comment
+            :class="props.nestedLevel % 2 === 0 ? 'nested-comment' : ''"
+            :comment="reply"
+            :nested-level="props.nestedLevel + 1"
+          />
+        </div>
       </div>
     </template>
   </Card>
 
 </template>
 
-<style scoped>
+<style>
 
 .bg-comment {
   background: var(--color-primary-light);
