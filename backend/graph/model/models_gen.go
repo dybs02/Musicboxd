@@ -228,19 +228,21 @@ type User struct {
 }
 
 type UserResponse struct {
-	ID              string                 `json:"_id" bson:"_id"`
-	Country         string                 `json:"country" bson:"country"`
-	DisplayName     string                 `json:"displayName" bson:"displayName"`
-	Email           string                 `json:"email" bson:"email"`
-	ExplicitContent *ExplicitContent       `json:"explicitContent" bson:"explicitContent"`
-	ExternalUrls    *ExternalUrls          `json:"externalUrls" bson:"externalUrls"`
-	Followers       *Followers             `json:"followers" bson:"followers"`
-	Href            string                 `json:"href" bson:"href"`
-	SpotifyID       string                 `json:"spotifyId" bson:"spotifyId"`
-	Images          []*Image               `json:"images" bson:"images"`
-	Product         string                 `json:"product" bson:"product"`
-	Type            string                 `json:"type" bson:"type"`
-	URI             string                 `json:"uri" bson:"uri"`
-	Role            string                 `json:"role" bson:"role"`
-	FavouriteAlbums []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
+	ID                 string                 `json:"_id" bson:"_id"`
+	Country            string                 `json:"country" bson:"country"`
+	DisplayName        string                 `json:"displayName" bson:"displayName"`
+	Email              string                 `json:"email" bson:"email"`
+	ExplicitContent    *ExplicitContent       `json:"explicitContent" bson:"explicitContent"`
+	ExternalUrls       *ExternalUrls          `json:"externalUrls" bson:"externalUrls"`
+	Followers          *Followers             `json:"followers" bson:"followers"`
+	Href               string                 `json:"href" bson:"href"`
+	SpotifyID          string                 `json:"spotifyId" bson:"spotifyId"`
+	Images             []*Image               `json:"images" bson:"images"`
+	Product            string                 `json:"product" bson:"product"`
+	Type               string                 `json:"type" bson:"type"`
+	URI                string                 `json:"uri" bson:"uri"`
+	Role               string                 `json:"role" bson:"role"`
+	FavouriteAlbums    []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
+	TrackReviewsNumber *int                   `json:"trackReviewsNumber,omitempty" bson:"trackReviewsNumber,omitempty"`
+	AlbumReviewsNumber *int                   `json:"albumReviewsNumber,omitempty" bson:"albumReviewsNumber,omitempty"`
 }

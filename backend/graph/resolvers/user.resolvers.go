@@ -115,5 +115,22 @@ func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.UserRes
 		return nil, err
 	}
 
+	if isFieldRequested(ctx, "albumReviewsNumber") || isFieldRequested(ctx, "trackReviewsNumber") {
+		convertedID, err := primitive.ObjectIDFromHex(res.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		counts, err := GetUserReviewNumbers(ctx, convertedID)
+		if err != nil {
+			return nil, err
+		}
+
+		albumReviews := int(counts.AlbumReviews)
+		trackReviews := int(counts.TrackReviews)
+		res.AlbumReviewsNumber = &albumReviews
+		res.TrackReviewsNumber = &trackReviews
+	}
+
 	return &res, nil
 }

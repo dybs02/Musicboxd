@@ -83,7 +83,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 		options.FindOneAndUpdate().
 			SetUpsert(true).
 			SetReturnDocument(options.After).
-			SetProjection(GetReviewProjection(cc.UserID)),
+			SetProjection(database.GetReviewProjection(cc.UserID)),
 	)
 	if review.Err() != nil {
 		return nil, review.Err()
@@ -134,7 +134,7 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		ctx,
 		bson.M{"itemId": itemID, "userId": convertedID},
 		options.FindOne().
-			SetProjection(GetReviewProjection(cc.UserID)),
+			SetProjection(database.GetReviewProjection(cc.UserID)),
 	)
 	if review.Err() != nil {
 		return nil, review.Err()
@@ -187,7 +187,7 @@ func (r *queryResolver) ReviewByID(ctx context.Context, reviewID string) (*model
 		ctx,
 		bson.M{"_id": convertedReviewID},
 		options.FindOne().
-			SetProjection(GetReviewProjection(cc.UserID)),
+			SetProjection(database.GetReviewProjection(cc.UserID)),
 	)
 	if review.Err() != nil {
 		return nil, review.Err()

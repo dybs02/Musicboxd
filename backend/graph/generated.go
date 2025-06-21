@@ -285,21 +285,23 @@ type ComplexityRoot struct {
 	}
 
 	UserResponse struct {
-		Country         func(childComplexity int) int
-		DisplayName     func(childComplexity int) int
-		Email           func(childComplexity int) int
-		ExplicitContent func(childComplexity int) int
-		ExternalUrls    func(childComplexity int) int
-		FavouriteAlbums func(childComplexity int) int
-		Followers       func(childComplexity int) int
-		Href            func(childComplexity int) int
-		ID              func(childComplexity int) int
-		Images          func(childComplexity int) int
-		Product         func(childComplexity int) int
-		Role            func(childComplexity int) int
-		SpotifyID       func(childComplexity int) int
-		Type            func(childComplexity int) int
-		URI             func(childComplexity int) int
+		AlbumReviewsNumber func(childComplexity int) int
+		Country            func(childComplexity int) int
+		DisplayName        func(childComplexity int) int
+		Email              func(childComplexity int) int
+		ExplicitContent    func(childComplexity int) int
+		ExternalUrls       func(childComplexity int) int
+		FavouriteAlbums    func(childComplexity int) int
+		Followers          func(childComplexity int) int
+		Href               func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		Images             func(childComplexity int) int
+		Product            func(childComplexity int) int
+		Role               func(childComplexity int) int
+		SpotifyID          func(childComplexity int) int
+		TrackReviewsNumber func(childComplexity int) int
+		Type               func(childComplexity int) int
+		URI                func(childComplexity int) int
 	}
 }
 
@@ -1637,6 +1639,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.URI(childComplexity), true
 
+	case "UserResponse.albumReviewsNumber":
+		if e.complexity.UserResponse.AlbumReviewsNumber == nil {
+			break
+		}
+
+		return e.complexity.UserResponse.AlbumReviewsNumber(childComplexity), true
+
 	case "UserResponse.country":
 		if e.complexity.UserResponse.Country == nil {
 			break
@@ -1727,6 +1736,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserResponse.SpotifyID(childComplexity), true
+
+	case "UserResponse.trackReviewsNumber":
+		if e.complexity.UserResponse.TrackReviewsNumber == nil {
+			break
+		}
+
+		return e.complexity.UserResponse.TrackReviewsNumber(childComplexity), true
 
 	case "UserResponse.type":
 		if e.complexity.UserResponse.Type == nil {
@@ -4039,6 +4055,10 @@ func (ec *executionContext) fieldContext_Comment_user(_ context.Context, field g
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -5820,6 +5840,10 @@ func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -6823,6 +6847,10 @@ func (ec *executionContext) fieldContext_Query_userByDisplayName(ctx context.Con
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -6907,6 +6935,10 @@ func (ec *executionContext) fieldContext_Query_userById(ctx context.Context, fie
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -7584,6 +7616,10 @@ func (ec *executionContext) fieldContext_ReportedComment_reportedByUser(_ contex
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -8173,6 +8209,10 @@ func (ec *executionContext) fieldContext_Review_user(_ context.Context, field gr
 				return ec.fieldContext_UserResponse_role(ctx, field)
 			case "favouriteAlbums":
 				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -12271,6 +12311,88 @@ func (ec *executionContext) fieldContext_UserResponse_favouriteAlbums(_ context.
 	return fc, nil
 }
 
+func (ec *executionContext) _UserResponse_trackReviewsNumber(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TrackReviewsNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserResponse_trackReviewsNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserResponse_albumReviewsNumber(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AlbumReviewsNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserResponse_albumReviewsNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext___Directive_name(ctx, field)
 	if err != nil {
@@ -15873,6 +15995,10 @@ func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "trackReviewsNumber":
+			out.Values[i] = ec._UserResponse_trackReviewsNumber(ctx, field, obj)
+		case "albumReviewsNumber":
+			out.Values[i] = ec._UserResponse_albumReviewsNumber(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

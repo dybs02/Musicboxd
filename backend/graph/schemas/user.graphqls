@@ -72,6 +72,8 @@ type UserResponse {
   uri: String!
   role: String!
   favouriteAlbums: [FavouriteAlbumEntry]!
+  trackReviewsNumber: Int
+  albumReviewsNumber: Int
 }
 
 extend type Query {

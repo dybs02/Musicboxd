@@ -29,6 +29,11 @@ type AverageRating struct {
 	Count         int     `bson:"count"`
 }
 
+type UserReviewNumbers struct {
+	AlbumReviews int64 `json:"albumReviews"`
+	TrackReviews int64 `json:"trackComments"`
+}
+
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
 	ginContext := ctx.Value(middleware.GinContextKey)
 	if ginContext == nil {
@@ -117,76 +122,6 @@ func isFieldRequested(ctx context.Context, fieldName string) bool {
 	return slices.Contains(fields, fieldName)
 }
 
-func GetReviewProjection(userID primitive.ObjectID) *bson.M {
-	return &bson.M{
-		// Calculate fields
-		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
-		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
-		"userReaction": bson.M{
-			"$cond": bson.A{
-				bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}}},
-				"like",
-				bson.M{
-					"$cond": bson.A{
-						bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}}},
-						"dislike",
-						"",
-					},
-				},
-			},
-		},
-		// Include most fields
-		"_id":         1,
-		"value":       1,
-		"itemId":      1,
-		"itemType":    1,
-		"title":       1,
-		"description": 1,
-		"userId":      1,
-		"user":        1,
-		"createdAt":   1,
-		"updatedAt":   1,
-		// TODO Add this as a function parameter to not query if not needed
-		"commentIds": 1,
-		"album":      1,
-		// Exclude likes and dislikes
-		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
-		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
-	}
-}
-
-func GetCommentProjection(userID primitive.ObjectID) *bson.M {
-	return &bson.M{
-		// Calculate fields
-		"repliesCount":  bson.M{"$size": bson.M{"$ifNull": bson.A{"$repliesIds", bson.A{}}}},
-		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
-		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
-		"userReaction": bson.M{
-			"$cond": bson.A{
-				bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}}},
-				"like",
-				bson.M{
-					"$cond": bson.A{
-						bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}}},
-						"dislike",
-						"",
-					},
-				},
-			},
-		},
-		// Include most fields
-		"_id":       1,
-		"reviewId":  1,
-		"userId":    1,
-		"text":      1,
-		"createdAt": 1,
-		"updatedAt": 1,
-		// Exclude likes and dislikes
-		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
-		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
-	}
-}
-
 func AddLikeDislike(ctx context.Context, userID primitive.ObjectID, itemID string, action string, collection string) (*mongo.SingleResult, error) {
 	if action != "like" && action != "dislike" {
 		return nil, errors.New("invalid action")
@@ -205,10 +140,10 @@ func AddLikeDislike(ctx context.Context, userID primitive.ObjectID, itemID strin
 
 	var projection *bson.M
 	if collection == "reviews" {
-		projection = GetReviewProjection(userID)
+		projection = database.GetReviewProjection(userID)
 	}
 	if collection == "comments" {
-		projection = GetCommentProjection(userID)
+		projection = database.GetCommentProjection(userID)
 	}
 	if projection == nil {
 		return nil, errors.New("invalid collection")
@@ -330,4 +265,26 @@ func FillCommentUsers(ctx context.Context, comments []*model.Comment) error {
 	}
 
 	return nil
+}
+
+func GetUserReviewNumbers(ctx context.Context, userID primitive.ObjectID) (*UserReviewNumbers, error) {
+	coll := database.GetDB().GetCollection("reviews")
+	counts := UserReviewNumbers{
+		AlbumReviews: 0,
+		TrackReviews: 0,
+	}
+
+	albumCount, err := coll.CountDocuments(ctx, bson.M{"userId": userID, "itemType": "album"})
+	if err != nil {
+		return nil, err
+	}
+	counts.AlbumReviews = albumCount
+
+	trackCount, err := coll.CountDocuments(ctx, bson.M{"userId": userID, "itemType": "track"})
+	if err != nil {
+		return nil, err
+	}
+	counts.TrackReviews = trackCount
+
+	return &counts, nil
 }

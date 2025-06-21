@@ -78,9 +78,19 @@ watch(() => route.params, fetch_data, { immediate: true })
         </div>
 
         <div class="flex flex-col items-center">
-          <span class="text-neutral-500">Total reviews:</span>
-          <!-- TODO add number of total reviews -->
-          <span class="text-3xl">12</span> 
+          <span class="text-neutral-500 text-xl">Total reviews:</span>
+          <div class="text-xl">
+            <span class="text-2xl"> {{ user.albumReviewsNumber }} </span> 
+            <span class="text-neutral-500 pl-2">
+              {{ user.albumReviewsNumber === 1 ? 'album' : 'albums' }}
+            </span> 
+          </div>
+          <div class="text-xl">
+            <span class="text-2xl"> {{ user.trackReviewsNumber }} </span> 
+            <span class="text-neutral-500 pl-2">
+              {{ user.trackReviewsNumber === 1 ? 'track' : 'tracks' }}
+            </span> 
+          </div>
         </div>
       </div>
     </template>

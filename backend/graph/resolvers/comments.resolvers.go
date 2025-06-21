@@ -189,7 +189,7 @@ func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageS
 				SetSort(bson.M{"createdAt": 1}).
 				SetSkip(int64(skip)).
 				SetLimit(int64(limit)).
-				SetProjection(GetCommentProjection(cc.UserID)),
+				SetProjection(database.GetCommentProjection(cc.UserID)),
 		)
 		if err != nil {
 			return nil, err
@@ -248,7 +248,7 @@ func (r *queryResolver) Replies(ctx context.Context, commentID string, repliesLe
 		options.Find().
 			SetSort(bson.M{"createdAt": 1}).
 			SetLimit(int64(limit)).
-			SetProjection(GetCommentProjection(cc.UserID)),
+			SetProjection(database.GetCommentProjection(cc.UserID)),
 	)
 	if err != nil {
 		return nil, err
