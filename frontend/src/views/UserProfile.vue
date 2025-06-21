@@ -11,6 +11,7 @@ import Card from 'primevue/card';
 import { getCountryName } from '@/utils/country';
 import FavouriteAlbums from '@/components/favouriteAlbums/FavouriteAlbums.vue';
 import Divider from 'primevue/divider';
+import Button from 'primevue/button';
 
 
 const route = useRoute();
@@ -67,7 +68,7 @@ watch(() => route.params, fetch_data, { immediate: true })
     
   <Card class="relative z-10 -mt-4"> 
     <template #header>
-      <div class="flex items-center gap-2 p-4">
+      <div class="flex items-center gap-2 px-8 pt-8">
         <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
         <div class="flex flex-col">
           <span class="text-3xl font-bold">{{ user.displayName }}</span>
@@ -78,18 +79,23 @@ watch(() => route.params, fetch_data, { immediate: true })
         </div>
 
         <div class="flex flex-col items-center">
-          <span class="text-neutral-500 text-xl">Total reviews:</span>
           <div class="text-xl">
             <span class="text-2xl"> {{ user.albumReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              {{ user.albumReviewsNumber === 1 ? 'album' : 'albums' }}
+              album {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
             </span> 
           </div>
           <div class="text-xl">
             <span class="text-2xl"> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              {{ user.trackReviewsNumber === 1 ? 'track' : 'tracks' }}
+              track {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
             </span> 
+          </div>
+          <div class="pt-2">
+            <Button severity="secondary" @click="() => router.push(`/diary/${user._id}`)">
+              {{ user.displayName }}'s diary
+              <i class="pi pi-external-link ml-1 cursor-pointer"></i>
+            </Button>
           </div>
         </div>
       </div>
