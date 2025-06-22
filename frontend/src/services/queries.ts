@@ -416,6 +416,54 @@ const GET_COMMENT_REPLIES = gql`
 `;
 
 
+const ADD_POST = gql`
+  mutation CreatePost($content: String!) {
+    createPost(content: $content) {
+      _id
+      content
+      createdAt
+      updatedAt
+      user {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
+      likesCount
+      dislikesCount
+      userReaction
+    }
+  }
+`;
+
+
+const GET_RECENT_POSTS = gql`
+  query GetRecentPost($pageSize: Int, $page: Int!, $type: String) {
+    getRecentPost(pageSize: $pageSize, page: $page, type: $type) {
+      totalPosts
+      totalPages
+      hasPreviousPage
+      hasNextPage
+      posts {
+        _id
+        content
+        createdAt
+        updatedAt
+        user {
+          _id
+          displayName
+          images {
+            url
+          }
+        }
+        likesCount
+        dislikesCount
+        userReaction
+      }
+    }
+  }
+`;
 
 export { 
   GET_ALBUM_BY_ID,
@@ -436,4 +484,6 @@ export {
   GET_COMMENTS_BY_REVIEW_ID,
   GET_REWIEW_BY_ID,
   GET_COMMENT_REPLIES,
+  ADD_POST,
+  GET_RECENT_POSTS,
 };

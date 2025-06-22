@@ -25,6 +25,8 @@ type User {
   tokens: Tokens
   role: String!
   favouriteAlbums: [FavouriteAlbumEntry]!
+  followingUsers: [ID]!
+  followerUsers: [ID]!
 }
 
 type ExplicitContent {
@@ -74,6 +76,8 @@ type UserResponse {
   favouriteAlbums: [FavouriteAlbumEntry]!
   trackReviewsNumber: Int
   albumReviewsNumber: Int
+  followingUsers: [ID]!
+  followerUsers: [ID]!
 }
 
 extend type Query {

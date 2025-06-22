@@ -95,7 +95,31 @@ type Image struct {
 type Mutation struct {
 }
 
+type Post struct {
+	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	Content       string        `json:"content" bson:"content"`
+	UserID        string        `json:"userId" bson:"userId"`
+	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	CreatedAt     time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+	CommentIds    []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
+	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
+	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
+	LikesCount    int           `json:"likesCount" bson:"likesCount"`
+	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
+	DislikesCount int           `json:"dislikesCount" bson:"dislikesCount"`
+	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
+}
+
 type Query struct {
+}
+
+type RecentPosts struct {
+	TotalPosts      int     `json:"totalPosts" bson:"totalPosts"`
+	TotalPages      int     `json:"totalPages" bson:"totalPages"`
+	HasPreviousPage bool    `json:"hasPreviousPage" bson:"hasPreviousPage"`
+	HasNextPage     bool    `json:"hasNextPage" bson:"hasNextPage"`
+	Posts           []*Post `json:"posts" bson:"posts"`
 }
 
 type RecentUserReviews struct {
@@ -225,6 +249,8 @@ type User struct {
 	Tokens          *Tokens                `json:"tokens,omitempty" bson:"tokens,omitempty"`
 	Role            string                 `json:"role" bson:"role"`
 	FavouriteAlbums []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
+	FollowingUsers  []*string              `json:"followingUsers" bson:"followingUsers"`
+	FollowerUsers   []*string              `json:"followerUsers" bson:"followerUsers"`
 }
 
 type UserResponse struct {
@@ -245,4 +271,6 @@ type UserResponse struct {
 	FavouriteAlbums    []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
 	TrackReviewsNumber *int                   `json:"trackReviewsNumber,omitempty" bson:"trackReviewsNumber,omitempty"`
 	AlbumReviewsNumber *int                   `json:"albumReviewsNumber,omitempty" bson:"albumReviewsNumber,omitempty"`
+	FollowingUsers     []*string              `json:"followingUsers" bson:"followingUsers"`
+	FollowerUsers      []*string              `json:"followerUsers" bson:"followerUsers"`
 }

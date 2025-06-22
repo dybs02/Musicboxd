@@ -41,6 +41,13 @@ const nav_items = ref([
       }
   },
   {
+      label: 'Posts',
+      icon: 'pi pi-send',
+      command: () => {
+        router.push({name: 'posts'});
+      }
+  },
+  {
       label: 'About',
       icon: 'pi pi-envelope',
       command: () => {
