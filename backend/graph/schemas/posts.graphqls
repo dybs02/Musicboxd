@@ -8,6 +8,7 @@ type Post {
   updatedAt: Time
   commentIds: [ID]
   comments: [Comment]
+  commentsNumber: Int!
 
   likes: [ID]
   likesCount: Int!

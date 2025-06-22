@@ -6,6 +6,7 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"musicboxd/database"
 	"musicboxd/graph"
@@ -17,13 +18,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text string, replyingToID *string) (*model.Comment, error) {
+func (r *mutationResolver) AddComment(ctx context.Context, itemID string, itemType string, text string, replyingToID *string) (*model.Comment, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
+	convertedItemID, err := primitive.ObjectIDFromHex(itemID)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 		"likes":      []interface{}{},
 		"dislikes":   []interface{}{},
 		"repliesIds": []interface{}{},
-		"reviewId":   convertedReviewID,
+		"itemId":     convertedItemID,
 		"userId":     cc.UserID,
 		"text":       text,
 		"updatedAt":  time.Now(),
@@ -60,7 +61,12 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 	}
 
 	res := model.Comment{}
-	err = coll.FindOne(ctx, bson.M{"_id": result.InsertedID}).Decode(&res)
+	err = coll.FindOne(
+		ctx,
+		bson.M{"_id": result.InsertedID},
+		options.FindOne().
+			SetProjection(database.GetCommentProjection(cc.UserID)),
+	).Decode(&res)
 	if err != nil {
 		return nil, err
 	}
@@ -70,10 +76,14 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 		return nil, err
 	}
 
-	coll = database.GetDB().GetCollection("reviews")
-	review := coll.FindOneAndUpdate(
+	if itemType != "reviews" && itemType != "posts" {
+		return nil, fmt.Errorf("invalid item type: %s", itemType)
+	}
+
+	coll = database.GetDB().GetCollection(itemType)
+	item := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{"_id": convertedReviewID},
+		bson.M{"_id": convertedItemID},
 		bson.M{
 			"$push": bson.M{
 				"commentIds": convertedCommentID,
@@ -83,8 +93,8 @@ func (r *mutationResolver) AddComment(ctx context.Context, reviewID string, text
 			SetReturnDocument(options.After),
 	)
 
-	if review.Err() != nil {
-		return nil, review.Err()
+	if item.Err() != nil {
+		return nil, item.Err()
 	}
 
 	if replyingToID != nil && *replyingToID != "" {
@@ -150,19 +160,19 @@ func (r *mutationResolver) AddLikeDislikeComment(ctx context.Context, commentID 
 	return &res, nil
 }
 
-func (r *queryResolver) CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error) {
+func (r *queryResolver) CommentsPage(ctx context.Context, itemID string, pageSize *int, page int) (*model.CommentsPage, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	convertedReviewID, err := primitive.ObjectIDFromHex(reviewID)
+	convertedItemID, err := primitive.ObjectIDFromHex(itemID)
 	if err != nil {
 		return nil, err
 	}
 
 	filter := bson.M{
-		"reviewId":     convertedReviewID,
+		"itemId":       convertedItemID,
 		"replyingToId": nil,
 	}
 	coll := database.GetDB().GetCollection("comments")

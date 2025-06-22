@@ -82,13 +82,13 @@ type ComplexityRoot struct {
 		Dislikes      func(childComplexity int) int
 		DislikesCount func(childComplexity int) int
 		ID            func(childComplexity int) int
+		ItemID        func(childComplexity int) int
 		Likes         func(childComplexity int) int
 		LikesCount    func(childComplexity int) int
 		Replies       func(childComplexity int) int
 		RepliesCount  func(childComplexity int) int
 		RepliesIds    func(childComplexity int) int
 		ReplyingToID  func(childComplexity int) int
-		ReviewID      func(childComplexity int) int
 		Text          func(childComplexity int) int
 		UpdatedAt     func(childComplexity int) int
 		User          func(childComplexity int) int
@@ -130,7 +130,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		AddComment            func(childComplexity int, reviewID string, text string, replyingToID *string) int
+		AddComment            func(childComplexity int, itemID string, itemType string, text string, replyingToID *string) int
 		AddLikeDislikeComment func(childComplexity int, commentID string, action string) int
 		AddLikeDislikePost    func(childComplexity int, postID string, action string) int
 		AddLikeDislikeReview  func(childComplexity int, reviewID string, action string) int
@@ -144,25 +144,26 @@ type ComplexityRoot struct {
 	}
 
 	Post struct {
-		CommentIds    func(childComplexity int) int
-		Comments      func(childComplexity int) int
-		Content       func(childComplexity int) int
-		CreatedAt     func(childComplexity int) int
-		Dislikes      func(childComplexity int) int
-		DislikesCount func(childComplexity int) int
-		ID            func(childComplexity int) int
-		Likes         func(childComplexity int) int
-		LikesCount    func(childComplexity int) int
-		UpdatedAt     func(childComplexity int) int
-		User          func(childComplexity int) int
-		UserID        func(childComplexity int) int
-		UserReaction  func(childComplexity int) int
+		CommentIds     func(childComplexity int) int
+		Comments       func(childComplexity int) int
+		CommentsNumber func(childComplexity int) int
+		Content        func(childComplexity int) int
+		CreatedAt      func(childComplexity int) int
+		Dislikes       func(childComplexity int) int
+		DislikesCount  func(childComplexity int) int
+		ID             func(childComplexity int) int
+		Likes          func(childComplexity int) int
+		LikesCount     func(childComplexity int) int
+		UpdatedAt      func(childComplexity int) int
+		User           func(childComplexity int) int
+		UserID         func(childComplexity int) int
+		UserReaction   func(childComplexity int) int
 	}
 
 	Query struct {
 		Album             func(childComplexity int, id string) int
 		AlbumsByIds       func(childComplexity int, ids []string) int
-		CommentsPage      func(childComplexity int, reviewID string, pageSize *int, page int) int
+		CommentsPage      func(childComplexity int, itemID string, pageSize *int, page int) int
 		GetRecentPost     func(childComplexity int, pageSize *int, page int, typeArg *string) int
 		RecentReviews     func(childComplexity int, number *int, itemType string) int
 		RecentUserReviews func(childComplexity int, pageSize *int, page int, itemType string, userID string) int
@@ -339,7 +340,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	AddComment(ctx context.Context, reviewID string, text string, replyingToID *string) (*model.Comment, error)
+	AddComment(ctx context.Context, itemID string, itemType string, text string, replyingToID *string) (*model.Comment, error)
 	AddLikeDislikeComment(ctx context.Context, commentID string, action string) (*model.Comment, error)
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
@@ -352,7 +353,7 @@ type MutationResolver interface {
 	UpdateCurrentUser(ctx context.Context, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) (*model.UserResponse, error)
 }
 type QueryResolver interface {
-	CommentsPage(ctx context.Context, reviewID string, pageSize *int, page int) (*model.CommentsPage, error)
+	CommentsPage(ctx context.Context, itemID string, pageSize *int, page int) (*model.CommentsPage, error)
 	Replies(ctx context.Context, commentID string, repliesLength *int) ([]*model.Comment, error)
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	GetRecentPost(ctx context.Context, pageSize *int, page int, typeArg *string) (*model.RecentPosts, error)
@@ -576,6 +577,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Comment.ID(childComplexity), true
 
+	case "Comment.itemId":
+		if e.complexity.Comment.ItemID == nil {
+			break
+		}
+
+		return e.complexity.Comment.ItemID(childComplexity), true
+
 	case "Comment.likes":
 		if e.complexity.Comment.Likes == nil {
 			break
@@ -617,13 +625,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Comment.ReplyingToID(childComplexity), true
-
-	case "Comment.reviewId":
-		if e.complexity.Comment.ReviewID == nil {
-			break
-		}
-
-		return e.complexity.Comment.ReviewID(childComplexity), true
 
 	case "Comment.text":
 		if e.complexity.Comment.Text == nil {
@@ -775,7 +776,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddComment(childComplexity, args["reviewId"].(string), args["text"].(string), args["replyingToId"].(*string)), true
+		return e.complexity.Mutation.AddComment(childComplexity, args["itemId"].(string), args["itemType"].(string), args["text"].(string), args["replyingToId"].(*string)), true
 
 	case "Mutation.addLikeDislikeComment":
 		if e.complexity.Mutation.AddLikeDislikeComment == nil {
@@ -911,6 +912,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Post.Comments(childComplexity), true
 
+	case "Post.commentsNumber":
+		if e.complexity.Post.CommentsNumber == nil {
+			break
+		}
+
+		return e.complexity.Post.CommentsNumber(childComplexity), true
+
 	case "Post.content":
 		if e.complexity.Post.Content == nil {
 			break
@@ -1022,7 +1030,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.CommentsPage(childComplexity, args["reviewId"].(string), args["pageSize"].(*int), args["page"].(int)), true
+		return e.complexity.Query.CommentsPage(childComplexity, args["itemId"].(string), args["pageSize"].(*int), args["page"].(int)), true
 
 	case "Query.getRecentPost":
 		if e.complexity.Query.GetRecentPost == nil {
@@ -2143,29 +2151,47 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Mutation_addComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addComment_argsReviewID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addComment_argsItemID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["reviewId"] = arg0
-	arg1, err := ec.field_Mutation_addComment_argsText(ctx, rawArgs)
+	args["itemId"] = arg0
+	arg1, err := ec.field_Mutation_addComment_argsItemType(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["text"] = arg1
-	arg2, err := ec.field_Mutation_addComment_argsReplyingToID(ctx, rawArgs)
+	args["itemType"] = arg1
+	arg2, err := ec.field_Mutation_addComment_argsText(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["replyingToId"] = arg2
+	args["text"] = arg2
+	arg3, err := ec.field_Mutation_addComment_argsReplyingToID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["replyingToId"] = arg3
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addComment_argsReviewID(
+func (ec *executionContext) field_Mutation_addComment_argsItemID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reviewId"))
-	if tmp, ok := rawArgs["reviewId"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
+	if tmp, ok := rawArgs["itemId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addComment_argsItemType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemType"))
+	if tmp, ok := rawArgs["itemType"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -2699,11 +2725,11 @@ func (ec *executionContext) field_Query_albumsByIds_argsIds(
 func (ec *executionContext) field_Query_commentsPage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_commentsPage_argsReviewID(ctx, rawArgs)
+	arg0, err := ec.field_Query_commentsPage_argsItemID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["reviewId"] = arg0
+	args["itemId"] = arg0
 	arg1, err := ec.field_Query_commentsPage_argsPageSize(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -2716,12 +2742,12 @@ func (ec *executionContext) field_Query_commentsPage_args(ctx context.Context, r
 	args["page"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Query_commentsPage_argsReviewID(
+func (ec *executionContext) field_Query_commentsPage_argsItemID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reviewId"))
-	if tmp, ok := rawArgs["reviewId"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("itemId"))
+	if tmp, ok := rawArgs["itemId"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -4347,8 +4373,8 @@ func (ec *executionContext) fieldContext_Comment__id(_ context.Context, field gr
 	return fc, nil
 }
 
-func (ec *executionContext) _Comment_reviewId(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Comment_reviewId(ctx, field)
+func (ec *executionContext) _Comment_itemId(ctx context.Context, field graphql.CollectedField, obj *model.Comment) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Comment_itemId(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -4361,7 +4387,7 @@ func (ec *executionContext) _Comment_reviewId(ctx context.Context, field graphql
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.ReviewID, nil
+		return obj.ItemID, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -4375,7 +4401,7 @@ func (ec *executionContext) _Comment_reviewId(ctx context.Context, field graphql
 	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Comment_reviewId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Comment_itemId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Comment",
 		Field:      field,
@@ -4888,8 +4914,8 @@ func (ec *executionContext) fieldContext_Comment_replies(_ context.Context, fiel
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -5265,8 +5291,8 @@ func (ec *executionContext) fieldContext_CommentsPage_comments(_ context.Context
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -5754,7 +5780,7 @@ func (ec *executionContext) _Mutation_addComment(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["reviewId"].(string), fc.Args["text"].(string), fc.Args["replyingToId"].(*string))
+		return ec.resolvers.Mutation().AddComment(rctx, fc.Args["itemId"].(string), fc.Args["itemType"].(string), fc.Args["text"].(string), fc.Args["replyingToId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5781,8 +5807,8 @@ func (ec *executionContext) fieldContext_Mutation_addComment(ctx context.Context
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -5870,8 +5896,8 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislikeComment(ctx cont
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -6083,6 +6109,8 @@ func (ec *executionContext) fieldContext_Mutation_createPost(ctx context.Context
 				return ec.fieldContext_Post_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Post_comments(ctx, field)
+			case "commentsNumber":
+				return ec.fieldContext_Post_commentsNumber(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -6166,6 +6194,8 @@ func (ec *executionContext) fieldContext_Mutation_updatePost(ctx context.Context
 				return ec.fieldContext_Post_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Post_comments(ctx, field)
+			case "commentsNumber":
+				return ec.fieldContext_Post_commentsNumber(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -6304,6 +6334,8 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislikePost(ctx context
 				return ec.fieldContext_Post_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Post_comments(ctx, field)
+			case "commentsNumber":
+				return ec.fieldContext_Post_commentsNumber(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -6988,8 +7020,8 @@ func (ec *executionContext) fieldContext_Post_comments(_ context.Context, field 
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -7020,6 +7052,50 @@ func (ec *executionContext) fieldContext_Post_comments(_ context.Context, field 
 				return ec.fieldContext_Comment_repliesIds(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Post_commentsNumber(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Post_commentsNumber(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CommentsNumber, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Post_commentsNumber(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7250,7 +7326,7 @@ func (ec *executionContext) _Query_commentsPage(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CommentsPage(rctx, fc.Args["reviewId"].(string), fc.Args["pageSize"].(*int), fc.Args["page"].(int))
+		return ec.resolvers.Query().CommentsPage(rctx, fc.Args["itemId"].(string), fc.Args["pageSize"].(*int), fc.Args["page"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -7344,8 +7420,8 @@ func (ec *executionContext) fieldContext_Query_replies(ctx context.Context, fiel
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -8766,6 +8842,8 @@ func (ec *executionContext) fieldContext_RecentPosts_posts(_ context.Context, fi
 				return ec.fieldContext_Post_commentIds(ctx, field)
 			case "comments":
 				return ec.fieldContext_Post_comments(ctx, field)
+			case "commentsNumber":
+				return ec.fieldContext_Post_commentsNumber(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -9166,8 +9244,8 @@ func (ec *executionContext) fieldContext_ReportedComment_comment(_ context.Conte
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -10089,8 +10167,8 @@ func (ec *executionContext) fieldContext_Review_comments(_ context.Context, fiel
 			switch field.Name {
 			case "_id":
 				return ec.fieldContext_Comment__id(ctx, field)
-			case "reviewId":
-				return ec.fieldContext_Comment_reviewId(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Comment_itemId(ctx, field)
 			case "userId":
 				return ec.fieldContext_Comment_userId(ctx, field)
 			case "user":
@@ -16279,8 +16357,8 @@ func (ec *executionContext) _Comment(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Comment")
 		case "_id":
 			out.Values[i] = ec._Comment__id(ctx, field, obj)
-		case "reviewId":
-			out.Values[i] = ec._Comment_reviewId(ctx, field, obj)
+		case "itemId":
+			out.Values[i] = ec._Comment_itemId(ctx, field, obj)
 		case "userId":
 			out.Values[i] = ec._Comment_userId(ctx, field, obj)
 		case "user":
@@ -16763,6 +16841,11 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			out.Values[i] = ec._Post_commentIds(ctx, field, obj)
 		case "comments":
 			out.Values[i] = ec._Post_comments(ctx, field, obj)
+		case "commentsNumber":
+			out.Values[i] = ec._Post_commentsNumber(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "likes":
 			out.Values[i] = ec._Post_likes(ctx, field, obj)
 		case "likesCount":

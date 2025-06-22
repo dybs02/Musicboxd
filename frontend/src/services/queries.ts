@@ -92,8 +92,8 @@ const CREATE_UPDATE_REWIEW_BY_ITEM_ID = gql`
 `;
 
 const ADD_COMMENT = gql`
-  mutation AddComment($reviewId: String!, $text: String!, $replyingToId: String) {
-    addComment(reviewId: $reviewId, text: $text, replyingToId: $replyingToId) {
+  mutation AddComment($itemId: String!, $itemType: String!, $text: String!, $replyingToId: String) {
+    addComment(itemId: $itemId, itemType: $itemType, text: $text, replyingToId: $replyingToId) {
       _id
       text
       createdAt
@@ -339,14 +339,14 @@ const ADD_LIKE_OR_DISLIKE_POST = gql`
 `
 
 
-const GET_COMMENTS_BY_REVIEW_ID = gql`
+const GET_COMMENTS_BY_ITEM_ID = gql`
   query commentsPage(
-    $reviewId: String!
+    $itemId: String!
     $pageSize: Int
     $page: Int!
   ) {
     commentsPage(
-      reviewId: $reviewId
+      itemId: $itemId
       pageSize: $pageSize
       page: $page
     ) {
@@ -357,6 +357,7 @@ const GET_COMMENTS_BY_REVIEW_ID = gql`
       comments {
         _id
         text
+        itemId
         createdAt
         updatedAt
         user {
@@ -468,6 +469,7 @@ const GET_RECENT_POSTS = gql`
             url
           }
         }
+        commentsNumber
         likesCount
         dislikesCount
         userReaction
@@ -493,7 +495,7 @@ export {
   ADD_LIKE_OR_DISLIKE_REVIEW,
   ADD_LIKE_OR_DISLIKE_COMMENT,
   ADD_LIKE_OR_DISLIKE_POST,
-  GET_COMMENTS_BY_REVIEW_ID,
+  GET_COMMENTS_BY_ITEM_ID,
   GET_REWIEW_BY_ID,
   GET_COMMENT_REPLIES,
   ADD_POST,

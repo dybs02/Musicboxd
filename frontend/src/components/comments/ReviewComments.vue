@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Comment from '@/components/comments/Comment.vue';
 import { useAuthStore } from '@/services/authStore';
-import { ADD_COMMENT, GET_COMMENTS_BY_REVIEW_ID } from '@/services/queries';
+import { ADD_COMMENT, GET_COMMENTS_BY_ITEM_ID } from '@/services/queries';
 import { emptyComment, emptyCommentsPage, type CommentsPageType, type CommentType } from '@/types/comments';
 import { handleGqlError } from '@/utils/error';
 import { Form } from '@primevue/forms';
@@ -41,9 +41,9 @@ let replyingToComment = ref<CommentType>(emptyComment);
 
 const fetch_comments = async () => {
   const { loading, onError, onResult } = useQuery(
-    GET_COMMENTS_BY_REVIEW_ID,
+    GET_COMMENTS_BY_ITEM_ID,
     {
-      reviewId: route.params.id,
+      itemId: route.params.id,
       pageSize: pageSize,
       page: 1,
     }
@@ -66,9 +66,9 @@ const fetch_comments = async () => {
 
 const change_page = async (event: PageState) => {
   const { onError, onResult } = useQuery(
-    GET_COMMENTS_BY_REVIEW_ID,
+    GET_COMMENTS_BY_ITEM_ID,
     {
-      reviewId: route.params.id,
+      itemId: route.params.id,
       pageSize: pageSize,
       page: event.page + 1,
     },
@@ -104,7 +104,8 @@ const submitComment = async () => {
     ADD_COMMENT,
     () => ({
       variables: {
-        reviewId: route.params.id,
+        itemId: route.params.id,
+        itemType: 'reviews',
         text: newComment.value.text,
         replyingToId: replyingToCommentId.value,
       },

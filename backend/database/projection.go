@@ -64,7 +64,7 @@ func GetCommentProjection(userID primitive.ObjectID) *bson.M {
 		},
 		// Include most fields
 		"_id":       1,
-		"reviewId":  1,
+		"itemId":    1,
 		"userId":    1,
 		"text":      1,
 		"createdAt": 1,
@@ -78,8 +78,9 @@ func GetCommentProjection(userID primitive.ObjectID) *bson.M {
 func GetPostProjection(userID primitive.ObjectID) *bson.M {
 	return &bson.M{
 		// Calculate fields
-		"likesCount":    bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
-		"dislikesCount": bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
+		"commentsNumber": bson.M{"$size": bson.M{"$ifNull": bson.A{"$commentIds", bson.A{}}}},
+		"likesCount":     bson.M{"$size": bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}},
+		"dislikesCount":  bson.M{"$size": bson.M{"$ifNull": bson.A{"$dislikes", bson.A{}}}},
 		"userReaction": bson.M{
 			"$cond": bson.A{
 				bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$likes", bson.A{}}}}},

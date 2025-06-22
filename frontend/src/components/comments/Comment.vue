@@ -110,7 +110,7 @@ const fetchReplies = () => {
 
 <template>
 
-  <Card class="bg-comment">
+  <Card :class="(props.nestedLevel % 2 === 0 ? 'custom-card' : '')">
     <template #title>
       <div class="flex mb-1">
         <div class="my-auto cursor-pointer" @click="navigateToUser(router, props.comment.user._id)">
@@ -180,7 +180,6 @@ const fetchReplies = () => {
       <div v-if="replies.length > 0" class="mt-2">
         <div v-for="reply in replies" :key="reply._id" class="nested-comment mb-2">
           <Comment
-            :class="props.nestedLevel % 2 === 0 ? 'nested-comment' : ''"
             :comment="reply"
             :nested-level="props.nestedLevel + 1"
           />
@@ -191,9 +190,9 @@ const fetchReplies = () => {
 
 </template>
 
-<style>
+<style scoped>
 
-.bg-comment {
+.custom-card  {
   background: var(--color-primary-light);
 }
 

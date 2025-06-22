@@ -1,3 +1,4 @@
+import type { CommentType } from "./comments";
 import { emptyUser, type UserType } from "./user";
 
 type PostType = {
@@ -6,6 +7,8 @@ type PostType = {
   user: UserType;
   createdAt: string;
   updatedAt: string;
+  comments: CommentType[];
+  commentsNumber: number;
   likesCount: number;
   dislikesCount: number;
   userReaction: string;
@@ -17,21 +20,12 @@ const emptyPost: PostType = {
   user: emptyUser,
   createdAt: "",
   updatedAt: "",
+  comments: [],
+  commentsNumber: 0,
   likesCount: 0,
   dislikesCount: 0,
   userReaction: "",
 };
-
-// const emptyPost: PostType = {
-//   _id: "y4787y82w37gh8",
-//   content: "Yooo just listend to this new track, it's fire!",
-//   user: emptyUser,
-//   createdAt: "2023-10-01T12:00:00Z",
-//   updatedAt: "2023-10-01T12:00:00Z",
-//   likesCount: 2,
-//   dislikesCount: 1,
-//   userReaction: "like",
-// };
 
 type RecentPostsType = {
   totalPosts: number;

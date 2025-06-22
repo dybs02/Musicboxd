@@ -37,7 +37,7 @@ type Albums struct {
 
 type Comment struct {
 	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
-	ReviewID      *string       `json:"reviewId,omitempty" bson:"reviewId,omitempty"`
+	ItemID        *string       `json:"itemId,omitempty" bson:"itemId,omitempty"`
 	UserID        *string       `json:"userId,omitempty" bson:"userId,omitempty"`
 	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
 	Text          *string       `json:"text,omitempty" bson:"text,omitempty"`
@@ -96,19 +96,20 @@ type Mutation struct {
 }
 
 type Post struct {
-	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
-	Content       string        `json:"content" bson:"content"`
-	UserID        string        `json:"userId" bson:"userId"`
-	User          *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
-	CreatedAt     time.Time     `json:"createdAt" bson:"createdAt"`
-	UpdatedAt     *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
-	CommentIds    []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
-	Comments      []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
-	Likes         []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
-	LikesCount    int           `json:"likesCount" bson:"likesCount"`
-	Dislikes      []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
-	DislikesCount int           `json:"dislikesCount" bson:"dislikesCount"`
-	UserReaction  *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
+	ID             *string       `json:"_id,omitempty" bson:"_id,omitempty"`
+	Content        string        `json:"content" bson:"content"`
+	UserID         string        `json:"userId" bson:"userId"`
+	User           *UserResponse `json:"user,omitempty" bson:"user,omitempty"`
+	CreatedAt      time.Time     `json:"createdAt" bson:"createdAt"`
+	UpdatedAt      *time.Time    `json:"updatedAt,omitempty" bson:"updatedAt,omitempty"`
+	CommentIds     []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
+	Comments       []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
+	CommentsNumber int           `json:"commentsNumber" bson:"commentsNumber"`
+	Likes          []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
+	LikesCount     int           `json:"likesCount" bson:"likesCount"`
+	Dislikes       []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`
+	DislikesCount  int           `json:"dislikesCount" bson:"dislikesCount"`
+	UserReaction   *string       `json:"userReaction,omitempty" bson:"userReaction,omitempty"`
 }
 
 type Query struct {

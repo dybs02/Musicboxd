@@ -134,7 +134,7 @@ watch(props, (newProps) => {
 
 <template>
 
-  <div class="flex my-auto text-neutral-500">
+  <div class="flex my-auto ">
     <div class="cursor-pointer" @click="addReaction('like')">
       <i v-if="userReaction==='like'" class="pi pi-thumbs-up-fill like-dislike-selected"></i>
       <i v-else class="pi pi-thumbs-up like-dislike"></i>
