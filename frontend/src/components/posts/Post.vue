@@ -63,7 +63,7 @@ const props = defineProps<{
         :userReaction="props.post.userReaction"
         :likesCount="props.post.likesCount"
         :dislikesCount="props.post.dislikesCount"
-        :fontRemSize="1.2"
+        :fontRemSize="1"
       />
     </template>
   </Card>

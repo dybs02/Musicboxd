@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ADD_LIKE_OR_DISLIKE_COMMENT, ADD_LIKE_OR_DISLIKE_REVIEW } from '@/services/queries';
+import { ADD_LIKE_OR_DISLIKE_COMMENT, ADD_LIKE_OR_DISLIKE_POST, ADD_LIKE_OR_DISLIKE_REVIEW } from '@/services/queries';
 import { handleGqlError } from '@/utils/error';
 import { useMutation } from '@vue/apollo-composable';
 import { ref, watch } from 'vue';
@@ -82,12 +82,44 @@ const addReactionComment = (reaction: string) => {
   addLikeDislike();
 };
 
+const addReactionPost = (reaction: string) => {
+  const { mutate: addLikeDislike, onError: onErrorAddLikeDislike, onDone: onDoneAddLikeDislike } = useMutation(
+    ADD_LIKE_OR_DISLIKE_POST,
+    () => ({
+      variables: {
+        postId: props.id,
+        action: reaction,
+      },
+    }
+  ));
+  
+  onErrorAddLikeDislike((err) => {
+    handleGqlError(router, err);
+  });
+  
+  onDoneAddLikeDislike((res: any) => {
+    if (res.loading) {
+      return;
+    }
+  
+    likesCount.value = res.data.addLikeDislikePost.likesCount;
+    dislikesCount.value = res.data.addLikeDislikePost.dislikesCount;
+    userReaction.value = res.data.addLikeDislikePost.userReaction;
+  })
+
+  addLikeDislike();
+};
+
+
 const addReaction = (reaction: string) => {
   if (props.idType === 'review') {
     addReactionReview(reaction);
   }
   if (props.idType === 'comment') {
     addReactionComment(reaction);
+  }
+  if (props.idType === 'post') {
+    addReactionPost(reaction);
   }
 };
 

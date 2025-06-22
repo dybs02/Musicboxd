@@ -145,6 +145,9 @@ func AddLikeDislike(ctx context.Context, userID primitive.ObjectID, itemID strin
 	if collection == "comments" {
 		projection = database.GetCommentProjection(userID)
 	}
+	if collection == "posts" {
+		projection = database.GetPostProjection(userID)
+	}
 	if projection == nil {
 		return nil, errors.New("invalid collection")
 	}

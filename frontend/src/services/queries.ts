@@ -328,6 +328,17 @@ const ADD_LIKE_OR_DISLIKE_COMMENT = gql`
 `
 
 
+const ADD_LIKE_OR_DISLIKE_POST = gql`
+  mutation addLikeDislikePost($postId: String!, $action: String!) {
+    addLikeDislikePost(postId: $postId, action: $action) {
+      likesCount
+      dislikesCount
+      userReaction
+    }
+  }
+`
+
+
 const GET_COMMENTS_BY_REVIEW_ID = gql`
   query commentsPage(
     $reviewId: String!
@@ -481,6 +492,7 @@ export {
   GET_RECENT_USER_REVIEWS_PAGINATION,
   ADD_LIKE_OR_DISLIKE_REVIEW,
   ADD_LIKE_OR_DISLIKE_COMMENT,
+  ADD_LIKE_OR_DISLIKE_POST,
   GET_COMMENTS_BY_REVIEW_ID,
   GET_REWIEW_BY_ID,
   GET_COMMENT_REPLIES,

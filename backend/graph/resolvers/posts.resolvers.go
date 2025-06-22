@@ -71,7 +71,23 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (string, e
 }
 
 func (r *mutationResolver) AddLikeDislikePost(ctx context.Context, postID string, action string) (*model.Post, error) {
-	panic(fmt.Errorf("not implemented: AddLikeDislikePost - addLikeDislikePost"))
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	post, err := AddLikeDislike(ctx, cc.UserID, postID, action, "posts")
+	if err != nil {
+		return nil, err
+	}
+
+	res := model.Post{}
+	err = post.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
 }
 
 func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page int, typeArg *string) (*model.RecentPosts, error) {
@@ -116,7 +132,8 @@ func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page i
 			options.Find().
 				SetSort(bson.M{"createdAt": -1}).
 				SetSkip(int64(skip)).
-				SetLimit(int64(limit)),
+				SetLimit(int64(limit)).
+				SetProjection(database.GetPostProjection(cc.UserID)),
 		)
 		if err != nil {
 			return nil, err
