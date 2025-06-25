@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LinkedReview from '@/components/posts/LinkedReview.vue';
 import Post from '@/components/posts/Post.vue';
 import { useAuthStore } from "@/services/authStore";
 import { ADD_POST, GET_RECENT_POSTS, GET_REWIEW_BY_ID_POST_LINK } from "@/services/queries";
@@ -188,38 +189,12 @@ watch(() => route.params, fetch_data, { immediate: true })
             <label for="on_label">Your post</label>
           </FloatLabel>
         </Form>
-        <div>
-          <Card v-if="showLinkedReview && linkedReview._id !== ''" class="mt-4" style="background: var(--color-primary-light);">
-            <template #header>
-              <div class="flex items-center ml-4 mt-4">
-                <i class="pi pi-bookmark mr-2"></i>
-                <span class="text-lg">Linked Review by</span>
-                <div class="ml-2 flex items-center">
-                  <Avatar :image="linkedReview.user.images[0].url" class="mr-2" size="normal" shape="circle" />
-                  <span class="font-bold">{{ linkedReview.user.displayName }}</span>
-                </div>
-                <div class="ml-auto mr-4">
-                  <Button
-                    @click="removeLinkedReview"
-                    v-tooltip.bottom="`Remove linked review`" 
-                    icon="pi pi-times"
-                    aria-label="remove-review"
-                    severity="secondary"
-                    size="small"
-                  />
-                </div>
-              </div>
-            </template>
-            <template #content>
-              <div class="flex items-center">
-                <img :src="linkedReview.album.images[0].url" alt="Review Image" class="w-16 h-16 mr-4 rounded">
-                <div class="flex-1 min-w-0 break-words">
-                  <h3 class="text-xl font-bold block break-words">{{ linkedReview.title }}</h3>
-                  <div class="text-sm block">{{ linkedReview.description }}</div>
-                </div>
-              </div>
-            </template>
-          </Card>
+        <div v-if="showLinkedReview && linkedReview._id !== ''">
+          <LinkedReview
+            :review="linkedReview"
+            :showCloseButton="true"
+            @closeLinkedReview="removeLinkedReview"
+          />
         </div>
         <div class="flex justify-end mt-4">
           <Button type="submit" severity="secondary" label="Add Post" class="ml-2" @click="submitPost"/>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Comment from '@/components/comments/Comment.vue';
 import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
+import LinkedReview from '@/components/posts/LinkedReview.vue';
 import { ADD_COMMENT, GET_COMMENTS_BY_ITEM_ID } from '@/services/queries';
 import { emptyComment, emptyCommentsPage, type CommentsPageType, type CommentType } from '@/types/comments';
 import type { PostType } from '@/types/posts';
@@ -154,8 +155,10 @@ emitter?.on('replyToComment', async (e: any) => {
       </div>
       <!-- TODO -->
       <div v-if="props.post.linkedReview">
-        LinkedReview:
-        {{ props.post.linkedReview?.title }}
+        <LinkedReview
+          :review="props.post.linkedReview"
+          :showCloseButton="false"
+        />
       </div>
     </template>
     <template #footer>

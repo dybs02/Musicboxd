@@ -192,6 +192,30 @@ func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page i
 					post.LinkedReview = review
 				}
 			}
+
+			if isFieldRequested(ctx, "posts.linkedReview.user") {
+				userIDMap := make(map[string]bool)
+				for _, post := range posts {
+					if post.LinkedReview != nil && post.LinkedReview.UserID != "" {
+						if post.LinkedReview.UserID != "" {
+							userIDMap[post.UserID] = true
+						}
+					}
+				}
+
+				userMap, err := database.GetUsers(ctx, userIDMap)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get users: %w", err)
+				}
+
+				for _, post := range posts {
+					if post.LinkedReview != nil && post.LinkedReview.UserID != "" {
+						if user, ok := userMap[post.LinkedReview.UserID]; ok {
+							post.LinkedReview.User = user
+						}
+					}
+				}
+			}
 		}
 
 		res.Posts = posts
