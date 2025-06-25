@@ -1,4 +1,5 @@
 import type { CommentType } from "./comments";
+import type { ReviewType } from "./review";
 import { emptyUser, type UserType } from "./user";
 
 type PostType = {
@@ -12,6 +13,8 @@ type PostType = {
   likesCount: number;
   dislikesCount: number;
   userReaction: string;
+  linkedReviewId: string;
+  linkedReview?: ReviewType;
 }
 
 const emptyPost: PostType = {
@@ -25,6 +28,8 @@ const emptyPost: PostType = {
   likesCount: 0,
   dislikesCount: 0,
   userReaction: "",
+  linkedReviewId: "",
+  linkedReview: undefined,
 };
 
 type RecentPostsType = {

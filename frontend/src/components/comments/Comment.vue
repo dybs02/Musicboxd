@@ -154,7 +154,7 @@ const fetchReplies = () => {
       </div>
     </template>
     <template #content>
-      <div style="white-space: pre;">
+      <div class="flex-1 break-words">
         {{ props.comment.text }}
       </div>
       <div v-if="props.showLikes" class="flex justify-content-between pt-4">

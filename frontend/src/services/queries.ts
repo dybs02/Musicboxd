@@ -402,6 +402,30 @@ const GET_REWIEW_BY_ID = gql`
   }
 `;
 
+const GET_REWIEW_BY_ID_POST_LINK = gql`
+  query ReviewById($reviewId: String!) {
+    reviewById(reviewId: $reviewId) {
+      _id
+      value
+      title
+      itemType
+      description
+      user {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
+      album {
+        images {
+          url
+        }
+      }
+    }
+  }
+`;
+
 
 const GET_COMMENT_REPLIES = gql`
   query Replies($commentId: String!, $repliesLength: Int) {
@@ -429,8 +453,8 @@ const GET_COMMENT_REPLIES = gql`
 
 
 const ADD_POST = gql`
-  mutation CreatePost($content: String!) {
-    createPost(content: $content) {
+  mutation CreatePost($content: String!, $linkedReviewId: String) {
+    createPost(content: $content, linkedReviewId: $linkedReviewId) {
       _id
       content
       createdAt
@@ -473,6 +497,25 @@ const GET_RECENT_POSTS = gql`
         likesCount
         dislikesCount
         userReaction
+        linkedReview {
+          _id
+          value
+          title
+          itemType
+          description
+          user {
+            _id
+            displayName
+            images {
+              url
+            }
+          }
+          album {
+            images {
+              url
+            }
+          }
+        }
       }
     }
   }
@@ -497,6 +540,7 @@ export {
   ADD_LIKE_OR_DISLIKE_POST,
   GET_COMMENTS_BY_ITEM_ID,
   GET_REWIEW_BY_ID,
+  GET_REWIEW_BY_ID_POST_LINK,
   GET_COMMENT_REPLIES,
   ADD_POST,
   GET_RECENT_POSTS,

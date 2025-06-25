@@ -105,6 +105,8 @@ type Post struct {
 	CommentIds     []*string     `json:"commentIds,omitempty" bson:"commentIds,omitempty"`
 	Comments       []*Comment    `json:"comments,omitempty" bson:"comments,omitempty"`
 	CommentsNumber int           `json:"commentsNumber" bson:"commentsNumber"`
+	LinkedReviewID *string       `json:"linkedReviewId,omitempty" bson:"linkedReviewId,omitempty"`
+	LinkedReview   *Review       `json:"linkedReview,omitempty" bson:"linkedReview,omitempty"`
 	Likes          []*string     `json:"likes,omitempty" bson:"likes,omitempty"`
 	LikesCount     int           `json:"likesCount" bson:"likesCount"`
 	Dislikes       []*string     `json:"dislikes,omitempty" bson:"dislikes,omitempty"`

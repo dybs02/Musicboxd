@@ -135,7 +135,7 @@ type ComplexityRoot struct {
 		AddLikeDislikePost    func(childComplexity int, postID string, action string) int
 		AddLikeDislikeReview  func(childComplexity int, reviewID string, action string) int
 		CreateOrUpdateReview  func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
-		CreatePost            func(childComplexity int, content string) int
+		CreatePost            func(childComplexity int, content string, linkedReviewID *string) int
 		DeletePost            func(childComplexity int, id string) int
 		ReportComment         func(childComplexity int, id string) int
 		ResolveComment        func(childComplexity int, id string, status string, notes *string) int
@@ -154,6 +154,8 @@ type ComplexityRoot struct {
 		ID             func(childComplexity int) int
 		Likes          func(childComplexity int) int
 		LikesCount     func(childComplexity int) int
+		LinkedReview   func(childComplexity int) int
+		LinkedReviewID func(childComplexity int) int
 		UpdatedAt      func(childComplexity int) int
 		User           func(childComplexity int) int
 		UserID         func(childComplexity int) int
@@ -344,7 +346,7 @@ type MutationResolver interface {
 	AddLikeDislikeComment(ctx context.Context, commentID string, action string) (*model.Comment, error)
 	ReportComment(ctx context.Context, id string) (string, error)
 	ResolveComment(ctx context.Context, id string, status string, notes *string) (string, error)
-	CreatePost(ctx context.Context, content string) (*model.Post, error)
+	CreatePost(ctx context.Context, content string, linkedReviewID *string) (*model.Post, error)
 	UpdatePost(ctx context.Context, id string, content string) (*model.Post, error)
 	DeletePost(ctx context.Context, id string) (string, error)
 	AddLikeDislikePost(ctx context.Context, postID string, action string) (*model.Post, error)
@@ -836,7 +838,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreatePost(childComplexity, args["content"].(string)), true
+		return e.complexity.Mutation.CreatePost(childComplexity, args["content"].(string), args["linkedReviewId"].(*string)), true
 
 	case "Mutation.deletePost":
 		if e.complexity.Mutation.DeletePost == nil {
@@ -967,6 +969,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Post.LikesCount(childComplexity), true
+
+	case "Post.linkedReview":
+		if e.complexity.Post.LinkedReview == nil {
+			break
+		}
+
+		return e.complexity.Post.LinkedReview(childComplexity), true
+
+	case "Post.linkedReviewId":
+		if e.complexity.Post.LinkedReviewID == nil {
+			break
+		}
+
+		return e.complexity.Post.LinkedReviewID(childComplexity), true
 
 	case "Post.updatedAt":
 		if e.complexity.Post.UpdatedAt == nil {
@@ -2451,6 +2467,11 @@ func (ec *executionContext) field_Mutation_createPost_args(ctx context.Context, 
 		return nil, err
 	}
 	args["content"] = arg0
+	arg1, err := ec.field_Mutation_createPost_argsLinkedReviewID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["linkedReviewId"] = arg1
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_createPost_argsContent(
@@ -2463,6 +2484,19 @@ func (ec *executionContext) field_Mutation_createPost_argsContent(
 	}
 
 	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_createPost_argsLinkedReviewID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("linkedReviewId"))
+	if tmp, ok := rawArgs["linkedReviewId"]; ok {
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	var zeroVal *string
 	return zeroVal, nil
 }
 
@@ -6068,7 +6102,7 @@ func (ec *executionContext) _Mutation_createPost(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreatePost(rctx, fc.Args["content"].(string))
+		return ec.resolvers.Mutation().CreatePost(rctx, fc.Args["content"].(string), fc.Args["linkedReviewId"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -6111,6 +6145,10 @@ func (ec *executionContext) fieldContext_Mutation_createPost(ctx context.Context
 				return ec.fieldContext_Post_comments(ctx, field)
 			case "commentsNumber":
 				return ec.fieldContext_Post_commentsNumber(ctx, field)
+			case "linkedReviewId":
+				return ec.fieldContext_Post_linkedReviewId(ctx, field)
+			case "linkedReview":
+				return ec.fieldContext_Post_linkedReview(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -6196,6 +6234,10 @@ func (ec *executionContext) fieldContext_Mutation_updatePost(ctx context.Context
 				return ec.fieldContext_Post_comments(ctx, field)
 			case "commentsNumber":
 				return ec.fieldContext_Post_commentsNumber(ctx, field)
+			case "linkedReviewId":
+				return ec.fieldContext_Post_linkedReviewId(ctx, field)
+			case "linkedReview":
+				return ec.fieldContext_Post_linkedReview(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -6336,6 +6378,10 @@ func (ec *executionContext) fieldContext_Mutation_addLikeDislikePost(ctx context
 				return ec.fieldContext_Post_comments(ctx, field)
 			case "commentsNumber":
 				return ec.fieldContext_Post_commentsNumber(ctx, field)
+			case "linkedReviewId":
+				return ec.fieldContext_Post_linkedReviewId(ctx, field)
+			case "linkedReview":
+				return ec.fieldContext_Post_linkedReview(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -7096,6 +7142,128 @@ func (ec *executionContext) fieldContext_Post_commentsNumber(_ context.Context, 
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Post_linkedReviewId(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Post_linkedReviewId(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LinkedReviewID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOID2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Post_linkedReviewId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Post_linkedReview(ctx context.Context, field graphql.CollectedField, obj *model.Post) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Post_linkedReview(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LinkedReview, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Review)
+	fc.Result = res
+	return ec.marshalOReview2ᚖmusicboxdᚋgraphᚋmodelᚐReview(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Post_linkedReview(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Post",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Review__id(ctx, field)
+			case "value":
+				return ec.fieldContext_Review_value(ctx, field)
+			case "itemId":
+				return ec.fieldContext_Review_itemId(ctx, field)
+			case "itemType":
+				return ec.fieldContext_Review_itemType(ctx, field)
+			case "title":
+				return ec.fieldContext_Review_title(ctx, field)
+			case "description":
+				return ec.fieldContext_Review_description(ctx, field)
+			case "userId":
+				return ec.fieldContext_Review_userId(ctx, field)
+			case "user":
+				return ec.fieldContext_Review_user(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Review_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Review_updatedAt(ctx, field)
+			case "commentIds":
+				return ec.fieldContext_Review_commentIds(ctx, field)
+			case "comments":
+				return ec.fieldContext_Review_comments(ctx, field)
+			case "track":
+				return ec.fieldContext_Review_track(ctx, field)
+			case "album":
+				return ec.fieldContext_Review_album(ctx, field)
+			case "likes":
+				return ec.fieldContext_Review_likes(ctx, field)
+			case "likesCount":
+				return ec.fieldContext_Review_likesCount(ctx, field)
+			case "dislikes":
+				return ec.fieldContext_Review_dislikes(ctx, field)
+			case "dislikesCount":
+				return ec.fieldContext_Review_dislikesCount(ctx, field)
+			case "userReaction":
+				return ec.fieldContext_Review_userReaction(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
 	}
 	return fc, nil
@@ -8844,6 +9012,10 @@ func (ec *executionContext) fieldContext_RecentPosts_posts(_ context.Context, fi
 				return ec.fieldContext_Post_comments(ctx, field)
 			case "commentsNumber":
 				return ec.fieldContext_Post_commentsNumber(ctx, field)
+			case "linkedReviewId":
+				return ec.fieldContext_Post_linkedReviewId(ctx, field)
+			case "linkedReview":
+				return ec.fieldContext_Post_linkedReview(ctx, field)
 			case "likes":
 				return ec.fieldContext_Post_likes(ctx, field)
 			case "likesCount":
@@ -16846,6 +17018,10 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "linkedReviewId":
+			out.Values[i] = ec._Post_linkedReviewId(ctx, field, obj)
+		case "linkedReview":
+			out.Values[i] = ec._Post_linkedReview(ctx, field, obj)
 		case "likes":
 			out.Values[i] = ec._Post_likes(ctx, field, obj)
 		case "likesCount":
@@ -19691,6 +19867,13 @@ func (ec *executionContext) marshalOReportedComment2ᚖmusicboxdᚋgraphᚋmodel
 		return graphql.Null
 	}
 	return ec._ReportedComment(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOReview2ᚖmusicboxdᚋgraphᚋmodelᚐReview(ctx context.Context, sel ast.SelectionSet, v *model.Review) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Review(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOReviewAlbum2ᚖmusicboxdᚋgraphᚋmodelᚐReviewAlbum(ctx context.Context, sel ast.SelectionSet, v *model.ReviewAlbum) graphql.Marshaler {

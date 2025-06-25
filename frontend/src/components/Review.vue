@@ -14,10 +14,12 @@ import Textarea from 'primevue/textarea';
 import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
+import { useToast } from 'primevue/usetoast';
 
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const props = defineProps<{
   review: ReviewType;
   itemId: string;
@@ -62,7 +64,7 @@ updateReviewOnDone((res) => {
 
 const submitReview = () => {
   if (review.value.title == '' || review.value.description == '' || review.value.value == 0) {
-    // TODO add toast component - not updated
+    toast.add({ severity: 'warn', summary: `This is not a valid review`, life: 2000 });
     return;
   }
 
@@ -78,6 +80,15 @@ const submitReview = () => {
   updateReview();
 };
 
+const copyReviewLink = async () => {
+  const reviewUrl = `${window.location.origin}/review/${props.review._id}`;
+  navigator.clipboard.writeText(reviewUrl).then(() => {
+    toast.add({ severity: 'info', summary: `Link copied`, life: 1000 });
+  }).catch(err => {
+    console.error('Failed to copy: ', err);
+  });
+};
+
 const toggleEdit = () => {
   reviewEditable.value = !reviewEditable.value;
 };
@@ -90,12 +101,34 @@ const toggleEdit = () => {
   <div v-if="!reviewEditable">
     <Card>
       <template #title>
-        <span class="text-sm text-neutral-500"> 
-          Review by 
-          <a @click="navigateToUser(router, props.review.user._id)" class="cursor-pointer">
-            {{ props.review.user.displayName }}
-          </a>
-        </span>
+        <div class="flex justify-between">
+          <span class="text-sm text-neutral-500"> 
+            Review by 
+            <a @click="navigateToUser(router, props.review.user._id)" class="cursor-pointer">
+              {{ props.review.user.displayName }}
+            </a>
+          </span>
+          <div>
+            <Button
+              @click="copyReviewLink"
+              v-tooltip.bottom="`Copy review link`" 
+              icon="pi pi-link"
+              aria-label="Save"
+              severity="secondary"
+              size="small"
+              class="mr-2"
+            />
+            <!-- TODO -->
+            <Button
+              @click=""
+              v-tooltip.bottom="`Share review`" 
+              icon="pi pi-share-alt"
+              aria-label="share"
+              severity="secondary"
+              size="small"
+            />
+          </div>
+        </div>
       </template>
       <template #subtitle>
         <div class="flex mb-1">
@@ -108,8 +141,8 @@ const toggleEdit = () => {
             shape="circle"
             />
           </div>
-          <div>
-            <span class="text-2xl font-bold">
+          <div class="overflowing flex-1 min-w-0">
+            <span class="text-2xl font-bold block break-words">
               {{ props.review.title }}
             </span>
             <Rating v-model="props.review.value" :stars="5" readonly></Rating>
@@ -117,9 +150,9 @@ const toggleEdit = () => {
         </div>
       </template>
       <template #content>
-        <p class="m-0">
+        <div class="flex-1 break-words">
             {{ props.review.description }}
-        </p>
+        </div>
       </template>
       <template #footer>
         <div class="flex justify-between mt-2">

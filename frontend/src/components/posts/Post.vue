@@ -149,7 +149,14 @@ emitter?.on('replyToComment', async (e: any) => {
       </div>
     </template>
     <template #content>
-      <p>{{ props.post.content }}</p>
+      <div class="flex-1 break-words">
+        {{ props.post.content }}
+      </div>
+      <!-- TODO -->
+      <div v-if="props.post.linkedReview">
+        LinkedReview:
+        {{ props.post.linkedReview?.title }}
+      </div>
     </template>
     <template #footer>
       <div class="flex justify-between mt-4">

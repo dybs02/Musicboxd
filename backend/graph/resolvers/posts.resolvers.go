@@ -16,24 +16,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *mutationResolver) CreatePost(ctx context.Context, content string) (*model.Post, error) {
+func (r *mutationResolver) CreatePost(ctx context.Context, content string, linkedReviewID *string) (*model.Post, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	document := bson.M{
+		"content":   content,
+		"userId":    cc.UserID,
+		"createdAt": time.Now(),
+		"updatedAt": time.Now(),
+		"likes":     []interface{}{},
+		"dislikes":  []interface{}{},
+		"comments":  []interface{}{},
+	}
+
+	if linkedReviewID != nil {
+		document["linkedReviewId"] = *linkedReviewID
+	}
+
 	coll := database.GetDB().GetCollection("posts")
 	post, err := coll.InsertOne(
 		ctx,
-		bson.M{
-			"content":   content,
-			"userId":    cc.UserID,
-			"createdAt": time.Now(),
-			"updatedAt": time.Now(),
-			"likes":     []interface{}{},
-			"dislikes":  []interface{}{},
-			"comments":  []interface{}{},
-		},
+		document,
 		options.InsertOne(),
 	)
 	if err != nil {
@@ -161,6 +167,29 @@ func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page i
 			for _, post := range posts {
 				if user, ok := userMap[post.UserID]; ok {
 					post.User = user
+				}
+			}
+		}
+
+		if isFieldRequested(ctx, "posts.linkedReview") && len(posts) > 0 {
+			reviewsIDMap := make(map[string]bool)
+			for _, post := range posts {
+				if post.LinkedReviewID != nil && *post.LinkedReviewID != "" {
+					reviewsIDMap[*post.LinkedReviewID] = true
+				}
+			}
+
+			reviewMap, err := database.GetReviews(ctx, reviewsIDMap, cc.UserID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get reviews: %w", err)
+			}
+
+			for _, post := range posts {
+				if post.LinkedReviewID == nil || *post.LinkedReviewID == "" {
+					continue
+				}
+				if review, ok := reviewMap[*post.LinkedReviewID]; ok {
+					post.LinkedReview = review
 				}
 			}
 		}

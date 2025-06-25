@@ -1,28 +1,28 @@
 <script setup lang="ts">
-import DiaryReviewsList from '@/components/diary/DiaryReviewsList.vue';
-import { useAuthStore } from "@/services/authStore";
-import { ADD_POST, GET_RECENT_POSTS, GET_RECENT_USER_REVIEWS_PAGINATION } from "@/services/queries";
-import { emptyRecentUserReviews, type RecentUserReviewsType } from '@/types/review';
-import { handleGqlError } from '@/utils/error';
-import { useMutation, useQuery } from '@vue/apollo-composable';
-import Card from 'primevue/card';
-import Paginator, { type PageState } from 'primevue/paginator';
-import ProgressSpinner from 'primevue/progressspinner';
-import { ref, watch } from 'vue';
-import SelectButton from 'primevue/selectbutton';
-import { Form } from '@primevue/forms';
-import Button from 'primevue/button';
-import FloatLabel from "primevue/floatlabel";
-import Textarea from 'primevue/textarea';
-import { useRoute, useRouter } from 'vue-router';
-import Divider from 'primevue/divider';
-import { emptyRecentPosts, type RecentPostsType } from '@/types/posts';
 import Post from '@/components/posts/Post.vue';
+import { useAuthStore } from "@/services/authStore";
+import { ADD_POST, GET_RECENT_POSTS, GET_REWIEW_BY_ID_POST_LINK } from "@/services/queries";
+import { emptyRecentPosts, type RecentPostsType } from '@/types/posts';
+import { emptyReview, type ReviewType } from '@/types/review';
+import { handleGqlError } from '@/utils/error';
+import { Form } from '@primevue/forms';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import Avatar from 'primevue/avatar';
+import Button from 'primevue/button';
+import Card from 'primevue/card';
+import FloatLabel from "primevue/floatlabel";
+import ProgressSpinner from 'primevue/progressspinner';
+import SelectButton from 'primevue/selectbutton';
+import Textarea from 'primevue/textarea';
+import { useToast } from 'primevue/usetoast';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 
 
 const pageSize = 10;
@@ -37,7 +37,9 @@ let posts = ref<RecentPostsType>(emptyRecentPosts);
 let postsLoading = ref(true);
 
 const newPostContent = ref<string>('');
-
+let linkedReview = ref<ReviewType>(emptyReview);
+let linkedReviewLoading = ref(true);
+let showLinkedReview = ref(false);
 
 const fetch_posts = async () => {
   const { loading, onError, onResult } = useQuery(
@@ -71,12 +73,17 @@ const submitPost = async () => {
     return;
   }
 
+  let vars: { content: string; linkedReviewId?: string } = {
+    content: newPostContent.value,
+  }
+  if (linkedReview.value._id !== '' && linkedReview.value._id) {
+    vars.linkedReviewId = linkedReview.value._id
+  }
+
   const { mutate: addPost, error: addPostError, onDone: addPostOnDone } = useMutation(
     ADD_POST,
     () => ({
-      variables: {
-        content: newPostContent.value,
-      },
+      variables: vars,
     }
   ));
 
@@ -86,11 +93,62 @@ const submitPost = async () => {
 
   addPostOnDone(async (result) => {
     newPostContent.value = '';
+    removeLinkedReview();
     // TODO have a secondary posts component before the public ones?
   });
 
   addPost();
 }
+
+const fetch_rewiew = async (id: string) => {
+  const { onError, onResult } = useQuery(
+    GET_REWIEW_BY_ID_POST_LINK,
+    {
+      reviewId: id,
+    }
+  );
+
+  linkedReviewLoading.value = true;
+
+  onError((err) => {
+    handleGqlError(router, err, ["mongo: no documents in result"]);
+    toast.add({ severity: 'warn', summary: `This is not a valid review link`, life: 2000 });
+  });
+  
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+
+    linkedReview.value = res?.data?.reviewById;
+    linkedReviewLoading.value = false;
+  });
+};
+
+watch(newPostContent, async (content) => {
+  const match = content.match(new RegExp(`${window.location.origin}/review/[a-f\\d]{24}`, 'i'))
+  if (!match) {
+    return;
+  }
+  
+  const reviewLink = match[0];
+  const reviewId = reviewLink.split('/').pop();
+
+  if (!reviewId) {
+    return;
+  }
+
+  await fetch_rewiew(reviewId);
+
+  newPostContent.value = content.replace(reviewLink, ``);
+  toast.add({ severity: 'info', summary: `Review link added`, life: 1000 });
+  showLinkedReview.value = true;
+});
+
+const removeLinkedReview = () => {
+  linkedReview.value = emptyReview;
+  showLinkedReview.value = false;
+};
 
 
 const fetch_data = async () => {
@@ -129,20 +187,50 @@ watch(() => route.params, fetch_data, { immediate: true })
             <Textarea v-model="newPostContent" id="over_label" rows="4" class="w-full" />
             <label for="on_label">Your post</label>
           </FloatLabel>
-          <div class="flex justify-end mt-4">
-            <Button type="submit" severity="secondary" label="Add Post" class="ml-2" @click="submitPost"/>
-          </div>
         </Form>
+        <div>
+          <Card v-if="showLinkedReview && linkedReview._id !== ''" class="mt-4" style="background: var(--color-primary-light);">
+            <template #header>
+              <div class="flex items-center ml-4 mt-4">
+                <i class="pi pi-bookmark mr-2"></i>
+                <span class="text-lg">Linked Review by</span>
+                <div class="ml-2 flex items-center">
+                  <Avatar :image="linkedReview.user.images[0].url" class="mr-2" size="normal" shape="circle" />
+                  <span class="font-bold">{{ linkedReview.user.displayName }}</span>
+                </div>
+                <div class="ml-auto mr-4">
+                  <Button
+                    @click="removeLinkedReview"
+                    v-tooltip.bottom="`Remove linked review`" 
+                    icon="pi pi-times"
+                    aria-label="remove-review"
+                    severity="secondary"
+                    size="small"
+                  />
+                </div>
+              </div>
+            </template>
+            <template #content>
+              <div class="flex items-center">
+                <img :src="linkedReview.album.images[0].url" alt="Review Image" class="w-16 h-16 mr-4 rounded">
+                <div class="flex-1 min-w-0 break-words">
+                  <h3 class="text-xl font-bold block break-words">{{ linkedReview.title }}</h3>
+                  <div class="text-sm block">{{ linkedReview.description }}</div>
+                </div>
+              </div>
+            </template>
+          </Card>
+        </div>
+        <div class="flex justify-end mt-4">
+          <Button type="submit" severity="secondary" label="Add Post" class="ml-2" @click="submitPost"/>
+        </div>
       </template>
     </Card>
   
     <div v-for="post in posts.posts" :key="post._id" class="mt-4">
-
       <Post
         :post="post"
       />
-      <!-- {{ post.content }} -->
-      <!-- {{ post.content }} - {{ post.user.displayName }} -->
     </div>
   </div>
 

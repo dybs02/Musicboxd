@@ -9,6 +9,8 @@ type Post {
   commentIds: [ID]
   comments: [Comment]
   commentsNumber: Int!
+  linkedReviewId: ID
+  linkedReview: Review
 
   likes: [ID]
   likesCount: Int!
@@ -30,7 +32,7 @@ extend type Query {
 }
 
 extend type Mutation {
-  createPost(content: String!): Post!
+  createPost(content: String!, linkedReviewId: String): Post!
   updatePost(id: String!, content: String!): Post!
   deletePost(id: String!): ID!
   addLikeDislikePost(postId: String!, action: String!): Post!
