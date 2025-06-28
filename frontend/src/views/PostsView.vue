@@ -95,6 +95,13 @@ const submitPost = async () => {
   addPostOnDone(async (result) => {
     newPostContent.value = '';
     removeLinkedReview();
+
+    if (route.params.reviewId) {
+      router.push({name: 'posts'});
+    }
+
+    toast.add({ severity: 'success', summary: `Added new post`, life: 2000 });
+
     // TODO have a secondary posts component before the public ones?
   });
 
@@ -154,6 +161,11 @@ const removeLinkedReview = () => {
 
 const fetch_data = async () => {
   fetch_posts();
+
+  if (route.params.reviewId) {
+    await fetch_rewiew(route.params.reviewId as string);
+    showLinkedReview.value = true;
+  }
 };
 
 // TODO better waty to do this?

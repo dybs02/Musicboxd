@@ -89,6 +89,14 @@ const copyReviewLink = async () => {
   });
 };
 
+const shareReviewLinkInPost = async () => {
+  router.push({
+    name: 'post-share-review',
+    params: { reviewId: props.review._id }
+  });
+};
+
+
 const toggleEdit = () => {
   reviewEditable.value = !reviewEditable.value;
 };
@@ -120,7 +128,7 @@ const toggleEdit = () => {
             />
             <!-- TODO -->
             <Button
-              @click=""
+              @click="shareReviewLinkInPost"
               v-tooltip.bottom="`Share review`" 
               icon="pi pi-share-alt"
               aria-label="share"

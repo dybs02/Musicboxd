@@ -1,9 +1,14 @@
 <script setup lang="ts">
 import { type ReviewType } from '@/types/review';
+import { navigateToReview, navigateToUser } from '@/utils/navigate';
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import { defineEmits } from 'vue';
+import { useRouter } from 'vue-router';
+
+
+const router = useRouter();
 
 const props = defineProps({
   review: {
@@ -30,7 +35,7 @@ const emit = defineEmits<{
       <div class="flex items-center ml-4 mt-4">
         <i class="pi pi-bookmark mr-2"></i>
         <span class="text-lg">Linked Review by</span>
-        <div class="ml-2 flex items-center">
+        <div class="ml-2 flex items-center cursor-pointer" @click="navigateToUser(router, props.review.user._id)">
           <Avatar :image="props.review.user.images[0].url" class="mr-2" size="normal" shape="circle" />
           <span class="font-bold">{{ props.review.user.displayName }}</span>
         </div>
@@ -47,7 +52,7 @@ const emit = defineEmits<{
       </div>
     </template>
     <template #content>
-      <div class="flex items-center">
+      <div class="flex items-center cursor-pointer" @click="navigateToReview(router, props.review._id)">
         <img :src="props.review.album.images[0].url" alt="Review Image" class="w-16 h-16 mr-4 rounded">
         <div class="flex-1 min-w-0 break-words">
           <h3 class="text-xl font-bold block break-words">{{ props.review.title }}</h3>
