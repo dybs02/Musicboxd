@@ -3,12 +3,12 @@ import LinkedReview from '@/components/posts/LinkedReview.vue';
 import Post from '@/components/posts/Post.vue';
 import { useAuthStore } from "@/services/authStore";
 import { ADD_POST, GET_RECENT_POSTS, GET_REWIEW_BY_ID_POST_LINK } from "@/services/queries";
-import { emptyRecentPosts, type RecentPostsType } from '@/types/posts';
+import { emptyRecentPosts, type PostType, type RecentPostsType } from '@/types/posts';
 import { emptyReview, type ReviewType } from '@/types/review';
 import { handleGqlError } from '@/utils/error';
 import { Form } from '@primevue/forms';
 import { useMutation, useQuery } from '@vue/apollo-composable';
-import Avatar from 'primevue/avatar';
+import { useIntersectionObserver } from '@vueuse/core';
 import Button from 'primevue/button';
 import Card from 'primevue/card';
 import FloatLabel from "primevue/floatlabel";
@@ -16,9 +16,8 @@ import ProgressSpinner from 'primevue/progressspinner';
 import SelectButton from 'primevue/selectbutton';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
-import { ref, watch } from 'vue';
+import { ref, shallowRef, useTemplateRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 
 const store = useAuthStore();
 const route = useRoute();
@@ -26,6 +25,7 @@ const router = useRouter();
 const toast = useToast();
 
 
+let page = 1;
 const pageSize = 10;
 const filter = ref({ name: 'All', value: '' });
 const filterOptions = ref([
@@ -34,7 +34,12 @@ const filterOptions = ref([
   { name: 'User',      value: 'user' },
 ]);
 
+const root = useTemplateRef<HTMLElement>('root')
+const target = useTemplateRef<HTMLDivElement>('target')
+const targetIsVisible = shallowRef(false)
+
 let posts = ref<RecentPostsType>(emptyRecentPosts);
+const fetchedPosts = ref<PostType[]>([]);
 let postsLoading = ref(true);
 
 const newPostContent = ref<string>('');
@@ -47,7 +52,7 @@ const fetch_posts = async () => {
     GET_RECENT_POSTS,
     {
       pageSize: pageSize,
-      page: 1,
+      page: page,
       type: filter.value.value,
     }
   );
@@ -63,7 +68,9 @@ const fetch_posts = async () => {
       return;
     }
 
+    page += 1;
     posts.value = res?.data?.getRecentPost;
+    fetchedPosts.value.push(...res?.data?.getRecentPost.posts);
   })
 };
 
@@ -170,6 +177,33 @@ const fetch_data = async () => {
 
 // TODO better waty to do this?
 watch(() => route.params, fetch_data, { immediate: true })
+
+const onLoadMorePosts = () => {
+  if (postsLoading.value) {
+    return;
+  }
+
+  if (!posts.value.hasNextPage) {
+    return;
+  }
+
+  fetch_posts();
+};
+
+const { isActive, pause, resume } = useIntersectionObserver(
+  target,
+  ([entry]) => {
+    if (entry.isIntersecting) {
+      onLoadMorePosts();
+    }
+  },
+)
+
+watch(filter, (newFilter) => {
+  page = 1;
+  fetchedPosts.value = [];
+  fetch_posts();
+});
 </script>
 
 <template>
@@ -187,7 +221,7 @@ watch(() => route.params, fetch_data, { immediate: true })
     <ProgressSpinner />
   </div>
   
-  <div v-else>
+  <div v-else ref="root">
     <Card>
       <template #header>
         <div class="px-6 pt-4">
@@ -214,11 +248,17 @@ watch(() => route.params, fetch_data, { immediate: true })
       </template>
     </Card>
   
-    <div v-for="post in posts.posts" :key="post._id" class="mt-4">
+    <div v-for="post in fetchedPosts" :key="post._id" class="mt-4">
       <Post
         :post="post"
       />
     </div>
+
+    <div ref="target" class="mt-4 text-center">
+      <p>Loading more posts...</p>
+    </div>
+    <div ref="scrollTrigger" class="h-4"></div>
+  
   </div>
 
 
