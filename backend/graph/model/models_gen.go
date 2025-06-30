@@ -254,6 +254,8 @@ type User struct {
 	FavouriteAlbums []*FavouriteAlbumEntry `json:"favouriteAlbums" bson:"favouriteAlbums"`
 	FollowingUsers  []*string              `json:"followingUsers" bson:"followingUsers"`
 	FollowerUsers   []*string              `json:"followerUsers" bson:"followerUsers"`
+	IsFollowing     *bool                  `json:"isFollowing,omitempty" bson:"isFollowing,omitempty"`
+	IsFollower      *bool                  `json:"isFollower,omitempty" bson:"isFollower,omitempty"`
 }
 
 type UserResponse struct {
@@ -276,4 +278,6 @@ type UserResponse struct {
 	AlbumReviewsNumber *int                   `json:"albumReviewsNumber,omitempty" bson:"albumReviewsNumber,omitempty"`
 	FollowingUsers     []*string              `json:"followingUsers" bson:"followingUsers"`
 	FollowerUsers      []*string              `json:"followerUsers" bson:"followerUsers"`
+	IsFollowing        *bool                  `json:"isFollowing,omitempty" bson:"isFollowing,omitempty"`
+	IsFollower         *bool                  `json:"isFollower,omitempty" bson:"isFollower,omitempty"`
 }

@@ -31,6 +31,8 @@ type UserType = {
   favouriteAlbums: FavouriteAlbumEntryType[];
   trackReviewsNumber: number;
   albumReviewsNumber: number;
+  isFollowing: boolean;
+  isFollower: boolean;
 };
 
 const emptyUser: UserType = {
@@ -50,7 +52,9 @@ const emptyUser: UserType = {
   role: "",
   favouriteAlbums: [emptyFavouriteAlbumEntry],
   trackReviewsNumber: 0,
-  albumReviewsNumber: 0
+  albumReviewsNumber: 0,
+  isFollowing: false,
+  isFollower: false,
 };
 
 export type {

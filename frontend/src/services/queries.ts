@@ -230,6 +230,8 @@ const GET_USER_BY_ID = gql`
       }
       trackReviewsNumber
       albumReviewsNumber
+      isFollowing
+      isFollower
     }
   }
 `;
@@ -521,6 +523,27 @@ const GET_RECENT_POSTS = gql`
   }
 `;
 
+
+const FOLLOW_USER = gql`
+  mutation FollowUser($userId: String!) {
+    followUser(userId: $userId) {
+      isFollowing
+      isFollower
+    }
+  }
+`;
+
+
+const UNFOLLOW_USER = gql`
+  mutation UnfollowUser($userId: String!) {
+    unfollowUser(userId: $userId) {
+      isFollowing
+      isFollower
+    }
+  }
+`;
+
+
 export { 
   GET_ALBUM_BY_ID,
   SEARCH,
@@ -544,4 +567,6 @@ export {
   GET_COMMENT_REPLIES,
   ADD_POST,
   GET_RECENT_POSTS,
+  FOLLOW_USER,
+  UNFOLLOW_USER,
 };

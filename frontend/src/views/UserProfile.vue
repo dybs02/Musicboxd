@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { GET_USER_BY_ID } from '@/services/queries';
+import { FOLLOW_USER, GET_USER_BY_ID, UNFOLLOW_USER } from '@/services/queries';
 import { emptyUser, type UserType } from '@/types/user';
 import { handleGqlError } from '@/utils/error';
-import { useQuery } from '@vue/apollo-composable';
+import { useMutation, useQuery } from '@vue/apollo-composable';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Panel from 'primevue/panel';
@@ -21,12 +21,16 @@ const router = useRouter();
 let user = ref<UserType>(emptyUser);
 let userLoading = ref(true);
 
+let unfollowButtonText = ref("Unfollow");
 
 const fetch_user = async () => {
   const { loading, error, result } = useQuery(
     GET_USER_BY_ID,
     {
       id: route.params.id,
+    },
+    {
+      fetchPolicy: 'cache-and-network'
     }
   );
 
@@ -36,9 +40,66 @@ const fetch_user = async () => {
     handleGqlError(router, err);
   });
 
-  user = computed<UserType>(() => result?.value?.userById ?? emptyUser);
+  watch(result, (newResult) => {
+    console.log("User data fetched:", newResult);
+    if (newResult?.userById) {
+      user.value = newResult.userById;
+    }
+
+    unfollowButtonText.value = user.value.isFollowing ? "Following" : "Unfollow";
+  });
 };
 
+
+const followUser = async () => {
+  const { mutate: follow, error: followError, onDone: followOnDone } = useMutation(
+    FOLLOW_USER,
+    () => ({
+      variables: {
+        userId: route.params.id,
+      },
+    }
+  ));
+
+  watch(followError, (err) => {
+    handleGqlError(router, err);
+  });
+
+  followOnDone(async (result) => {
+    user.value = {
+      ...user.value,
+      isFollowing: result.data.followUser.isFollowing,
+      isFollower: result.data.followUser.isFollower
+    };
+  });
+
+  follow();
+}
+
+const unfollowUser = async () => {
+  const { mutate: unfollow, error: unfollowError, onDone: unfollowOnDone } = useMutation(
+    UNFOLLOW_USER,
+    () => ({
+      variables: {
+        userId: route.params.id,
+      },
+    }
+  ));
+
+  watch(unfollowError, (err) => {
+    handleGqlError(router, err);
+  });
+
+  unfollowOnDone(async (result) => {
+    user.value = {
+      ...user.value,
+      isFollowing: result.data.unfollowUser.isFollowing,
+      isFollower: result.data.unfollowUser.isFollower
+    };
+  });
+
+  unfollow();
+}
 
 const getFirstFavAlbumImageUrl = () => {
   return user.value.favouriteAlbums.find(entry => entry.key === 1)?.album?.images[0]?.url ?? "";
@@ -71,7 +132,22 @@ watch(() => route.params, fetch_data, { immediate: true })
       <div class="flex items-center gap-2 px-8 pt-8">
         <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
         <div class="flex flex-col">
-          <span class="text-3xl font-bold">{{ user.displayName }}</span>
+          <div class="flex items-center gap-2">
+            <span class="text-3xl font-bold">{{ user.displayName }}</span>
+            <div class="">
+              <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>Follow</Button>
+              <Button 
+                v-if="user.isFollowing" 
+                @click="unfollowUser" 
+                :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
+                outlined
+                @mouseenter="unfollowButtonText = 'Unfollow'"
+                @mouseleave="unfollowButtonText = 'Following'"
+              >
+                {{ unfollowButtonText }}
+              </Button>
+            </div>
+          </div>
           <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
         </div>
 

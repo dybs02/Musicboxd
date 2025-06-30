@@ -3,22 +3,33 @@ package database
 import (
 	"context"
 	"musicboxd/graph/model"
+	"musicboxd/hlp/jwt"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // TODO replace all ocurences of getting user by ID with this function
 // TODO add user projection to not query following and followers
 func GetUserByPrimitiveID(ctx context.Context, userID primitive.ObjectID) (*model.UserResponse, error) {
+	cc, err := jwt.ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	coll := GetDB().GetCollection("users")
-	user := coll.FindOne(ctx, bson.M{"_id": userID})
+	user := coll.FindOne(
+		ctx,
+		bson.M{"_id": userID},
+		options.FindOne().SetProjection(GetUserProjection(cc.UserID)),
+	)
 	if user.Err() != nil {
 		return nil, user.Err()
 	}
 
 	u := model.UserResponse{}
-	err := user.Decode(&u)
+	err = user.Decode(&u)
 	if err != nil {
 		return nil, err
 	}

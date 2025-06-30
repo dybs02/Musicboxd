@@ -137,8 +137,10 @@ type ComplexityRoot struct {
 		CreateOrUpdateReview  func(childComplexity int, itemID string, itemType string, title *string, description *string, value *int) int
 		CreatePost            func(childComplexity int, content string, linkedReviewID *string) int
 		DeletePost            func(childComplexity int, id string) int
+		FollowUser            func(childComplexity int, userID string) int
 		ReportComment         func(childComplexity int, id string) int
 		ResolveComment        func(childComplexity int, id string, status string, notes *string) int
+		UnfollowUser          func(childComplexity int, userID string) int
 		UpdateCurrentUser     func(childComplexity int, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) int
 		UpdatePost            func(childComplexity int, id string, content string) int
 	}
@@ -310,6 +312,8 @@ type ComplexityRoot struct {
 		Href            func(childComplexity int) int
 		ID              func(childComplexity int) int
 		Images          func(childComplexity int) int
+		IsFollower      func(childComplexity int) int
+		IsFollowing     func(childComplexity int) int
 		Product         func(childComplexity int) int
 		Role            func(childComplexity int) int
 		SpotifyID       func(childComplexity int) int
@@ -332,6 +336,8 @@ type ComplexityRoot struct {
 		Href               func(childComplexity int) int
 		ID                 func(childComplexity int) int
 		Images             func(childComplexity int) int
+		IsFollower         func(childComplexity int) int
+		IsFollowing        func(childComplexity int) int
 		Product            func(childComplexity int) int
 		Role               func(childComplexity int) int
 		SpotifyID          func(childComplexity int) int
@@ -353,6 +359,8 @@ type MutationResolver interface {
 	CreateOrUpdateReview(ctx context.Context, itemID string, itemType string, title *string, description *string, value *int) (*model.Review, error)
 	AddLikeDislikeReview(ctx context.Context, reviewID string, action string) (*model.Review, error)
 	UpdateCurrentUser(ctx context.Context, displayName *string, favouriteAlbum *model.FavouriteAlbumEntryInput) (*model.UserResponse, error)
+	FollowUser(ctx context.Context, userID string) (*model.UserResponse, error)
+	UnfollowUser(ctx context.Context, userID string) (*model.UserResponse, error)
 }
 type QueryResolver interface {
 	CommentsPage(ctx context.Context, itemID string, pageSize *int, page int) (*model.CommentsPage, error)
@@ -852,6 +860,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeletePost(childComplexity, args["id"].(string)), true
 
+	case "Mutation.followUser":
+		if e.complexity.Mutation.FollowUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_followUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.FollowUser(childComplexity, args["userId"].(string)), true
+
 	case "Mutation.reportComment":
 		if e.complexity.Mutation.ReportComment == nil {
 			break
@@ -875,6 +895,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ResolveComment(childComplexity, args["id"].(string), args["status"].(string), args["notes"].(*string)), true
+
+	case "Mutation.unfollowUser":
+		if e.complexity.Mutation.UnfollowUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_unfollowUser_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UnfollowUser(childComplexity, args["userId"].(string)), true
 
 	case "Mutation.updateCurrentUser":
 		if e.complexity.Mutation.UpdateCurrentUser == nil {
@@ -1859,6 +1891,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.User.Images(childComplexity), true
 
+	case "User.isFollower":
+		if e.complexity.User.IsFollower == nil {
+			break
+		}
+
+		return e.complexity.User.IsFollower(childComplexity), true
+
+	case "User.isFollowing":
+		if e.complexity.User.IsFollowing == nil {
+			break
+		}
+
+		return e.complexity.User.IsFollowing(childComplexity), true
+
 	case "User.product":
 		if e.complexity.User.Product == nil {
 			break
@@ -1991,6 +2037,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.UserResponse.Images(childComplexity), true
+
+	case "UserResponse.isFollower":
+		if e.complexity.UserResponse.IsFollower == nil {
+			break
+		}
+
+		return e.complexity.UserResponse.IsFollower(childComplexity), true
+
+	case "UserResponse.isFollowing":
+		if e.complexity.UserResponse.IsFollowing == nil {
+			break
+		}
+
+		return e.complexity.UserResponse.IsFollowing(childComplexity), true
 
 	case "UserResponse.product":
 		if e.complexity.UserResponse.Product == nil {
@@ -2523,6 +2583,29 @@ func (ec *executionContext) field_Mutation_deletePost_argsID(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_followUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_followUser_argsUserID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_followUser_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+	if tmp, ok := rawArgs["userId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_reportComment_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -2602,6 +2685,29 @@ func (ec *executionContext) field_Mutation_resolveComment_argsNotes(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_unfollowUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_unfollowUser_argsUserID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["userId"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_unfollowUser_argsUserID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("userId"))
+	if tmp, ok := rawArgs["userId"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
 	return zeroVal, nil
 }
 
@@ -4563,6 +4669,10 @@ func (ec *executionContext) fieldContext_Comment_user(_ context.Context, field g
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -6674,6 +6784,10 @@ func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -6686,6 +6800,198 @@ func (ec *executionContext) fieldContext_Mutation_updateCurrentUser(ctx context.
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateCurrentUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_followUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_followUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().FollowUser(rctx, fc.Args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserResponse)
+	fc.Result = res
+	return ec.marshalOUserResponse2ᚖmusicboxdᚋgraphᚋmodelᚐUserResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_followUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_UserResponse__id(ctx, field)
+			case "country":
+				return ec.fieldContext_UserResponse_country(ctx, field)
+			case "displayName":
+				return ec.fieldContext_UserResponse_displayName(ctx, field)
+			case "email":
+				return ec.fieldContext_UserResponse_email(ctx, field)
+			case "explicitContent":
+				return ec.fieldContext_UserResponse_explicitContent(ctx, field)
+			case "externalUrls":
+				return ec.fieldContext_UserResponse_externalUrls(ctx, field)
+			case "followers":
+				return ec.fieldContext_UserResponse_followers(ctx, field)
+			case "href":
+				return ec.fieldContext_UserResponse_href(ctx, field)
+			case "spotifyId":
+				return ec.fieldContext_UserResponse_spotifyId(ctx, field)
+			case "images":
+				return ec.fieldContext_UserResponse_images(ctx, field)
+			case "product":
+				return ec.fieldContext_UserResponse_product(ctx, field)
+			case "type":
+				return ec.fieldContext_UserResponse_type(ctx, field)
+			case "uri":
+				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
+			case "favouriteAlbums":
+				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
+			case "followingUsers":
+				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
+			case "followerUsers":
+				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_followUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_unfollowUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_unfollowUser(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UnfollowUser(rctx, fc.Args["userId"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.UserResponse)
+	fc.Result = res
+	return ec.marshalOUserResponse2ᚖmusicboxdᚋgraphᚋmodelᚐUserResponse(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_unfollowUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_UserResponse__id(ctx, field)
+			case "country":
+				return ec.fieldContext_UserResponse_country(ctx, field)
+			case "displayName":
+				return ec.fieldContext_UserResponse_displayName(ctx, field)
+			case "email":
+				return ec.fieldContext_UserResponse_email(ctx, field)
+			case "explicitContent":
+				return ec.fieldContext_UserResponse_explicitContent(ctx, field)
+			case "externalUrls":
+				return ec.fieldContext_UserResponse_externalUrls(ctx, field)
+			case "followers":
+				return ec.fieldContext_UserResponse_followers(ctx, field)
+			case "href":
+				return ec.fieldContext_UserResponse_href(ctx, field)
+			case "spotifyId":
+				return ec.fieldContext_UserResponse_spotifyId(ctx, field)
+			case "images":
+				return ec.fieldContext_UserResponse_images(ctx, field)
+			case "product":
+				return ec.fieldContext_UserResponse_product(ctx, field)
+			case "type":
+				return ec.fieldContext_UserResponse_type(ctx, field)
+			case "uri":
+				return ec.fieldContext_UserResponse_uri(ctx, field)
+			case "role":
+				return ec.fieldContext_UserResponse_role(ctx, field)
+			case "favouriteAlbums":
+				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
+			case "trackReviewsNumber":
+				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
+			case "albumReviewsNumber":
+				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
+			case "followingUsers":
+				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
+			case "followerUsers":
+				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_unfollowUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6895,6 +7201,10 @@ func (ec *executionContext) fieldContext_Post_user(_ context.Context, field grap
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -8540,6 +8850,10 @@ func (ec *executionContext) fieldContext_Query_userByDisplayName(ctx context.Con
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -8632,6 +8946,10 @@ func (ec *executionContext) fieldContext_Query_userById(ctx context.Context, fie
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -9571,6 +9889,10 @@ func (ec *executionContext) fieldContext_ReportedComment_reportedByUser(_ contex
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -10168,6 +10490,10 @@ func (ec *executionContext) fieldContext_Review_user(_ context.Context, field gr
 				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
 			case "followerUsers":
 				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
+			case "isFollowing":
+				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
+			case "isFollower":
+				return ec.fieldContext_UserResponse_isFollower(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
 		},
@@ -13664,6 +13990,88 @@ func (ec *executionContext) fieldContext_User_followerUsers(_ context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _User_isFollowing(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_isFollowing(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFollowing, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_isFollowing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_isFollower(ctx context.Context, field graphql.CollectedField, obj *model.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_isFollower(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFollower, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_isFollower(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _UserResponse__id(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_UserResponse__id(ctx, field)
 	if err != nil {
@@ -14519,6 +14927,88 @@ func (ec *executionContext) fieldContext_UserResponse_followerUsers(_ context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserResponse_isFollowing(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_isFollowing(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFollowing, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserResponse_isFollowing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _UserResponse_isFollower(ctx context.Context, field graphql.CollectedField, obj *model.UserResponse) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UserResponse_isFollower(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsFollower, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_UserResponse_isFollower(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "UserResponse",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -16954,6 +17444,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateCurrentUser(ctx, field)
 			})
+		case "followUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_followUser(ctx, field)
+			})
+		case "unfollowUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_unfollowUser(ctx, field)
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18220,6 +18718,10 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "isFollowing":
+			out.Values[i] = ec._User_isFollowing(ctx, field, obj)
+		case "isFollower":
+			out.Values[i] = ec._User_isFollower(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -18343,6 +18845,10 @@ func (ec *executionContext) _UserResponse(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "isFollowing":
+			out.Values[i] = ec._UserResponse_isFollowing(ctx, field, obj)
+		case "isFollower":
+			out.Values[i] = ec._UserResponse_isFollower(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

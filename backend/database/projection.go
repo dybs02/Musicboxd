@@ -109,3 +109,39 @@ func GetPostProjection(userID primitive.ObjectID) *bson.M {
 		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array
 	}
 }
+
+func GetUserProjection(userID primitive.ObjectID) *bson.M {
+	return &bson.M{
+		// Calculate fields
+		"isFollowing": bson.M{"$cond": bson.A{
+			bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$followingUsers", bson.A{}}}}},
+			true,
+			false,
+		}},
+		"isFollower": bson.M{"$cond": bson.A{
+			bson.M{"$in": bson.A{userID, bson.M{"$ifNull": bson.A{"$followerUsers", bson.A{}}}}},
+			true,
+			false,
+		}},
+		// Include most fields
+		"_id":                1,
+		"country":            1,
+		"displayName":        1,
+		"email":              1,
+		"explicitContent":    1,
+		"externalUrls":       1,
+		"followers":          1,
+		"href":               1,
+		"spotifyId":          1,
+		"images":             1,
+		"product":            1,
+		"type":               1,
+		"uri":                1,
+		"role":               1,
+		"favouriteAlbums":    1,
+		"trackReviewsNumber": 1,
+		"albumReviewsNumber": 1,
+		"followingUsers":     1,
+		"followerUsers":      1,
+	}
+}
