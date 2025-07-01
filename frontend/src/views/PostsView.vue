@@ -54,6 +54,9 @@ const fetch_posts = async () => {
       pageSize: pageSize,
       page: page,
       type: filter.value.value,
+    },
+    {
+      fetchPolicy: 'cache-and-network'
     }
   );
 
@@ -70,7 +73,7 @@ const fetch_posts = async () => {
 
     page += 1;
     posts.value = res?.data?.getRecentPost;
-    fetchedPosts.value.push(...res?.data?.getRecentPost.posts);
+    fetchedPosts.value = [...fetchedPosts.value, ...res?.data?.getRecentPost.posts];
   })
 };
 
@@ -213,7 +216,7 @@ watch(filter, (newFilter) => {
     v-model="filter"
     :options="filterOptions"
     optionLabel="name"
-    @change="fetch_posts"
+    :allowEmpty=false
     />
   </div>
   

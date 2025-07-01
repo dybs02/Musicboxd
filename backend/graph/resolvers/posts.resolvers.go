@@ -104,7 +104,7 @@ func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page i
 
 	// Default to "all" type, which shows all posts
 	filter := bson.M{}
-	if *typeArg == "followers" {
+	if *typeArg == "following" {
 		following, err := database.GetFollowingIDs(ctx, cc.UserID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get following: %w", err)
