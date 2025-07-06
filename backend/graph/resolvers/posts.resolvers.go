@@ -198,7 +198,7 @@ func (r *queryResolver) GetRecentPost(ctx context.Context, pageSize *int, page i
 				for _, post := range posts {
 					if post.LinkedReview != nil && post.LinkedReview.UserID != "" {
 						if post.LinkedReview.UserID != "" {
-							userIDMap[post.UserID] = true
+							userIDMap[post.LinkedReview.UserID] = true
 						}
 					}
 				}
