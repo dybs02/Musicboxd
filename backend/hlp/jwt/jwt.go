@@ -69,17 +69,7 @@ func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
 	return gc, nil
 }
 
-func ValidateJWT(ctx context.Context) (*CustomClaims, error) {
-	ginCtx, err := GinContextFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	tokenString := ginCtx.GetHeader("Authorization")
-	if tokenString == "" {
-		return nil, err
-	}
-
+func ValidateJWT(tokenString string) (*CustomClaims, error) {
 	var claims CustomClaims
 
 	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
@@ -100,4 +90,18 @@ func ValidateJWT(ctx context.Context) (*CustomClaims, error) {
 	}
 
 	return &claims, nil
+}
+
+func ValidateJWTFromCtx(ctx context.Context) (*CustomClaims, error) {
+	ginCtx, err := GinContextFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	tokenString := ginCtx.GetHeader("Authorization")
+	if tokenString == "" {
+		return nil, fmt.Errorf("authorization header is missing")
+	}
+
+	return ValidateJWT(tokenString)
 }

@@ -92,6 +92,10 @@ type Image struct {
 	Width  *int   `json:"width,omitempty" bson:"width,omitempty"`
 }
 
+type Message struct {
+	TimeStamp time.Time `json:"timeStamp" bson:"timeStamp"`
+}
+
 type Mutation struct {
 }
 
@@ -193,6 +197,9 @@ type SimplifiedArtist struct {
 	Name         string        `json:"name" bson:"name"`
 	Type         string        `json:"type" bson:"type"`
 	URI          string        `json:"uri" bson:"uri"`
+}
+
+type Subscription struct {
 }
 
 type Tokens struct {

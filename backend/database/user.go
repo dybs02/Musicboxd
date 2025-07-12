@@ -13,7 +13,7 @@ import (
 // TODO replace all ocurences of getting user by ID with this function
 // TODO add user projection to not query following and followers
 func GetUserByPrimitiveID(ctx context.Context, userID primitive.ObjectID) (*model.UserResponse, error) {
-	cc, err := jwt.ValidateJWT(ctx)
+	cc, err := jwt.ValidateJWTFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}

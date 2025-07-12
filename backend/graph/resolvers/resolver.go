@@ -32,8 +32,17 @@ type UserReviewNumbers struct {
 	TrackReviews int64 `json:"trackComments"`
 }
 
+func ValidateJWTString(token string) (*jwt.CustomClaims, error) {
+	cc, err := jwt.ValidateJWT(token)
+	if err != nil {
+		return nil, err
+	}
+
+	return cc, nil
+}
+
 func ValidateJWT(ctx context.Context) (*jwt.CustomClaims, error) {
-	cc, err := jwt.ValidateJWT(ctx)
+	cc, err := jwt.ValidateJWTFromCtx(ctx)
 	if err != nil {
 		return nil, err
 	}

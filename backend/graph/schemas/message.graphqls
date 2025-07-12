@@ -1,0 +1,10 @@
+type Message {
+  # id: ID!
+  # sender: String!
+  # message: String!
+  timeStamp: Time!
+}
+
+extend type Subscription {
+  msg: Message!
+}

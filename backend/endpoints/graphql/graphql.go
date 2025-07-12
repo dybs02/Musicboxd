@@ -5,16 +5,45 @@ import (
 	"fmt"
 	"musicboxd/graph"
 	resolver "musicboxd/graph/resolvers"
+	"musicboxd/hlp"
+	"net/http"
+	"slices"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 func GraphqlHandler() gin.HandlerFunc {
-	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver.Resolver{}}))
+	h := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver.Resolver{}}))
+
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			origin := r.Header.Get("Origin")
+			if origin == r.Header.Get("Host") {
+				return true
+			}
+
+			// TODO Remove, after testing in production
+			fmt.Printf("Origin: %s, Host: %s\n", origin, r.Header.Get("Host"))
+			fmt.Printf("Allowed Origins: %v\n", hlp.Envs["FRONTEND_URL"])
+			return slices.Contains([]string{hlp.Envs["FRONTEND_URL"]}, origin)
+		},
+	}
+
+	h.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader:              upgrader,
+	})
+
+	h.AddTransport(transport.Options{})
+	h.AddTransport(transport.GET{})
+	h.AddTransport(transport.POST{})
 
 	// TODO Disable in production
 	h.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {

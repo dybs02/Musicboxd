@@ -6,6 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.56
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/gorilla/websocket v1.5.0
 	github.com/vektah/gqlparser/v2 v2.5.19
 	go.mongodb.org/mongo-driver v1.17.1
 	golang.org/x/oauth2 v0.23.0
@@ -27,7 +28,6 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
