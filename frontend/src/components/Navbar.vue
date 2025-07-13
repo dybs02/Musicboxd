@@ -48,10 +48,10 @@ const nav_items = ref([
       }
   },
   {
-      label: 'About',
+      label: 'Chat',
       icon: 'pi pi-envelope',
       command: () => {
-        router.push({name: 'about'});
+        router.push({name: 'chat'});
       }
   },
 ]);

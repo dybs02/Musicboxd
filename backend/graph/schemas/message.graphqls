@@ -1,10 +1,32 @@
+type Chat {
+  _id: ID!
+  name: String
+  participantsIds: [ID!]!
+  participants: [UserResponse!]!
+  participantId: ID!
+  participant: UserResponse!
+  messages: [Message!]!
+  createdAt: Time!
+}
+
 type Message {
-  # id: ID!
-  # sender: String!
-  # message: String!
-  timeStamp: Time!
+  _id: ID!
+  content: String!
+  senderId: ID!
+  sender: UserResponse
+  createdAt: Time!
+}
+
+extend type Query {
+  chat(participantId: ID!): Chat!
+}
+
+extend type Mutation {
+  # TODO this might be used for group chats in the future
+  # createChat(name: String, participantIds: [ID!]!): Chat!
+  sendMessage(chatId: ID!, content: String!): Message!
 }
 
 extend type Subscription {
-  msg: Message!
+  messageAdded(chatId: ID!): Message!
 }

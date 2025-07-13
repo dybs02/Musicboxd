@@ -67,7 +67,12 @@ const router = createRouter({
       path: '/posts/:reviewId',
       name: 'post-share-review',
       component: () => import('@/views/PostsView.vue')
-    }
+    },
+    {
+      path: '/chat',
+      name: 'chat',
+      component: () => import('@/views/ChatView.vue')
+    },
   ]
 })
 

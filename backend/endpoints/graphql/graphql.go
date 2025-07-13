@@ -15,6 +15,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
@@ -46,6 +47,7 @@ func GraphqlHandler() gin.HandlerFunc {
 	h.AddTransport(transport.POST{})
 
 	// TODO Disable in production
+	h.Use(extension.Introspection{})
 	h.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 		oc := graphql.GetOperationContext(ctx)
 		fmt.Printf("\n\n\nOperation: %s \n%s \n%s", oc.OperationName, oc.RawQuery, oc.Variables)

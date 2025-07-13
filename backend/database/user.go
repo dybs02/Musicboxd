@@ -96,3 +96,22 @@ func GetUsers(ctx context.Context, userIDMap map[string]bool) (map[string]*model
 
 	return userMap, nil
 }
+
+func GetUsersByIDs(ctx context.Context, userIDs *[]primitive.ObjectID) ([]*model.UserResponse, error) {
+	usersColl := GetDB().GetCollection("users")
+	usersCursor, err := usersColl.Find(
+		ctx,
+		bson.M{"_id": bson.M{"$in": &userIDs}},
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer usersCursor.Close(ctx)
+
+	var users []*model.UserResponse
+	if err = usersCursor.All(ctx, &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

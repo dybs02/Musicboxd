@@ -544,6 +544,47 @@ const UNFOLLOW_USER = gql`
 `;
 
 
+const SEND_MESSAGE = gql`
+  mutation SendMessage($chatId: ID!, $content: String!) {
+    sendMessage(chatId: $chatId, content: $content) {
+      _id
+      content
+      senderId
+      createdAt
+    }
+  }
+`;
+
+
+const CHAT_BY_PARTICIPANT = gql`
+  query Chat($participantId: ID!) {
+    chat(participantId: $participantId) {
+      _id
+      name
+      createdAt
+      messages {
+        _id
+        content
+        senderId
+        createdAt
+      }
+    }
+  }
+`;
+
+const CHAT_SUBSCRIPTION = gql`
+  subscription MessageAdded($chatId: ID!) {
+    messageAdded(chatId: $chatId) {
+      _id
+      content
+      senderId
+      createdAt
+    }
+  }
+`;
+
+
+
 export { 
   GET_ALBUM_BY_ID,
   SEARCH,
@@ -569,4 +610,7 @@ export {
   GET_RECENT_POSTS,
   FOLLOW_USER,
   UNFOLLOW_USER,
+  SEND_MESSAGE,
+  CHAT_BY_PARTICIPANT,
+  CHAT_SUBSCRIPTION,
 };

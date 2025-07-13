@@ -7,7 +7,6 @@ import ProgressSpinner from 'primevue/progressspinner';
 import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { handleGqlError } from '@/utils/error';
-import Chat from '@/components/chat/Chat.vue';
 
 
 const route = useRoute();
@@ -95,7 +94,6 @@ watch(() => route.params, fetch_data, { immediate: true })
   </div>
 
     <div v-else>
-    <Chat />
     <ReviewPanel
       :reviews="recentAlbumReviews"
       title="Recently added album reviews"

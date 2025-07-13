@@ -35,6 +35,17 @@ type Albums struct {
 	Items    []*Album `json:"items" bson:"items"`
 }
 
+type Chat struct {
+	ID              string          `json:"_id" bson:"_id"`
+	Name            *string         `json:"name,omitempty" bson:"name,omitempty"`
+	ParticipantsIds []string        `json:"participantsIds" bson:"participantsIds"`
+	Participants    []*UserResponse `json:"participants" bson:"participants"`
+	ParticipantID   string          `json:"participantId" bson:"participantId"`
+	Participant     *UserResponse   `json:"participant" bson:"participant"`
+	Messages        []*Message      `json:"messages" bson:"messages"`
+	CreatedAt       time.Time       `json:"createdAt" bson:"createdAt"`
+}
+
 type Comment struct {
 	ID            *string       `json:"_id,omitempty" bson:"_id,omitempty"`
 	ItemID        *string       `json:"itemId,omitempty" bson:"itemId,omitempty"`
@@ -93,7 +104,11 @@ type Image struct {
 }
 
 type Message struct {
-	TimeStamp time.Time `json:"timeStamp" bson:"timeStamp"`
+	ID        string        `json:"_id" bson:"_id"`
+	Content   string        `json:"content" bson:"content"`
+	SenderID  string        `json:"senderId" bson:"senderId"`
+	Sender    *UserResponse `json:"sender,omitempty" bson:"sender,omitempty"`
+	CreatedAt time.Time     `json:"createdAt" bson:"createdAt"`
 }
 
 type Mutation struct {

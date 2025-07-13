@@ -8,6 +8,8 @@ import (
 	"musicboxd/graph/model"
 	"musicboxd/hlp/jwt"
 	"slices"
+	"strconv"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"go.mongodb.org/mongo-driver/bson"
@@ -272,4 +274,154 @@ func GetUserReviewNumbers(ctx context.Context, userID primitive.ObjectID) (*User
 	counts.TrackReviews = trackCount
 
 	return &counts, nil
+}
+
+func CreateNewChat(ctx context.Context, name *string, participantIds []string) (*model.Chat, error) {
+	// TODO this is old implementation, most likely will not work as expected
+	chatName := ""
+	if name == nil || *name == "" {
+		chatName = `Chat with ` + strconv.Itoa(len(participantIds))
+	} else {
+		chatName = *name
+	}
+
+	if len(participantIds) == 0 {
+		return nil, fmt.Errorf("at least one participant ID is required")
+	}
+
+	participantConvertedIds := make([]primitive.ObjectID, len(participantIds))
+	for i, id := range participantIds {
+		convertedId, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			return nil, fmt.Errorf("invalid participant ID %s: %w", id, err)
+		}
+		participantConvertedIds[i] = convertedId
+	}
+
+	document := bson.M{
+		"name":           chatName,
+		"participantIds": participantConvertedIds,
+		"messages":       []interface{}{},
+		"createdAt":      time.Now(),
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	chat, err := coll.InsertOne(ctx, document)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chat: %w", err)
+	}
+
+	res := &model.Chat{
+		ID:        chat.InsertedID.(primitive.ObjectID).Hex(),
+		Name:      &chatName,
+		CreatedAt: document["createdAt"].(time.Time),
+	}
+
+	if isFieldRequested(ctx, "participants") {
+		participants, err := database.GetUsersByIDs(ctx, &participantConvertedIds)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch participants: %w", err)
+		}
+
+		res.Participants = participants
+	}
+
+	return res, nil
+}
+
+func CreateNewPrivateChat(ctx context.Context, name *string, participantId string) (*model.Chat, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	participant, err := database.GetUserByID(ctx, participantId)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch participant: %w", err)
+	}
+
+	convertedParticipantID, err := primitive.ObjectIDFromHex(participantId)
+	if err != nil {
+		return nil, fmt.Errorf("invalid participant ID: %w", err)
+	}
+
+	chatName := ""
+	if name == nil || *name == "" {
+		chatName = `Chat with ` + participant.DisplayName
+	} else {
+		chatName = *name
+	}
+
+	document := bson.M{
+		"name":            chatName,
+		"participantsIds": []primitive.ObjectID{cc.UserID, convertedParticipantID},
+		"participantId":   convertedParticipantID,
+		"messages":        []primitive.A{},
+		"createdAt":       time.Now(),
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	chat, err := coll.InsertOne(ctx, document)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chat: %w", err)
+	}
+
+	res := &model.Chat{
+		ID:              chat.InsertedID.(primitive.ObjectID).Hex(),
+		Name:            &chatName,
+		ParticipantsIds: []string{cc.UserID.Hex(), participantId},
+		Participants:    []*model.UserResponse{participant},
+		ParticipantID:   participantId,
+		Participant:     participant,
+		CreatedAt:       document["createdAt"].(time.Time),
+	}
+
+	return res, nil
+}
+
+func MessageFromUpdatedFields(updatedFields bson.M) (*model.Message, error) {
+	for fieldName, fieldValue := range updatedFields {
+		// First insert to the messages array - changeEvent is replacement of array
+		if fieldName == "messages" {
+			messagesArray, ok := fieldValue.(primitive.A)
+			if !ok {
+				fmt.Printf("Expected messages to be an array, got %T\n", fieldValue)
+				continue
+			}
+
+			for _, item := range messagesArray {
+				messageData, ok := item.(bson.M)
+				if !ok {
+					fmt.Printf("Expected message item to be a bson.M, got %T\n", item)
+					continue
+				}
+
+				message := &model.Message{
+					ID:        messageData["_id"].(primitive.ObjectID).Hex(),
+					Content:   messageData["content"].(string),
+					SenderID:  messageData["senderId"].(primitive.ObjectID).Hex(),
+					Sender:    nil, // TODO populated later if requested ??
+					CreatedAt: messageData["createdAt"].(primitive.DateTime).Time(),
+				}
+
+				return message, nil
+			}
+		}
+
+		if len(fieldName) > 9 && fieldName[:9] == "messages." {
+			messageData := fieldValue.(bson.M)
+
+			message := &model.Message{
+				ID:        messageData["_id"].(primitive.ObjectID).Hex(),
+				Content:   messageData["content"].(string),
+				SenderID:  messageData["senderId"].(primitive.ObjectID).Hex(),
+				Sender:    nil, // TODO populated later if requested ??
+				CreatedAt: messageData["createdAt"].(primitive.DateTime).Time(),
+			}
+
+			return message, nil
+		}
+	}
+
+	return nil, fmt.Errorf("no valid message data found in updated fields")
 }

@@ -7,14 +7,110 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func (r *subscriptionResolver) Msg(ctx context.Context) (<-chan *model.Message, error) {
+func (r *mutationResolver) SendMessage(ctx context.Context, chatID string, content string) (*model.Message, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO check if user is a participant in the chat
+
+	document := bson.M{
+		"_id":       primitive.NewObjectID(),
+		"content":   content,
+		"senderId":  cc.UserID,
+		"createdAt": time.Now(),
+	}
+
+	convertedChatID, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid chat ID: %w", err)
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	chat, err := coll.UpdateOne(
+		ctx,
+		bson.M{"_id": convertedChatID},
+		bson.M{
+			"$push": bson.M{
+				"messages": document,
+			},
+		},
+		options.Update().SetUpsert(false),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to send message: %w", err)
+	}
+
+	if chat.MatchedCount == 0 {
+		return nil, fmt.Errorf("chat not found")
+	}
+
+	res := &model.Message{
+		ID:        document["_id"].(primitive.ObjectID).Hex(),
+		Content:   document["content"].(string),
+		SenderID:  document["senderId"].(primitive.ObjectID).Hex(),
+		CreatedAt: document["createdAt"].(time.Time),
+	}
+
+	return res, nil
+}
+
+func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.Chat, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedParticipantID, err := primitive.ObjectIDFromHex(participantID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid participant ID: %w", err)
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	chat := coll.FindOne(
+		ctx,
+		bson.M{
+			"participantId": convertedParticipantID,
+		},
+		options.FindOne().SetProjection(database.GetChatProjection(cc.UserID)),
+	)
+
+	if chat.Err() != nil {
+		// If chat not found, create a new one, idc that this is a query resolver
+		if chat.Err() == mongo.ErrNoDocuments {
+			chat, err := CreateNewPrivateChat(ctx, nil, participantID)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create chat: %w", err)
+			}
+
+			return chat, nil
+		}
+		return nil, fmt.Errorf("failed to retrieve chat: %w", chat.Err())
+	}
+
+	res := &model.Chat{}
+	err = chat.Decode(res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode chat: %w", err)
+	}
+
+	return res, nil
+}
+
+func (r *subscriptionResolver) MessageAdded(ctx context.Context, chatID string) (<-chan *model.Message, error) {
 	connParams := transport.GetInitPayload(ctx)
 	jwt := connParams["Authorization"].(string)
 
@@ -23,28 +119,55 @@ func (r *subscriptionResolver) Msg(ctx context.Context) (<-chan *model.Message, 
 		return nil, err
 	}
 
-	ch := make(chan *model.Message)
+	ch := make(chan *model.Message, 10)
+
+	convertedChatID, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		fmt.Printf("Invalid chat ID: %v\n", err)
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	pipeline := mongo.Pipeline{
+		{{
+			Key: "$match",
+			Value: bson.M{
+				"fullDocument._id": convertedChatID,
+				"operationType":    "update",
+			},
+		}},
+	}
 
 	go func() {
 		defer close(ch)
 
-		for {
-			time.Sleep(1 * time.Second)
-			fmt.Println("Tick")
+		changeStream, err := coll.Watch(ctx, pipeline, options.ChangeStream().SetFullDocument(options.UpdateLookup))
+		if err != nil {
+			fmt.Printf("Error creating change stream: %v\n", err)
+			return
+		}
+		defer changeStream.Close(ctx)
 
-			t := &model.Message{
-				TimeStamp: time.Now(),
+		for changeStream.Next(ctx) {
+			var changeEvent bson.M
+			if err := changeStream.Decode(&changeEvent); err != nil {
+				fmt.Printf("Error decoding change event: %v\n", err)
+				continue
+			}
+
+			updateDescription := changeEvent["updateDescription"].(bson.M)
+			updatedFields := updateDescription["updatedFields"].(bson.M)
+
+			msg, err := MessageFromUpdatedFields(updatedFields)
+			if err != nil {
+				fmt.Printf("Error extracting message from updated fields: %v\n", err)
+				continue
 			}
 
 			select {
+			case ch <- msg:
 			case <-ctx.Done():
-				// Subscription closes
-				fmt.Println("Subscription Closed")
 				return
-
-			case ch <- t:
-				// Message sent
-				fmt.Println("Message sent")
 			}
 		}
 	}()

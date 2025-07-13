@@ -145,3 +145,18 @@ func GetUserProjection(userID primitive.ObjectID) *bson.M {
 		"followerUsers":      1,
 	}
 }
+
+func GetChatProjection(userID primitive.ObjectID) *bson.M {
+	return &bson.M{
+		// Calculate fields
+		"messagesNumber": bson.M{"$size": bson.M{"$ifNull": bson.A{"$messages", bson.A{}}}},
+		// Include most fields
+		"_id":             1,
+		"name":            1,
+		"participantsIds": 1,
+		"participantId":   1,
+		"createdAt":       1,
+		// TODO pagination for messages
+		"messages": 1,
+	}
+}
