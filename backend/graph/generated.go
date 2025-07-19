@@ -150,6 +150,14 @@ type ComplexityRoot struct {
 		SenderID  func(childComplexity int) int
 	}
 
+	MessagesPage struct {
+		HasNextPage     func(childComplexity int) int
+		HasPreviousPage func(childComplexity int) int
+		Messages        func(childComplexity int) int
+		TotalMessages   func(childComplexity int) int
+		TotalPages      func(childComplexity int) int
+	}
+
 	Mutation struct {
 		AddComment            func(childComplexity int, itemID string, itemType string, text string, replyingToID *string) int
 		AddLikeDislikeComment func(childComplexity int, commentID string, action string) int
@@ -192,6 +200,7 @@ type ComplexityRoot struct {
 		Chat              func(childComplexity int, participantID string) int
 		CommentsPage      func(childComplexity int, itemID string, pageSize *int, page int) int
 		GetRecentPost     func(childComplexity int, pageSize *int, page int, typeArg *string) int
+		MessagesPage      func(childComplexity int, chatID string, pageSize *int, page int) int
 		RecentReviews     func(childComplexity int, number *int, itemType string) int
 		RecentUserReviews func(childComplexity int, pageSize *int, page int, itemType string, userID string) int
 		Replies           func(childComplexity int, commentID string, repliesLength *int) int
@@ -394,6 +403,7 @@ type QueryResolver interface {
 	CommentsPage(ctx context.Context, itemID string, pageSize *int, page int) (*model.CommentsPage, error)
 	Replies(ctx context.Context, commentID string, repliesLength *int) ([]*model.Comment, error)
 	Chat(ctx context.Context, participantID string) (*model.Chat, error)
+	MessagesPage(ctx context.Context, chatID string, pageSize *int, page int) (*model.MessagesPage, error)
 	ReportedComments(ctx context.Context, number *int) ([]*model.ReportedComment, error)
 	GetRecentPost(ctx context.Context, pageSize *int, page int, typeArg *string) (*model.RecentPosts, error)
 	Review(ctx context.Context, itemID string, userID string) (*model.Review, error)
@@ -899,6 +909,41 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Message.SenderID(childComplexity), true
 
+	case "MessagesPage.hasNextPage":
+		if e.complexity.MessagesPage.HasNextPage == nil {
+			break
+		}
+
+		return e.complexity.MessagesPage.HasNextPage(childComplexity), true
+
+	case "MessagesPage.hasPreviousPage":
+		if e.complexity.MessagesPage.HasPreviousPage == nil {
+			break
+		}
+
+		return e.complexity.MessagesPage.HasPreviousPage(childComplexity), true
+
+	case "MessagesPage.messages":
+		if e.complexity.MessagesPage.Messages == nil {
+			break
+		}
+
+		return e.complexity.MessagesPage.Messages(childComplexity), true
+
+	case "MessagesPage.totalMessages":
+		if e.complexity.MessagesPage.TotalMessages == nil {
+			break
+		}
+
+		return e.complexity.MessagesPage.TotalMessages(childComplexity), true
+
+	case "MessagesPage.totalPages":
+		if e.complexity.MessagesPage.TotalPages == nil {
+			break
+		}
+
+		return e.complexity.MessagesPage.TotalPages(childComplexity), true
+
 	case "Mutation.addComment":
 		if e.complexity.Mutation.AddComment == nil {
 			break
@@ -1238,6 +1283,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.GetRecentPost(childComplexity, args["pageSize"].(*int), args["page"].(int), args["type"].(*string)), true
+
+	case "Query.messagesPage":
+		if e.complexity.Query.MessagesPage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_messagesPage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MessagesPage(childComplexity, args["chatId"].(string), args["pageSize"].(*int), args["page"].(int)), true
 
 	case "Query.recentReviews":
 		if e.complexity.Query.RecentReviews == nil {
@@ -3218,6 +3275,65 @@ func (ec *executionContext) field_Query_getRecentPost_argsType(
 	}
 
 	var zeroVal *string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_messagesPage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_messagesPage_argsChatID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["chatId"] = arg0
+	arg1, err := ec.field_Query_messagesPage_argsPageSize(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["pageSize"] = arg1
+	arg2, err := ec.field_Query_messagesPage_argsPage(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["page"] = arg2
+	return args, nil
+}
+func (ec *executionContext) field_Query_messagesPage_argsChatID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("chatId"))
+	if tmp, ok := rawArgs["chatId"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_messagesPage_argsPageSize(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("pageSize"))
+	if tmp, ok := rawArgs["pageSize"]; ok {
+		return ec.unmarshalOInt2ᚖint(ctx, tmp)
+	}
+
+	var zeroVal *int
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_messagesPage_argsPage(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (int, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("page"))
+	if tmp, ok := rawArgs["page"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -6884,6 +7000,238 @@ func (ec *executionContext) fieldContext_Message_createdAt(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _MessagesPage_totalMessages(ctx context.Context, field graphql.CollectedField, obj *model.MessagesPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MessagesPage_totalMessages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalMessages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MessagesPage_totalMessages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessagesPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessagesPage_totalPages(ctx context.Context, field graphql.CollectedField, obj *model.MessagesPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MessagesPage_totalPages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MessagesPage_totalPages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessagesPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessagesPage_hasPreviousPage(ctx context.Context, field graphql.CollectedField, obj *model.MessagesPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MessagesPage_hasPreviousPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasPreviousPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MessagesPage_hasPreviousPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessagesPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessagesPage_hasNextPage(ctx context.Context, field graphql.CollectedField, obj *model.MessagesPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MessagesPage_hasNextPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HasNextPage, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MessagesPage_hasNextPage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessagesPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MessagesPage_messages(ctx context.Context, field graphql.CollectedField, obj *model.MessagesPage) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MessagesPage_messages(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Messages, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.Message)
+	fc.Result = res
+	return ec.marshalNMessage2ᚕᚖmusicboxdᚋgraphᚋmodelᚐMessageᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MessagesPage_messages(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MessagesPage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "_id":
+				return ec.fieldContext_Message__id(ctx, field)
+			case "content":
+				return ec.fieldContext_Message_content(ctx, field)
+			case "senderId":
+				return ec.fieldContext_Message_senderId(ctx, field)
+			case "sender":
+				return ec.fieldContext_Message_sender(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Message_createdAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addComment(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_addComment(ctx, field)
 	if err != nil {
@@ -9054,6 +9402,73 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_chat_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_messagesPage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_messagesPage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().MessagesPage(rctx, fc.Args["chatId"].(string), fc.Args["pageSize"].(*int), fc.Args["page"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.MessagesPage)
+	fc.Result = res
+	return ec.marshalNMessagesPage2ᚖmusicboxdᚋgraphᚋmodelᚐMessagesPage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_messagesPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "totalMessages":
+				return ec.fieldContext_MessagesPage_totalMessages(ctx, field)
+			case "totalPages":
+				return ec.fieldContext_MessagesPage_totalPages(ctx, field)
+			case "hasPreviousPage":
+				return ec.fieldContext_MessagesPage_hasPreviousPage(ctx, field)
+			case "hasNextPage":
+				return ec.fieldContext_MessagesPage_hasNextPage(ctx, field)
+			case "messages":
+				return ec.fieldContext_MessagesPage_messages(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MessagesPage", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_messagesPage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -18673,6 +19088,65 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 	return out
 }
 
+var messagesPageImplementors = []string{"MessagesPage"}
+
+func (ec *executionContext) _MessagesPage(ctx context.Context, sel ast.SelectionSet, obj *model.MessagesPage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, messagesPageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MessagesPage")
+		case "totalMessages":
+			out.Values[i] = ec._MessagesPage_totalMessages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalPages":
+			out.Values[i] = ec._MessagesPage_totalPages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasPreviousPage":
+			out.Values[i] = ec._MessagesPage_hasPreviousPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "hasNextPage":
+			out.Values[i] = ec._MessagesPage_hasNextPage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "messages":
+			out.Values[i] = ec._MessagesPage_messages(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
@@ -18961,6 +19435,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_chat(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "messagesPage":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_messagesPage(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -21032,6 +21528,20 @@ func (ec *executionContext) marshalNMessage2ᚖmusicboxdᚋgraphᚋmodelᚐMessa
 		return graphql.Null
 	}
 	return ec._Message(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNMessagesPage2musicboxdᚋgraphᚋmodelᚐMessagesPage(ctx context.Context, sel ast.SelectionSet, v model.MessagesPage) graphql.Marshaler {
+	return ec._MessagesPage(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNMessagesPage2ᚖmusicboxdᚋgraphᚋmodelᚐMessagesPage(ctx context.Context, sel ast.SelectionSet, v *model.MessagesPage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._MessagesPage(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalNPost2musicboxdᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v model.Post) graphql.Marshaler {

@@ -1,17 +1,17 @@
 <script setup lang="ts">
+import FavouriteAlbums from '@/components/favouriteAlbums/FavouriteAlbums.vue';
 import { FOLLOW_USER, GET_USER_BY_ID, UNFOLLOW_USER } from '@/services/queries';
 import { emptyUser, type UserType } from '@/types/user';
-import { handleGqlError } from '@/utils/error';
-import { useMutation, useQuery } from '@vue/apollo-composable';
-import { computed, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import Panel from 'primevue/panel';
-import Avatar from 'primevue/avatar';
-import Card from 'primevue/card';
 import { getCountryName } from '@/utils/country';
-import FavouriteAlbums from '@/components/favouriteAlbums/FavouriteAlbums.vue';
-import Divider from 'primevue/divider';
+import { handleGqlError } from '@/utils/error';
+import { navigateToChat } from '@/utils/navigate';
+import { useMutation, useQuery } from '@vue/apollo-composable';
+import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
+import Card from 'primevue/card';
+import Divider from 'primevue/divider';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 
 const route = useRoute();
@@ -146,6 +146,11 @@ watch(() => route.params, fetch_data, { immediate: true })
               >
                 {{ unfollowButtonText }}
               </Button>
+
+              <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="ml-2">
+                Chat
+                <i class="pi pi-external-link ml-1 cursor-pointer"></i>
+              </Button>
             </div>
           </div>
           <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
@@ -164,7 +169,7 @@ watch(() => route.params, fetch_data, { immediate: true })
           <div class="text-xl">
             <span class="text-2xl"> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              track {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
+              track {{ user.trackReviewsNumber === 1 ? 'review' : 'reviews' }}
             </span> 
           </div>
           <div class="pt-2">

@@ -111,6 +111,14 @@ type Message struct {
 	CreatedAt time.Time     `json:"createdAt" bson:"createdAt"`
 }
 
+type MessagesPage struct {
+	TotalMessages   int        `json:"totalMessages" bson:"totalMessages"`
+	TotalPages      int        `json:"totalPages" bson:"totalPages"`
+	HasPreviousPage bool       `json:"hasPreviousPage" bson:"hasPreviousPage"`
+	HasNextPage     bool       `json:"hasNextPage" bson:"hasNextPage"`
+	Messages        []*Message `json:"messages" bson:"messages"`
+}
+
 type Mutation struct {
 }
 

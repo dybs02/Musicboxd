@@ -40,12 +40,30 @@ const emptyMessage: MessageType = {
   createdAt: ''
 }
 
+type MessagesPage = {
+  totalMessages: number
+  totalPages: number
+  hasPreviousPage: boolean
+  hasNextPage: boolean
+  messages: MessageType[]
+}
+
+const emptyMessagesPage: MessagesPage = {
+  totalMessages: 0,
+  totalPages: 0,
+  hasPreviousPage: false,
+  hasNextPage: false,
+  messages: []
+}
+
 export type {
   ChatType,
   MessageType,
+  MessagesPage,
 };
 
 export {
   emptyChat,
   emptyMessage,
+  emptyMessagesPage,
 };

@@ -54,9 +54,25 @@ const navigateToReview = (router: Router, reviewId: string) => {
   });
 }
 
+const navigateToChat = (router: Router, userId: string) => {
+  if (userId === null) {
+    // TODO navigate to error page
+    console.error('User ID is required to navigate to chat');
+    return;
+  }
+
+  router.push({ 
+    name: 'chat',
+    params: { 
+      userId: userId
+    }
+  });
+}
+
 export {
   navigateToUser,
   navigateToAlbum,
   navigateToTrack,
   navigateToReview,
+  navigateToChat,
 }

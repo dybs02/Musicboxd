@@ -156,7 +156,21 @@ func GetChatProjection(userID primitive.ObjectID) *bson.M {
 		"participantsIds": 1,
 		"participantId":   1,
 		"createdAt":       1,
-		// TODO pagination for messages
-		"messages": 1,
+		// Only the 20 newest messages
+		// Not really used, as there is pagination for messages
+		"messages": bson.M{
+			"$slice": bson.A{"$messages", -10},
+		},
+	}
+}
+
+func GetMessagesProjection(userID primitive.ObjectID) *bson.M {
+	return &bson.M{
+		"messages": bson.M{
+			"_id":       1,
+			"content":   1,
+			"senderId":  1,
+			"createdAt": 1,
+		},
 	}
 }

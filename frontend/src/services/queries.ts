@@ -562,15 +562,17 @@ const CHAT_BY_PARTICIPANT = gql`
       _id
       name
       createdAt
-      messages {
+      participant {
         _id
-        content
-        senderId
-        createdAt
+        displayName
+        images {
+          url
+        }
       }
     }
   }
 `;
+
 
 const CHAT_SUBSCRIPTION = gql`
   subscription MessageAdded($chatId: ID!) {
@@ -582,6 +584,32 @@ const CHAT_SUBSCRIPTION = gql`
     }
   }
 `;
+
+
+const GET_MESSAGES_BY_CHAT_ID_PAGE = gql`
+  query messagesPage(
+    $chatId: ID!
+    $pageSize: Int
+    $page: Int!
+  ) {
+    messagesPage(
+      chatId: $chatId
+      pageSize: $pageSize
+      page: $page
+    ) {
+      totalMessages
+      totalPages
+      hasPreviousPage
+      hasNextPage
+      messages {
+        _id
+        content
+        senderId
+        createdAt
+      }
+    }
+  }
+`
 
 
 
@@ -613,4 +641,5 @@ export {
   SEND_MESSAGE,
   CHAT_BY_PARTICIPANT,
   CHAT_SUBSCRIPTION,
+  GET_MESSAGES_BY_CHAT_ID_PAGE,
 };

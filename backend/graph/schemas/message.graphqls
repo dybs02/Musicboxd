@@ -17,8 +17,18 @@ type Message {
   createdAt: Time!
 }
 
+type MessagesPage {
+  totalMessages: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  messages: [Message!]!
+}
+
+
 extend type Query {
   chat(participantId: ID!): Chat!
+  messagesPage(chatId: ID!, pageSize: Int, page: Int!): MessagesPage!
 }
 
 extend type Mutation {

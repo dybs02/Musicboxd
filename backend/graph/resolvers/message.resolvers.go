@@ -7,6 +7,7 @@ package resolver
 import (
 	"context"
 	"fmt"
+	"math"
 	"musicboxd/database"
 	"musicboxd/graph"
 	"musicboxd/graph/model"
@@ -107,7 +108,87 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 		return nil, fmt.Errorf("failed to decode chat: %w", err)
 	}
 
+	if isFieldRequested(ctx, "participant") {
+		user, err := database.GetUserByPrimitiveID(ctx, convertedParticipantID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve user: %w", err)
+		}
+
+		res.Participant = user
+	}
+
 	return res, nil
+}
+
+func (r *queryResolver) MessagesPage(ctx context.Context, chatID string, pageSize *int, page int) (*model.MessagesPage, error) {
+	_, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedChatID, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid chat ID: %w", err)
+	}
+
+	currentPage := 1
+	if page > 0 {
+		currentPage = page
+	}
+
+	limit := 10
+	if pageSize != nil && *pageSize > 0 {
+		limit = min(*pageSize, 50)
+	}
+
+	skip := (currentPage - 1) * limit
+
+	coll := database.GetDB().GetCollection("chats")
+	res := model.MessagesPage{}
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: bson.D{{Key: "_id", Value: convertedChatID}}}},
+		{{Key: "$project", Value: bson.D{
+			{Key: "_id", Value: 1},
+			{Key: "messagesCount", Value: bson.D{{Key: "$size", Value: "$messages"}}},
+			{Key: "messages", Value: bson.D{
+				{Key: "$slice", Value: bson.A{
+					bson.D{{Key: "$reverseArray", Value: "$messages"}},
+					skip,
+					limit,
+				}},
+			}},
+		}}},
+	}
+
+	cursor, err := coll.Aggregate(
+		ctx,
+		pipeline,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	defer cursor.Close(ctx)
+	var chat []*MessagesAggregationResult
+	if err = cursor.All(ctx, &chat); err != nil {
+		return nil, err
+	}
+	if len(chat) == 0 {
+		return nil, fmt.Errorf("chat not found")
+	}
+
+	if isFieldRequested(ctx, "messages.sender") && len(chat[0].Messages) > 0 {
+		// TODO add sender field to messages projection
+		return nil, fmt.Errorf("sender field is not supported in messages projection")
+	}
+
+	res.Messages = chat[0].Messages
+	res.TotalMessages = int(chat[0].MessagesCount)
+	res.TotalPages = int(math.Ceil(float64(res.TotalMessages) / float64(limit)))
+	res.HasNextPage = currentPage < res.TotalPages
+	res.HasPreviousPage = currentPage > 1
+
+	return &res, nil
 }
 
 func (r *subscriptionResolver) MessageAdded(ctx context.Context, chatID string) (<-chan *model.Message, error) {

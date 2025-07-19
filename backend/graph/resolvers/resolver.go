@@ -34,6 +34,12 @@ type UserReviewNumbers struct {
 	TrackReviews int64 `json:"trackComments"`
 }
 
+type MessagesAggregationResult struct {
+	ChatID        string           `json:"_id"`
+	Messages      []*model.Message `json:"messages"`
+	MessagesCount int64            `json:"messagesCount"`
+}
+
 func ValidateJWTString(token string) (*jwt.CustomClaims, error) {
 	cc, err := jwt.ValidateJWT(token)
 	if err != nil {
