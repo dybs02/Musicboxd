@@ -258,6 +258,8 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 		Tokens:          tokens,
 		Role:            `user`,
 		FavouriteAlbums: favouriteAlbumsAlbumsMap,
+		FollowingUsers:  make([]*string, 0),
+		FollowerUsers:   make([]*string, 0),
 	}
 
 	db := database.GetDB()
@@ -265,7 +267,6 @@ func saveToDB(tokensData *tokenResponse, userData *userData) (*model.User, error
 	var err error
 	if res.Err() == nil {
 		_, err = db.GetCollection("users").UpdateOne(context.TODO(), bson.M{"spotifyId": userData.Id}, bson.M{
-			// TODO add setOnInsert ??
 			"$set": bson.M{
 				"country":         userData.Country,
 				"displayName":     userData.DisplayName,
