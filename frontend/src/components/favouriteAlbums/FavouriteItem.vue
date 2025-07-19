@@ -90,7 +90,7 @@ const isLoggedUserProfile = () => {
       <div class="opacity-0 hover:opacity-100 duration-100 absolute inset-0 z-10 flex justify-center items-center text-6xl text-white font-semibold">
         <i v-if="isLoggedUserProfile()" class="pi pi-plus overlay-icon" @click="visible = true"></i>
         <!-- TODO maybe navigate to review if exists ? -->
-        <i v-else class="pi pi-link overlay-icon" @click="navigateToAlbum(router, album.album.albumId, route.params.id as string)"></i>
+        <i v-else class="pi pi-link overlay-icon" @click="navigateToAlbum(router, album.album.albumId)"></i>
       </div>
     </div>
   </div>
