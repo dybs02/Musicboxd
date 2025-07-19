@@ -7,6 +7,7 @@ package resolver
 import (
 	"context"
 	"errors"
+	"fmt"
 	"musicboxd/database"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
@@ -82,29 +83,27 @@ func (r *mutationResolver) UpdateCurrentUser(ctx context.Context, displayName *s
 	return &res, nil
 }
 
-func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName string) (*model.UserResponse, error) {
-	coll := database.GetDB().GetCollection("users")
-	user := coll.FindOne(ctx, bson.M{"displayName": displayName})
-	if user.Err() != nil {
-		return nil, user.Err()
-	}
-
-	res := model.UserResponse{}
-	err := user.Decode(&res)
-	if err != nil {
-		return nil, err
-	}
-	return &res, nil
-}
-
-func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.UserResponse, error) {
-	convertedID, err := primitive.ObjectIDFromHex(id)
+func (r *mutationResolver) FollowUser(ctx context.Context, userID string) (*model.UserResponse, error) {
+	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
 	}
 
+	followingID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID: %w", err)
+	}
+
 	coll := database.GetDB().GetCollection("users")
-	user := coll.FindOne(ctx, bson.M{"_id": convertedID})
+	user := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": cc.UserID, "followingUsers": bson.M{"$ne": followingID}},
+		bson.M{"$addToSet": bson.M{"followingUsers": followingID}},
+		options.
+			FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(database.GetUserProjection(cc.UserID)),
+	)
 	if user.Err() != nil {
 		return nil, user.Err()
 	}
@@ -113,6 +112,113 @@ func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.UserRes
 	err = user.Decode(&res)
 	if err != nil {
 		return nil, err
+	}
+
+	// Update the follower list of the followed user
+
+	return &res, nil
+}
+
+func (r *mutationResolver) UnfollowUser(ctx context.Context, userID string) (*model.UserResponse, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	followingID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid user ID: %w", err)
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": cc.UserID, "followingUsers": bson.M{"$eq": followingID}},
+		bson.M{"$pull": bson.M{"followingUsers": followingID}},
+		options.
+			FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(database.GetUserProjection(cc.UserID)),
+	)
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err = user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (r *queryResolver) UserByDisplayName(ctx context.Context, displayName string) (*model.UserResponse, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(
+		ctx,
+		bson.M{"displayName": displayName},
+		options.FindOne().SetProjection(database.GetUserProjection(cc.UserID)),
+	)
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err = user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (r *queryResolver) UserByID(ctx context.Context, id string) (*model.UserResponse, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("users")
+	user := coll.FindOne(
+		ctx,
+		bson.M{"_id": convertedID},
+		options.FindOne().SetProjection(database.GetUserProjection(cc.UserID)),
+	)
+	if user.Err() != nil {
+		return nil, user.Err()
+	}
+
+	res := model.UserResponse{}
+	err = user.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	if isFieldRequested(ctx, "albumReviewsNumber") || isFieldRequested(ctx, "trackReviewsNumber") {
+		convertedID, err := primitive.ObjectIDFromHex(res.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		counts, err := GetUserReviewNumbers(ctx, convertedID)
+		if err != nil {
+			return nil, err
+		}
+
+		albumReviews := int(counts.AlbumReviews)
+		trackReviews := int(counts.TrackReviews)
+		res.AlbumReviewsNumber = &albumReviews
+		res.TrackReviewsNumber = &trackReviews
 	}
 
 	return &res, nil

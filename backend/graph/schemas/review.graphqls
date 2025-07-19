@@ -9,8 +9,17 @@ type Review {
   description: String!
   userId: ID!
   user: UserResponse
-  comments: [Comment!]
+  createdAt: Time!
+  updatedAt: Time
+  commentIds: [ID]
+  comments: [Comment]
+  track: ReviewTrack
   album: ReviewAlbum
+  likes: [ID]
+  likesCount: Int!
+  dislikes: [ID]
+  dislikesCount: Int!
+  userReaction: String
 }
 
 type ReviewAlbum {
@@ -20,22 +29,28 @@ type ReviewAlbum {
   artists: [SimplifiedArtist!]!
 }
 
-type Comment {
-  _id: ID
-  reviewId: String
-  userId: String
-  user: UserResponse
-  text: String
-  createdAt: Time
-  updatedAt: Time
+type ReviewTrack {
+  trackId: String!
+  name: String!
+  artists: [SimplifiedArtist!]!
+}
+
+type RecentUserReviews {
+  totalReviews: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  reviews: [Review!]!
 }
 
 extend type Query {
   review(itemId: String!, userId: String!): Review!
+  reviewById(reviewId: String!): Review!
   recentReviews(number: Int, itemType: String!): [Review!]!
+  recentUserReviews(pageSize: Int, page: Int!, itemType: String!, userId: String!): RecentUserReviews!
 }
 
 extend type Mutation {
   createOrUpdateReview(itemId: String!, itemType: String!, title: String, description: String, value: Int): Review!
-  addComment(itemId: String!, reviewId: String!, text: String!): [Comment!]!
+  addLikeDislikeReview(reviewId: String!, action: String!): Review!
 }

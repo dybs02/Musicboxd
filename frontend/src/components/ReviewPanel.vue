@@ -47,16 +47,17 @@ const responsiveOptions = ref([
       <Carousel :value="props.reviews" :numVisible="4" :numScroll="2" :responsiveOptions="responsiveOptions">
         <template #item="slotProps">
           <div class="bg-primary-light 0 rounded-lg mx-auto m-2 p-4 w-[200px] h-[320px]">
-            <div class="cursor-pointer" @click="navigateToReview(router, slotProps.data.itemType, slotProps.data.itemId, slotProps.data.userId)">
+            <div class="cursor-pointer" @click="navigateToReview(router, slotProps.data._id)">
               <div class="mb-4">
                 <div class="relative mx-auto">
                   <img :src="slotProps.data.album.images[0].url" :alt="slotProps.data.album.name" class="w-full" />
                 </div>
               </div>
-              <div class="mb-1 font-bold text-lg truncate">{{ slotProps.data.album.name }}</div>
+              <div v-if="slotProps.data.itemType === 'album'" class="mb-1 font-bold text-lg truncate">{{ slotProps.data.album.name }}</div>
+              <div v-if="slotProps.data.itemType === 'track'" class="mb-1 font-bold text-lg truncate">{{ slotProps.data.track.name }}</div>
               <div class="mb-1 font-small">{{ slotProps.data.album.artists[0].name }}</div>
             </div>
-            <div class="flex mt-4 cursor-pointer" @click="navigateToReview(router, slotProps.data.itemType, slotProps.data.itemId, slotProps.data.userId)">
+            <div class="flex mt-4 cursor-pointer" @click="navigateToReview(router, slotProps.data._id)">
               <div class="my-auto mr-2">
                 <Avatar
                   :image="slotProps.data.user.images[0].url"

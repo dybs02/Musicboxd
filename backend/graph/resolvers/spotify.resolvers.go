@@ -45,6 +45,17 @@ func (r *queryResolver) Track(ctx context.Context, id string) (*model.Track, err
 	if err != nil {
 		return nil, err
 	}
+
+	if isFieldRequested(ctx, "averageRating") {
+		avg, err := GetAverageRaiting(ctx, res.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.AverageRating = &avg.AverageRating
+		res.RatingCount = &avg.Count
+	}
+
 	return res, nil
 }
 
@@ -68,6 +79,16 @@ func (r *queryResolver) Album(ctx context.Context, id string) (*model.Album, err
 
 	// 	res.TrackList = tracksRes
 	// }
+
+	if isFieldRequested(ctx, "averageRating") {
+		avg, err := GetAverageRaiting(ctx, res.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.AverageRating = &avg.AverageRating
+		res.RatingCount = &avg.Count
+	}
 
 	return res, nil
 }

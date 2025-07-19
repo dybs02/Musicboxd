@@ -29,6 +29,9 @@ type Track {
   type: String!
   uri: String!
   is_local: Boolean!
+
+  averageRating: Float
+  ratingCount: Int
 }
 
 type Albums {
@@ -56,6 +59,9 @@ type Album {
   uri: String!
   artists: [SimplifiedArtist!]!
   tracks: Tracks!
+
+  averageRating: Float
+  ratingCount: Int
 }
 
 type SimplifiedArtist {

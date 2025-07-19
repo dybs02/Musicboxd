@@ -1,0 +1,37 @@
+type Comment {
+  _id: ID
+  itemId: ID
+  userId: String
+  user: UserResponse
+  text: String
+  createdAt: Time
+  updatedAt: Time
+  likesCount: Int!
+  dislikesCount: Int!
+  userReaction: String
+  replyingToId: ID
+  repliesCount: Int!
+  replies: [Comment]!
+
+  likes: [ID]
+  dislikes: [ID]
+  repliesIds: [ID]
+}
+
+type CommentsPage {
+  totalComments: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  comments: [Comment!]!
+}
+
+extend type Query {
+  commentsPage(itemId: String!, pageSize: Int, page: Int!): CommentsPage!
+  replies(commentId: String!, repliesLength: Int): [Comment]!
+}
+
+extend type Mutation {
+  addComment(itemId: String!, itemType: String!, text: String!, replyingToId: String): Comment!
+  addLikeDislikeComment(commentId: String!, action: String!): Comment!
+}

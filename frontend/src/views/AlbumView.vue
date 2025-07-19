@@ -1,19 +1,17 @@
 <script setup lang="ts">
 import AlbumInfo from '@/components/album/AlbumInfo.vue';
 import TrackList from "@/components/album/TrackList.vue";
-import ReviewComments from '@/components/comments/ReviewComments.vue';
 import Review from "@/components/Review.vue";
 import { useAuthStore } from "@/services/authStore";
-import { GET_ALBUM_BY_ID, GET_REWIEW_BY_ITEM_ID_USER_ID } from "@/services/queries";
-import { emptyReview, type CommentType, type ReviewType } from '@/types/review';
+import { GET_ALBUM_BY_ID, GET_REWIEW_ID_BY_ITEM_ID_USER_ID } from "@/services/queries";
+import { emptyReview, type ReviewType } from '@/types/review';
 import { emptyAlbum, type AlbumType } from '@/types/spotify';
 import { handleGqlError } from '@/utils/error';
-import { navigateToAlbum } from '@/utils/navigate';
 import { useQuery } from '@vue/apollo-composable';
 import { useMediaQuery } from '@vueuse/core';
 import Image from 'primevue/image';
 import ProgressSpinner from 'primevue/progressspinner';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 
@@ -22,60 +20,75 @@ const route = useRoute();
 const router = useRouter();
 const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
 
+const props = defineProps<{
+  itemId: string;
+  hideAddReview: boolean;
+}>();
 
 
 let album = ref<AlbumType>(emptyAlbum);
 let albumLoading = ref(true);
-
-let review = ref<ReviewType>(emptyReview);
 let reviewLoading = ref(true);
 
+const albumId = computed(() => {
+  return props.itemId ?? route.params.id;
+});
 
 
 const fetch_album = async () => {
-  const { loading, error, result } = useQuery(
+  const { onError, onResult } = useQuery(
     GET_ALBUM_BY_ID,
     {
-      id: route.params.albumId
+      id: albumId.value,
     }
   );
 
-  albumLoading = loading;
+  albumLoading.value = true;
 
-  watch(error, (err) => {
+  onError((err) => {
     handleGqlError(router, err);
   });
 
-  album = computed<AlbumType>(() => result?.value?.album ?? emptyAlbum);
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+
+    album.value = res?.data?.album;
+    albumLoading.value = false;
+  });
 };
 
 const fetch_rewiew = async () => {
-  const userId = route.params.userId ?? store.getId();
-
-  const { loading, error, result } = useQuery(
-    GET_REWIEW_BY_ITEM_ID_USER_ID,
+  const { onError, onResult } = useQuery(
+    GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
     {
-      itemId: route.params.albumId,
-      userId: userId,
+      itemId: albumId.value,
+      userId: store.getId(),
     }
   );
 
-  reviewLoading = loading;
+  reviewLoading.value = true;
 
-  watch(error, (err) => {
-    handleGqlError(router, err, ['mongo: no documents in result']);
-
-    if (route.params.userId !== store.getId()) {
-      navigateToAlbum(
-        router,
-        route.params.albumId as string,
-        store.getId()
-      );
-    }
-
+  onError((err) => {
+    handleGqlError(router, err, ["mongo: no documents in result"]);
   });
   
-  review = computed<ReviewType>(() => result.value?.review ?? emptyReview);
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+    
+    if (res?.data?.review) {
+      router.push({
+        name: 'review',
+        params: {
+          id: res?.data?.review._id,
+        },
+      });
+      return;
+    }
+  });
 };
 
 
@@ -87,22 +100,16 @@ const fetch_data = async () => {
 
 watch(() => route.params, fetch_data, { immediate: true })
 
-
-const updateComments = (comments: CommentType[]) => {
-  // idk if there is a way to update comments & keep them reactive
-  router.go(0);
-};
-
 </script>
 
 <template>
-  <div v-if="albumLoading || reviewLoading" class="flex justify-center pt-12">
+  <div v-if="albumLoading" class="flex justify-center pt-12">
     <ProgressSpinner />
   </div>
 
   <div v-else>
     <div class="flex">
-      <div class="w-1/2">
+      <div class="w-1/3">
         <Image
           :src="album.images[0].url ?? ''"
           alt="Album Cover"
@@ -110,7 +117,7 @@ const updateComments = (comments: CommentType[]) => {
           preview
           />
       </div>
-      <div class="w-1/2 pl-4 sm:px-4 sm:pt-4">
+      <div class="w-2/3 pl-4 sm:px-4 sm:pt-4">
         <AlbumInfo
           :album="album"
         />
@@ -118,15 +125,6 @@ const updateComments = (comments: CommentType[]) => {
           <TrackList
             :track_list="album.tracks.items"
             class="mt-4"
-          />
-          <Review
-            :item-id="route.params.albumId as string"
-            :item-type="'album'"
-            :rating="review.value"
-            :title="review.title"
-            :description="review.description"
-            :user="review.user"
-            class="pt-4"
           />
         </div>
       </div>
@@ -136,23 +134,14 @@ const updateComments = (comments: CommentType[]) => {
         :track_list="album.tracks.items"
         class="mt-4"
       />
-      <Review
-        :item-id="route.params.albumId as string"
-        :item-type="'album'"
-        :rating="review.value"
-        :title="review.title"
-        :description="review.description"
-        :user="review.user"
-        class="pt-4"
-      />
     </div>
 
-    <ReviewComments
-      v-if="review !== emptyReview"
-      :item-id="route.params.albumId as string"
-      :comments="review.comments"
-      @update-comments="updateComments"
-      class="sm:px-4 mt-4"
+    <Review
+      v-if="!props.hideAddReview"
+      class="pt-4"
+      :review="emptyReview"
+      :item-id="albumId"
+      :item-type="'album'"
     />
   </div>
 

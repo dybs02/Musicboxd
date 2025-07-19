@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"musicboxd/database"
-	"musicboxd/graph"
 	"musicboxd/graph/model"
 	"time"
 
@@ -112,31 +111,22 @@ func (r *mutationResolver) ResolveComment(ctx context.Context, id string, status
 		return "", fmt.Errorf("invalid comment ID")
 	}
 
-	rewiews := database.GetDB().GetCollection("reviews")
-	review := rewiews.FindOneAndUpdate(
+	coll = database.GetDB().GetCollection("comments")
+	deletedComment := coll.FindOneAndUpdate(
 		ctx,
-		bson.M{
-			"comments._id": bson.M{
-				"$eq": convertedCommentID,
-			},
-		},
+		bson.M{"_id": convertedCommentID},
 		bson.M{
 			"$set": bson.M{
-				"comments.$[elem].text":      "Comment deleted by moderator",
-				"comments.$[elem].updatedAt": primitive.NewDateTimeFromTime(time.Now()),
+				"text":      "Comment deleted by moderator",
+				"updatedAt": primitive.NewDateTimeFromTime(time.Now()),
 			},
 		},
 		options.FindOneAndUpdate().
-			SetReturnDocument(options.After).
-			SetArrayFilters(options.ArrayFilters{
-				Filters: []interface{}{
-					bson.M{"elem._id": convertedCommentID},
-				},
-			}),
+			SetReturnDocument(options.After),
 	)
 
-	if review.Err() != nil {
-		return "", review.Err()
+	if deletedComment.Err() != nil {
+		return "", deletedComment.Err()
 	}
 
 	return commentID.Hex(), nil
@@ -167,19 +157,8 @@ func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*m
 	}
 
 	defer cursor.Close(ctx)
-
-	res := []*model.ReportedComment{}
-	for cursor.Next(ctx) {
-		reportedComment := model.ReportedComment{}
-		err = cursor.Decode(&reportedComment)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, &reportedComment)
-	}
-
-	err = cursor.Err()
-	if err != nil {
+	var res []*model.ReportedComment
+	if err = cursor.All(ctx, &res); err != nil {
 		return nil, err
 	}
 
@@ -187,92 +166,135 @@ func (r *queryResolver) ReportedComments(ctx context.Context, number *int) ([]*m
 		return nil, fmt.Errorf("no reported comments found")
 	}
 
-	for i, reportedComment := range res {
-
-		// TODO move those requests to a different function
-		if isFieldRequested(ctx, "comment") {
-			review := model.Review{}
-
-			convertedID, err := primitive.ObjectIDFromHex(reportedComment.CommentID)
+	// TODO move those requests to a different function
+	if isFieldRequested(ctx, "comment") {
+		commentIDs := make([]primitive.ObjectID, 0, len(res))
+		for _, reportedComment := range res {
+			objID, err := primitive.ObjectIDFromHex(reportedComment.CommentID)
 			if err != nil {
 				return nil, err
 			}
+			commentIDs = append(commentIDs, objID)
+		}
 
-			coll := database.GetDB().GetCollection("reviews")
-			err = coll.FindOne(
+		coll = database.GetDB().GetCollection("comments")
+		commentCursor, err := coll.Find(
+			ctx,
+			bson.M{"_id": bson.M{"$in": commentIDs}},
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		defer commentCursor.Close(ctx)
+
+		var comments []*model.Comment
+		if err = commentCursor.All(ctx, &comments); err != nil {
+			return nil, err
+		}
+
+		commentMap := make(map[string]*model.Comment)
+		for _, comment := range comments {
+			commentMap[*comment.ID] = comment
+		}
+
+		if isFieldRequested(ctx, "comment.user") {
+			userIDMap := make(map[string]bool)
+			for _, comment := range comments {
+				if comment.UserID != nil && *comment.UserID != "" {
+					userIDMap[*comment.UserID] = true
+				}
+			}
+
+			userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
+			for id := range userIDMap {
+				objID, err := primitive.ObjectIDFromHex(id)
+				if err != nil {
+					return nil, err
+				}
+				userIDs = append(userIDs, objID)
+			}
+
+			usersColl := database.GetDB().GetCollection("users")
+			usersCursor, err := usersColl.Find(
 				ctx,
-				bson.M{
-					"comments._id": bson.M{
-						"$eq": convertedID,
-					},
-				},
-			).Decode(&review)
+				bson.M{"_id": bson.M{"$in": userIDs}},
+			)
 			if err != nil {
 				return nil, err
 			}
-			if len(review.Comments) == 0 {
-				return nil, fmt.Errorf("no comments found")
+			defer usersCursor.Close(ctx)
+
+			var users []*model.UserResponse
+			if err = usersCursor.All(ctx, &users); err != nil {
+				return nil, err
 			}
 
-			for _, comment := range review.Comments {
-				if *comment.ID == reportedComment.CommentID {
-					res[i].Comment = comment
-					break
-				}
+			userMap := make(map[string]*model.UserResponse)
+			for _, user := range users {
+				userMap[user.ID] = user
 			}
 
-			if isFieldRequested(ctx, "comment.user") {
-				coll := database.GetDB().GetCollection("users")
-
-				convertedID, err := primitive.ObjectIDFromHex(*res[i].Comment.UserID)
-				if err != nil {
-					return nil, err
+			for _, comment := range comments {
+				if comment.UserID != nil && *comment.UserID != "" {
+					if user, ok := userMap[*comment.UserID]; ok {
+						comment.User = user
+					}
 				}
-
-				user := coll.FindOne(ctx, bson.M{"_id": convertedID})
-				if user.Err() != nil {
-					return nil, user.Err()
-				}
-
-				u := model.UserResponse{}
-				err = user.Decode(&u)
-				if err != nil {
-					return nil, err
-				}
-
-				res[i].Comment.User = &u
 			}
 		}
 
-		if isFieldRequested(ctx, "reportedByUser") {
-			coll := database.GetDB().GetCollection("users")
+		// Assign comments to reported comments
+		for _, rc := range res {
+			rc.Comment = commentMap[rc.CommentID]
+		}
+	}
 
-			convertedID, err := primitive.ObjectIDFromHex(res[i].ReportedBy)
+	if isFieldRequested(ctx, "reportedByUser") {
+		userIDMap := make(map[string]bool)
+		for _, rc := range res {
+			if rc.ReportedBy != "" {
+				userIDMap[rc.ReportedBy] = true
+			}
+		}
+
+		userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
+		for id := range userIDMap {
+			objID, err := primitive.ObjectIDFromHex(id)
 			if err != nil {
 				return nil, err
 			}
+			userIDs = append(userIDs, objID)
+		}
 
-			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
-			if user.Err() != nil {
-				return nil, user.Err()
+		usersColl := database.GetDB().GetCollection("users")
+		usersCursor, err := usersColl.Find(
+			ctx,
+			bson.M{"_id": bson.M{"$in": userIDs}},
+		)
+		if err != nil {
+			return nil, err
+		}
+		defer usersCursor.Close(ctx)
+
+		var users []*model.UserResponse
+		if err = usersCursor.All(ctx, &users); err != nil {
+			return nil, err
+		}
+
+		userMap := make(map[string]*model.UserResponse)
+		for _, user := range users {
+			userMap[user.ID] = user
+		}
+
+		for _, rc := range res {
+			if rc.ReportedBy != "" {
+				if user, ok := userMap[rc.ReportedBy]; ok {
+					rc.ReportedByUser = user
+				}
 			}
-
-			u := model.UserResponse{}
-			err = user.Decode(&u)
-			if err != nil {
-				return nil, err
-			}
-
-			res[i].ReportedByUser = &u
 		}
 	}
 
 	return res, nil
 }
-
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }

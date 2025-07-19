@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Review from "@/components/Review.vue";
-import ReviewComments from '@/components/comments/ReviewComments.vue';
+import TrackInfo from "@/components/track/TrackInfo.vue";
 import { useAuthStore } from '@/services/authStore';
-import { GET_REWIEW_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
-import { emptyReview, type CommentType, type ReviewType } from "@/types/review";
+import { GET_REWIEW_ID_BY_ITEM_ID_USER_ID, GET_TRACK_BY_ID } from "@/services/queries";
+import { emptyReview } from "@/types/review";
 import { emptyTrack, type TrackType } from "@/types/spotify";
 import { handleGqlError } from "@/utils/error";
 import { navigateToAlbum } from "@/utils/navigate";
@@ -22,60 +22,78 @@ const route = useRoute();
 const router = useRouter();
 const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
 
+const props = defineProps<{
+  itemId: string;
+  hideAddReview: boolean;
+}>();
+
 
 let track = ref<TrackType>(emptyTrack);
 let trackLoading = ref(true);
-
-let review = ref<ReviewType>(emptyReview);
 let reviewLoading = ref(true);
 
+const trackId = computed(() => {
+  console.log('trackId', props.itemId, route.params.id);
+  return props.itemId ?? route.params.id;
+});
 
 
 const fetch_track = async () => {
-  const { loading, error, result } = useQuery(
+  const { onError, onResult } = useQuery(
     GET_TRACK_BY_ID,
     {
-      id: route.params.trackId
+      id: trackId.value,
     }
   );
 
-  trackLoading = loading;
+  trackLoading.value = true;
 
-  watch(error, (err) => {
+  onError((err) => {
     handleGqlError(router, err);
   });
 
-  track = computed<TrackType>(() => result?.value?.track ?? emptyTrack);
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+
+    track.value = res?.data?.track;
+    trackLoading.value = false;
+  });
 };
 
 const fetch_rewiew = async () => {
-  const userId = route.params.userId ?? store.getId();
-
-  const { loading, error, result } = useQuery(
-    GET_REWIEW_BY_ITEM_ID_USER_ID,
+  const { onError, onResult } = useQuery(
+    GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
     {
-      itemId: route.params.trackId,
-      userId: userId,
+      itemId: trackId.value,
+      userId: store.getId(),
     }
   );
 
-  reviewLoading = loading;
+  reviewLoading.value = true;
 
-  watch(error, (err) => {
-    handleGqlError(router, err, ['mongo: no documents in result']);
-
-    if (route.params.userId !== store.getId()) {
-      navigateToAlbum(
-        router,
-        route.params.albumId as string,
-        store.getId()
-      );
-    }
-
+  onError((err) => {
+    handleGqlError(router, err, ["mongo: no documents in result"]);
   });
-
-  review = computed<ReviewType>(() => result.value?.review ?? emptyReview);
+  
+  onResult((res) => {
+    if (res.loading) {
+      return;
+    }
+    
+    if (res?.data?.review) {
+      router.push({
+        name: 'review',
+        params: {
+          id: res?.data?.review._id,
+        },
+      });
+      return;
+    }
+  });
 };
+
 
 const fetch_data = async () => {
   fetch_track();
@@ -85,24 +103,17 @@ const fetch_data = async () => {
 
 watch(() => route.params.id, fetch_data, { immediate: true })
 
-
-// TODO: move to separate file
-const updateComments = (comments: CommentType[]) => {
-  // idk if there is a way to update comments & keep them reactive
-  router.go(0);
-};
-
 </script>
 
 <template>
   <!-- TODO v-if for error -->
-  <div v-if="trackLoading || reviewLoading" class="flex justify-center pt-12">
+  <div v-if="trackLoading" class="flex justify-center pt-12">
     <ProgressSpinner />
   </div>
 
   <div v-else>
     <div class="flex">
-      <div class="w-1/2">
+      <div class="w-1/3">
         <Image
           :src="track.album.images[0].url ?? ''"
           alt="Album Cover"
@@ -110,62 +121,19 @@ const updateComments = (comments: CommentType[]) => {
           preview
           />
       </div>
-      <div class="w-1/2 pl-4 sm:px-4 sm:pt-4">
-        <Card>
-          <template #content>
-            <div class="text-3xl sm:text-5xl font-bold">
-              <a :href="track.external_urls.spotify" target="_blank">
-                {{ track.name }}
-              </a>
-            </div>
-            <Divider />
-            <div class="sm:text-2xl pb-1">
-              <a :href="track.artists[0].external_urls.spotify" target="_blank">
-                {{ track.artists[0].name }}
-              </a>
-            </div>
-            <div class="text-sm sm:text-xl">
-              <a @click="navigateToAlbum(router, track.album.id, store.getId())" class="cursor-pointer">
-                {{ track.album.name }}
-              </a>
-              <a class="text-slate-500">
-                ({{ track.album.release_date.split("-")[0] }})
-              </a>
-            </div>
-          </template>
-        </Card>
-        <div v-if="!isMdScreen" >
-          <Review
-            :item-id="route.params.trackId as string"
-            :item-type="'track'"
-            :rating="review.value"
-            :title="review.title"
-            :description="review.description"
-            :user="review.user"
-            class="pt-4"
-          />
-        </div>
+      <div class="w-2/3 pl-4 sm:px-4 sm:pt-4">
+        <TrackInfo
+          :track="track"
+        />
       </div>
     </div>
 
-    <div v-if="isMdScreen" class="sm:px-4 sm:pt-4">
-      <Review
-        :item-id="route.params.trackId as string"
-        :item-type="'track'"
-        :rating="review.value"
-        :title="review.title"
-        :description="review.description"
-        :user="review.user"
-        class="pt-4"
-      />
-    </div>
-
-    <ReviewComments
-      v-if="review !== emptyReview"
-      :item-id="route.params.trackId as string"
-      :comments="review.comments"
-      @update-comments="updateComments"
-      class="sm:px-4 mt-4"
+    <Review
+      v-if="!props.hideAddReview"
+      class="pt-4"
+      :review="emptyReview"
+      :item-id="trackId"
+      :item-type="'track'"
     />
   </div>
 

@@ -14,6 +14,7 @@ import apolloClient from './services/apollo'
 
 import App from './App.vue'
 import router from './router'
+import mitt from 'mitt'
 
 const app = createApp({
   setup () {
@@ -38,5 +39,7 @@ app.use(router)
 
 app.use(ConfirmationService);
 app.use(ToastService);
+
+app.provide('emitter', mitt())
 
 app.mount('#app')

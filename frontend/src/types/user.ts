@@ -29,6 +29,10 @@ type UserType = {
   uri: string;
   role: string;
   favouriteAlbums: FavouriteAlbumEntryType[];
+  trackReviewsNumber: number;
+  albumReviewsNumber: number;
+  isFollowing: boolean;
+  isFollower: boolean;
 };
 
 const emptyUser: UserType = {
@@ -47,6 +51,10 @@ const emptyUser: UserType = {
   uri: "",
   role: "",
   favouriteAlbums: [emptyFavouriteAlbumEntry],
+  trackReviewsNumber: 0,
+  albumReviewsNumber: 0,
+  isFollowing: false,
+  isFollower: false,
 };
 
 export type {

@@ -7,6 +7,7 @@ package resolver
 import (
 	"context"
 	"errors"
+	"math"
 	"musicboxd/database"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
@@ -29,6 +30,7 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	}
 
 	var album *model.Album
+	dbTrack := map[string]interface{}{}
 
 	if itemType == "track" {
 		track, err := hlp.SpotifyGetTrack(itemID, accessToken)
@@ -36,6 +38,13 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 			return nil, err
 		}
 		album = track.Album
+
+		dbTrack = map[string]interface{}{
+			"trackId": track.ID,
+			"name":    track.Name,
+			"artists": track.Artists,
+		}
+
 	} else if itemType == "album" {
 		album, err = hlp.SpotifyGetAlbum(itemID, accessToken)
 		if err != nil {
@@ -58,15 +67,23 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 		bson.M{"itemId": itemID, "userId": cc.UserID, "itemType": itemType},
 		bson.M{
 			"$setOnInsert": bson.M{
-				"comments": []interface{}{},
+				"comments":  []interface{}{},
+				"createdAt": time.Now(),
+				"likes":     []interface{}{},
+				"dislikes":  []interface{}{},
 			},
 			"$set": bson.M{
 				"title":       title,
 				"description": description,
 				"value":       value,
 				"album":       dbAlbum,
+				"track":       dbTrack,
+				"updatedAt":   time.Now(),
 			}},
-		options.FindOneAndUpdate().SetUpsert(true).SetReturnDocument(options.After),
+		options.FindOneAndUpdate().
+			SetUpsert(true).
+			SetReturnDocument(options.After).
+			SetProjection(database.GetReviewProjection(cc.UserID)),
 	)
 	if review.Err() != nil {
 		return nil, review.Err()
@@ -81,7 +98,68 @@ func (r *mutationResolver) CreateOrUpdateReview(ctx context.Context, itemID stri
 	return &res, nil
 }
 
-func (r *mutationResolver) AddComment(ctx context.Context, itemID string, reviewID string, text string) ([]*model.Comment, error) {
+func (r *mutationResolver) AddLikeDislikeReview(ctx context.Context, reviewID string, action string) (*model.Review, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	review, err := AddLikeDislike(ctx, cc.UserID, reviewID, action, "reviews")
+	if err != nil {
+		return nil, err
+	}
+
+	res := model.Review{}
+	err = review.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res, nil
+}
+
+func (r *queryResolver) Review(ctx context.Context, itemID string, userID string) (*model.Review, error) {
+	cc, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedID, err := primitive.ObjectIDFromHex(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	review := coll.FindOne(
+		ctx,
+		bson.M{"itemId": itemID, "userId": convertedID},
+		options.FindOne().
+			SetProjection(database.GetReviewProjection(cc.UserID)),
+	)
+	if review.Err() != nil {
+		return nil, review.Err()
+	}
+
+	res := model.Review{}
+	err = review.Decode(&res)
+	if err != nil {
+		return nil, err
+	}
+
+	if isFieldRequested(ctx, "user") {
+		u, err := database.GetUserByID(ctx, res.UserID)
+		if err != nil {
+			return nil, err
+		}
+
+		res.User = u
+	}
+
+	return &res, nil
+}
+
+func (r *queryResolver) ReviewByID(ctx context.Context, reviewID string) (*model.Review, error) {
+	// TODO allow not logged in users to see reviews
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
@@ -93,75 +171,12 @@ func (r *mutationResolver) AddComment(ctx context.Context, itemID string, review
 	}
 
 	coll := database.GetDB().GetCollection("reviews")
-	comment := coll.FindOneAndUpdate(
+	review := coll.FindOne(
 		ctx,
-		bson.M{"itemId": itemID, "userId": convertedReviewID},
-		bson.M{
-			"$push": bson.M{
-				"comments": bson.M{
-					"_id":       primitive.NewObjectID(),
-					"reviewId":  reviewID, // why would i need it here?
-					"userId":    cc.UserID,
-					"text":      text,
-					"createdAt": time.Now(), // TODO check if timezone independent - utc+0?
-					"updatedAt": time.Now(),
-				},
-			},
-		},
-		options.FindOneAndUpdate().SetReturnDocument(options.After),
+		bson.M{"_id": convertedReviewID},
+		options.FindOne().
+			SetProjection(database.GetReviewProjection(cc.UserID)),
 	)
-
-	if comment.Err() != nil {
-		return nil, comment.Err()
-	}
-
-	res := model.Review{}
-	err = comment.Decode(&res)
-	if err != nil {
-		return nil, err
-	}
-
-	if isFieldRequested(ctx, "user") {
-		for _, comment := range res.Comments {
-			coll := database.GetDB().GetCollection("users")
-
-			convertedID, err := primitive.ObjectIDFromHex(*comment.UserID)
-			if err != nil {
-				return nil, err
-			}
-
-			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
-			if user.Err() != nil {
-				return nil, user.Err()
-			}
-
-			u := model.UserResponse{}
-			err = user.Decode(&u)
-			if err != nil {
-				return nil, err
-			}
-
-			comment.User = &u
-		}
-	}
-
-	// TODO return only the added comment?
-	return res.Comments, nil
-}
-
-func (r *queryResolver) Review(ctx context.Context, itemID string, userID string) (*model.Review, error) {
-	_, err := ValidateJWT(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	convertedID, err := primitive.ObjectIDFromHex(userID)
-	if err != nil {
-		return nil, err
-	}
-
-	coll := database.GetDB().GetCollection("reviews")
-	review := coll.FindOne(ctx, bson.M{"itemId": itemID, "userId": convertedID})
 	if review.Err() != nil {
 		return nil, review.Err()
 	}
@@ -172,6 +187,7 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		return nil, err
 	}
 
+	// TODO make a separate function for this
 	if isFieldRequested(ctx, "user") {
 		convertedID, err := primitive.ObjectIDFromHex(res.UserID)
 		if err != nil {
@@ -191,30 +207,6 @@ func (r *queryResolver) Review(ctx context.Context, itemID string, userID string
 		}
 
 		res.User = &u
-	}
-
-	if isFieldRequested(ctx, "comments.user") {
-		for _, comment := range res.Comments {
-			coll := database.GetDB().GetCollection("users")
-
-			convertedID, err := primitive.ObjectIDFromHex(*comment.UserID)
-			if err != nil {
-				return nil, err
-			}
-
-			user := coll.FindOne(ctx, bson.M{"_id": convertedID})
-			if user.Err() != nil {
-				return nil, user.Err()
-			}
-
-			u := model.UserResponse{}
-			err = user.Decode(&u)
-			if err != nil {
-				return nil, err
-			}
-
-			comment.User = &u
-		}
 	}
 
 	return &res, nil
@@ -260,10 +252,119 @@ func (r *queryResolver) RecentReviews(ctx context.Context, number *int, itemType
 			r.User = &u
 		}
 
-		// comments.user field is not added
-
 		res = append(res, &r)
 	}
+
+	return res, nil
+}
+
+func (r *queryResolver) RecentUserReviews(ctx context.Context, pageSize *int, page int, itemType string, userID string) (*model.RecentUserReviews, error) {
+	// Authenticate user or no ???
+
+	filter := bson.M{}
+	if itemType != "" {
+		filter["itemType"] = itemType
+	}
+	if userID != "" {
+		convertedID, err := primitive.ObjectIDFromHex(userID)
+		if err != nil {
+			return nil, err
+		}
+		filter["userId"] = convertedID
+	}
+
+	coll := database.GetDB().GetCollection("reviews")
+	res := &model.RecentUserReviews{}
+
+	currentPage := 1
+	if page > 0 {
+		currentPage = page
+	}
+
+	limit := 10
+	if pageSize != nil && *pageSize > 0 {
+		limit = min(*pageSize, 20)
+	}
+
+	skip := (currentPage - 1) * limit
+
+	if isFieldRequested(ctx, "reviews") {
+		cursor, err := coll.Find(
+			ctx,
+			filter,
+			options.Find().
+				SetSort(bson.M{"createdAt": -1}).
+				SetSkip(int64(skip)).
+				SetLimit(int64(limit)),
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		defer cursor.Close(ctx)
+		var reviews []*model.Review
+		if err = cursor.All(ctx, &reviews); err != nil {
+			return nil, err
+		}
+
+		if isFieldRequested(ctx, "user") && len(reviews) > 0 {
+			// TODO extract this to a separate function, also used in moderator
+			userIDMap := make(map[string]bool)
+			for _, review := range reviews {
+				if review.UserID != "" {
+					userIDMap[review.UserID] = true
+				}
+			}
+
+			userIDs := make([]primitive.ObjectID, 0, len(userIDMap))
+			for id := range userIDMap {
+				objID, err := primitive.ObjectIDFromHex(id)
+				if err != nil {
+					return nil, err
+				}
+				userIDs = append(userIDs, objID)
+			}
+
+			usersColl := database.GetDB().GetCollection("users")
+			usersCursor, err := usersColl.Find(
+				ctx,
+				bson.M{"_id": bson.M{"$in": userIDs}},
+			)
+			if err != nil {
+				return nil, err
+			}
+			defer usersCursor.Close(ctx)
+
+			var users []*model.UserResponse
+			if err = usersCursor.All(ctx, &users); err != nil {
+				return nil, err
+			}
+
+			userMap := make(map[string]*model.UserResponse)
+			for _, user := range users {
+				userMap[user.ID] = user
+			}
+
+			for _, review := range reviews {
+				if user, ok := userMap[review.UserID]; ok {
+					review.User = user
+				}
+			}
+		}
+
+		res.Reviews = reviews
+
+	}
+
+	total, err := coll.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	res.TotalReviews = int(total)
+	res.TotalPages = int(math.Ceil(float64(total) / float64(limit)))
+	res.HasNextPage = currentPage < res.TotalPages
+	res.HasPreviousPage = currentPage > 1
 
 	return res, nil
 }

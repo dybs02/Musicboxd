@@ -8,6 +8,7 @@ import (
 	"musicboxd/database"
 	"musicboxd/graph/model"
 	"musicboxd/hlp"
+	"musicboxd/hlp/jwt"
 	"net/http"
 	"net/url"
 
@@ -89,12 +90,12 @@ func CallbackEndpoint(c *gin.Context) {
 		return
 	}
 
-	ui := hlp.UserInfo{
+	ui := jwt.UserInfo{
 		ID:    *dbUser.ID,
 		Email: dbUser.Email,
 		Role:  dbUser.Role,
 	}
-	token, err := hlp.GenerateJWT(ui)
+	token, err := jwt.GenerateJWT(ui)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "could not generate jwt"})
 		return

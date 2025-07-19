@@ -62,6 +62,19 @@ const emptySimplifiedArtist: SimplifiedArtistType = {
 };
 
 
+type ReviewTrackType = {
+  trackId: string;
+  name: string;
+  artists: SimplifiedArtistType[];
+}
+
+const emptyReviewTrack: ReviewTrackType = {
+  trackId: "",
+  name: "",
+  artists: [emptySimplifiedArtist],
+}
+
+
 type ReviewAlbumType = {
   albumId: string;
   name: string;
@@ -84,6 +97,7 @@ export type {
   FollowersType,
   ImageType,
   SimplifiedArtistType,
+  ReviewTrackType,
   ReviewAlbumType,
 };
 
@@ -93,5 +107,6 @@ export {
   emptyFollowers,
   emptyImage,
   emptySimplifiedArtist,
+  emptyReviewTrack,
   emptyReviewAlbum,
 };

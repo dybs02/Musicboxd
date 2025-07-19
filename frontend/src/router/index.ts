@@ -9,12 +9,12 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/album/:albumId/review/:userId',
+      path: '/album/:id',
       name: 'album',
       component: () => import('@/views/AlbumView.vue')
     },
     {
-      path: '/track/:trackId/review/:userId',
+      path: '/track/:id',
       name: 'track',
       component: () => import('@/views/TrackView.vue')
     },
@@ -52,7 +52,27 @@ const router = createRouter({
       path: '/admin/reported',
       name: 'reported',
       component: () => import('@/views/admin/ReportedView.vue')
-    }
+    },
+    {
+      path: '/diary/:userId',
+      name: 'diary',
+      component: () => import('@/views/DiaryView.vue')
+    },
+    {
+      path: '/posts',
+      name: 'posts',
+      component: () => import('@/views/PostsView.vue')
+    },
+    {
+      path: '/posts/:reviewId',
+      name: 'post-share-review',
+      component: () => import('@/views/PostsView.vue')
+    },
+    {
+      path: '/chat/:userId',
+      name: 'chat',
+      component: () => import('@/views/ChatView.vue')
+    },
   ]
 })
 

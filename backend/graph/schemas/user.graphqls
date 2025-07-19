@@ -25,6 +25,10 @@ type User {
   tokens: Tokens
   role: String!
   favouriteAlbums: [FavouriteAlbumEntry]!
+  followingUsers: [ID]!
+  followerUsers: [ID]!
+  isFollowing: Boolean
+  isFollower: Boolean
 }
 
 type ExplicitContent {
@@ -72,6 +76,12 @@ type UserResponse {
   uri: String!
   role: String!
   favouriteAlbums: [FavouriteAlbumEntry]!
+  trackReviewsNumber: Int
+  albumReviewsNumber: Int
+  followingUsers: [ID]!
+  followerUsers: [ID]!
+  isFollowing: Boolean
+  isFollower: Boolean
 }
 
 extend type Query {
@@ -81,4 +91,6 @@ extend type Query {
 
 extend type Mutation {
   updateCurrentUser(displayName: String, favouriteAlbum: FavouriteAlbumEntryInput): UserResponse
+  followUser(userId: String!): UserResponse
+  unfollowUser(userId: String!): UserResponse
 }

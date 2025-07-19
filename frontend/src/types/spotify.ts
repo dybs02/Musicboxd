@@ -39,6 +39,9 @@ type TrackType = {
   type: string;
   uri: string;
   is_local: boolean;
+
+  averageRating: number;
+  ratingCount: number;
 }
 
 const emptyTrack: TrackType = {
@@ -58,7 +61,10 @@ const emptyTrack: TrackType = {
   track_number: 0,
   type: '',
   uri: '',
-  is_local: false
+  is_local: false,
+
+  averageRating: 0,
+  ratingCount: 0
 };
 
 
@@ -98,6 +104,9 @@ type AlbumType = {
   uri: string;
   artists: SimplifiedArtistType[];
   tracks: TracksType;
+
+  averageRating: number;
+  ratingCount: number;
 };
 
 const emptyAlbum: AlbumType = {
@@ -115,6 +124,9 @@ const emptyAlbum: AlbumType = {
   uri: '',
   artists: [emptySimplifiedArtist],
   tracks: emptyTracks,
+
+  averageRating: 0,
+  ratingCount: 0
 };
 
 

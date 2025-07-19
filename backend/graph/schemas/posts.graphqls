@@ -1,0 +1,39 @@
+
+type Post {
+  _id: ID
+  content: String!
+  userId: ID!
+  user: UserResponse
+  createdAt: Time!
+  updatedAt: Time
+  commentIds: [ID]
+  comments: [Comment]
+  commentsNumber: Int!
+  linkedReviewId: ID
+  linkedReview: Review
+
+  likes: [ID]
+  likesCount: Int!
+  dislikes: [ID]
+  dislikesCount: Int!
+  userReaction: String
+}
+
+type RecentPosts {
+  totalPosts: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  posts: [Post!]!
+}
+
+extend type Query {
+  getRecentPost(pageSize: Int, page: Int!, type: String): RecentPosts!
+}
+
+extend type Mutation {
+  createPost(content: String!, linkedReviewId: String): Post!
+  updatePost(id: String!, content: String!): Post!
+  deletePost(id: String!): ID!
+  addLikeDislikePost(postId: String!, action: String!): Post!
+}

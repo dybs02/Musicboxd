@@ -24,7 +24,7 @@ func NewApi() *Api {
 
 	gql := api.Group("/graphql")
 	gql.Use(middleware.GinContextToContextMiddleware())
-	gql.POST("/query", gqlEndpoint.GraphqlHandler())
+	gql.Any("/query", gqlEndpoint.GraphqlHandler())
 	gql.GET("/", gqlEndpoint.PlaygroundHandler())
 
 	return r
