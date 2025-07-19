@@ -2,13 +2,17 @@ package resolver
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"musicboxd/database"
 	"musicboxd/graph/model"
 	"musicboxd/hlp/jwt"
 	"slices"
+	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -335,10 +339,15 @@ func CreateNewChat(ctx context.Context, name *string, participantIds []string) (
 	return res, nil
 }
 
-func CreateNewPrivateChat(ctx context.Context, name *string, participantId string) (*model.Chat, error) {
+func CreateNewPrivateChat(ctx context.Context, name *string, participantId string, chatID primitive.ObjectID) (*model.Chat, error) {
 	cc, err := ValidateJWT(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	user, err := database.GetUserByPrimitiveID(ctx, cc.UserID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve user: %w", err)
 	}
 
 	participant, err := database.GetUserByID(ctx, participantId)
@@ -353,15 +362,15 @@ func CreateNewPrivateChat(ctx context.Context, name *string, participantId strin
 
 	chatName := ""
 	if name == nil || *name == "" {
-		chatName = `Chat with ` + participant.DisplayName
+		chatName = user.DisplayName + ` and ` + participant.DisplayName + ` chat`
 	} else {
 		chatName = *name
 	}
 
 	document := bson.M{
+		"_id":             chatID,
 		"name":            chatName,
 		"participantsIds": []primitive.ObjectID{cc.UserID, convertedParticipantID},
-		"participantId":   convertedParticipantID,
 		"messages":        []primitive.A{},
 		"createdAt":       time.Now(),
 	}
@@ -376,9 +385,7 @@ func CreateNewPrivateChat(ctx context.Context, name *string, participantId strin
 		ID:              chat.InsertedID.(primitive.ObjectID).Hex(),
 		Name:            &chatName,
 		ParticipantsIds: []string{cc.UserID.Hex(), participantId},
-		Participants:    []*model.UserResponse{participant},
-		ParticipantID:   participantId,
-		Participant:     participant,
+		Participants:    []*model.UserResponse{user, participant},
 		CreatedAt:       document["createdAt"].(time.Time),
 	}
 
@@ -430,4 +437,26 @@ func MessageFromUpdatedFields(updatedFields bson.M) (*model.Message, error) {
 	}
 
 	return nil, fmt.Errorf("no valid message data found in updated fields")
+}
+
+func CreateChatObjectID(userIDs []string) (primitive.ObjectID, error) {
+	if len(userIDs) == 0 {
+		return primitive.NilObjectID, fmt.Errorf("no user IDs provided")
+	}
+
+	sort.Strings(userIDs)
+	joined := strings.Join(userIDs, "_")
+
+	hasher := sha256.New()
+	hasher.Write([]byte(joined))
+	hash := hasher.Sum(nil)
+
+	hasssh := hash[:12]
+	tostr := hex.EncodeToString(hasssh)
+	objectID, err := primitive.ObjectIDFromHex(tostr)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+
+	return objectID, nil
 }

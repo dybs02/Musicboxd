@@ -80,11 +80,16 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 		return nil, fmt.Errorf("invalid participant ID: %w", err)
 	}
 
+	chatId, err := CreateChatObjectID([]string{participantID, cc.UserID.Hex()})
+	if err != nil {
+		return nil, fmt.Errorf("failed to create chat ID: %w", err)
+	}
+
 	coll := database.GetDB().GetCollection("chats")
 	chat := coll.FindOne(
 		ctx,
 		bson.M{
-			"participantId": convertedParticipantID,
+			"_id": chatId,
 		},
 		options.FindOne().SetProjection(database.GetChatProjection(cc.UserID)),
 	)
@@ -92,7 +97,7 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 	if chat.Err() != nil {
 		// If chat not found, create a new one, idc that this is a query resolver
 		if chat.Err() == mongo.ErrNoDocuments {
-			chat, err := CreateNewPrivateChat(ctx, nil, participantID)
+			chat, err := CreateNewPrivateChat(ctx, nil, participantID, chatId)
 			if err != nil {
 				return nil, fmt.Errorf("failed to create chat: %w", err)
 			}
@@ -108,13 +113,13 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 		return nil, fmt.Errorf("failed to decode chat: %w", err)
 	}
 
-	if isFieldRequested(ctx, "participant") {
-		user, err := database.GetUserByPrimitiveID(ctx, convertedParticipantID)
+	if isFieldRequested(ctx, "participants") {
+		users, err := database.GetUsersByIDs(ctx, &[]primitive.ObjectID{cc.UserID, convertedParticipantID})
 		if err != nil {
 			return nil, fmt.Errorf("failed to retrieve user: %w", err)
 		}
 
-		res.Participant = user
+		res.Participants = users
 	}
 
 	return res, nil

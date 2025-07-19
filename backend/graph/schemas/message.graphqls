@@ -3,8 +3,6 @@ type Chat {
   name: String
   participantsIds: [ID!]!
   participants: [UserResponse!]!
-  participantId: ID!
-  participant: UserResponse!
   messages: [Message!]!
   createdAt: Time!
 }

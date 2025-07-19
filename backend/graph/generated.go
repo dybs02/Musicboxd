@@ -84,8 +84,6 @@ type ComplexityRoot struct {
 		ID              func(childComplexity int) int
 		Messages        func(childComplexity int) int
 		Name            func(childComplexity int) int
-		Participant     func(childComplexity int) int
-		ParticipantID   func(childComplexity int) int
 		Participants    func(childComplexity int) int
 		ParticipantsIds func(childComplexity int) int
 	}
@@ -628,20 +626,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Chat.Name(childComplexity), true
-
-	case "Chat.participant":
-		if e.complexity.Chat.Participant == nil {
-			break
-		}
-
-		return e.complexity.Chat.Participant(childComplexity), true
-
-	case "Chat.participantId":
-		if e.complexity.Chat.ParticipantID == nil {
-			break
-		}
-
-		return e.complexity.Chat.ParticipantID(childComplexity), true
 
 	case "Chat.participants":
 		if e.complexity.Chat.Participants == nil {
@@ -5069,138 +5053,6 @@ func (ec *executionContext) fieldContext_Chat_participants(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Chat_participantId(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_participantId(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ParticipantID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Chat_participantId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Chat",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Chat_participant(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Chat_participant(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Participant, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.UserResponse)
-	fc.Result = res
-	return ec.marshalNUserResponse2ᚖmusicboxdᚋgraphᚋmodelᚐUserResponse(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Chat_participant(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Chat",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "_id":
-				return ec.fieldContext_UserResponse__id(ctx, field)
-			case "country":
-				return ec.fieldContext_UserResponse_country(ctx, field)
-			case "displayName":
-				return ec.fieldContext_UserResponse_displayName(ctx, field)
-			case "email":
-				return ec.fieldContext_UserResponse_email(ctx, field)
-			case "explicitContent":
-				return ec.fieldContext_UserResponse_explicitContent(ctx, field)
-			case "externalUrls":
-				return ec.fieldContext_UserResponse_externalUrls(ctx, field)
-			case "followers":
-				return ec.fieldContext_UserResponse_followers(ctx, field)
-			case "href":
-				return ec.fieldContext_UserResponse_href(ctx, field)
-			case "spotifyId":
-				return ec.fieldContext_UserResponse_spotifyId(ctx, field)
-			case "images":
-				return ec.fieldContext_UserResponse_images(ctx, field)
-			case "product":
-				return ec.fieldContext_UserResponse_product(ctx, field)
-			case "type":
-				return ec.fieldContext_UserResponse_type(ctx, field)
-			case "uri":
-				return ec.fieldContext_UserResponse_uri(ctx, field)
-			case "role":
-				return ec.fieldContext_UserResponse_role(ctx, field)
-			case "favouriteAlbums":
-				return ec.fieldContext_UserResponse_favouriteAlbums(ctx, field)
-			case "trackReviewsNumber":
-				return ec.fieldContext_UserResponse_trackReviewsNumber(ctx, field)
-			case "albumReviewsNumber":
-				return ec.fieldContext_UserResponse_albumReviewsNumber(ctx, field)
-			case "followingUsers":
-				return ec.fieldContext_UserResponse_followingUsers(ctx, field)
-			case "followerUsers":
-				return ec.fieldContext_UserResponse_followerUsers(ctx, field)
-			case "isFollowing":
-				return ec.fieldContext_UserResponse_isFollowing(ctx, field)
-			case "isFollower":
-				return ec.fieldContext_UserResponse_isFollower(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type UserResponse", field.Name)
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Chat_messages(ctx context.Context, field graphql.CollectedField, obj *model.Chat) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Chat_messages(ctx, field)
 	if err != nil {
@@ -9382,10 +9234,6 @@ func (ec *executionContext) fieldContext_Query_chat(ctx context.Context, field g
 				return ec.fieldContext_Chat_participantsIds(ctx, field)
 			case "participants":
 				return ec.fieldContext_Chat_participants(ctx, field)
-			case "participantId":
-				return ec.fieldContext_Chat_participantId(ctx, field)
-			case "participant":
-				return ec.fieldContext_Chat_participant(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chat_messages(ctx, field)
 			case "createdAt":
@@ -18641,16 +18489,6 @@ func (ec *executionContext) _Chat(ctx context.Context, sel ast.SelectionSet, obj
 			}
 		case "participants":
 			out.Values[i] = ec._Chat_participants(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "participantId":
-			out.Values[i] = ec._Chat_participantId(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "participant":
-			out.Values[i] = ec._Chat_participant(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

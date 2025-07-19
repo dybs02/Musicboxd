@@ -562,7 +562,7 @@ const CHAT_BY_PARTICIPANT = gql`
       _id
       name
       createdAt
-      participant {
+      participants {
         _id
         displayName
         images {

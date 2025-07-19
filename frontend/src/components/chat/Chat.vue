@@ -84,7 +84,7 @@ const sendMessage = () => {
 }
 
 const change_page = async () => {
-  if (page > messagesPage.value.totalPages && !messagesPageLoading.value) {
+  if (page > messagesPage.value.totalPages && messagesPage.value.totalPages !== 0) {
     return;
   }
 
@@ -156,7 +156,6 @@ const { isActive, pause, resume } = useIntersectionObserver(
 )
 
 const onLoad = async () => {
-  await change_page();
   await nextTick(() => {
     scrollToBottom();
   });
@@ -178,7 +177,7 @@ onMounted(() => {
   <Card>
     <template #header>
       <div class="pl-6 pt-4">
-        <h2 class="text-lg font-semibold">Chat with {{ props.chat.participant.displayName }}</h2>
+        <h2 class="text-lg font-semibold">{{ props.chat.name }}</h2>
       </div>
     </template>
 

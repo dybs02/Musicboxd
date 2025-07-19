@@ -40,8 +40,6 @@ type Chat struct {
 	Name            *string         `json:"name,omitempty" bson:"name,omitempty"`
 	ParticipantsIds []string        `json:"participantsIds" bson:"participantsIds"`
 	Participants    []*UserResponse `json:"participants" bson:"participants"`
-	ParticipantID   string          `json:"participantId" bson:"participantId"`
-	Participant     *UserResponse   `json:"participant" bson:"participant"`
 	Messages        []*Message      `json:"messages" bson:"messages"`
 	CreatedAt       time.Time       `json:"createdAt" bson:"createdAt"`
 }
