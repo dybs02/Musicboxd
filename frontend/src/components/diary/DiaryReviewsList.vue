@@ -21,7 +21,7 @@ const props = defineProps({
 const router = useRouter();
 
 
-const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
+const isMdScreen = useMediaQuery('(max-width: 550px)') // Tailwind md breakpoint
 
 const getSeverity = (itemType: string) => {
   switch (itemType) {

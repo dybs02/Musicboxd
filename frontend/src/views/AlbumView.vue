@@ -18,7 +18,7 @@ import { useRoute, useRouter } from 'vue-router';
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
+const isMdScreen = useMediaQuery('(max-width: 550px)') // Tailwind md breakpoint
 
 const props = defineProps<{
   itemId: string;
@@ -108,8 +108,8 @@ watch(() => route.params, fetch_data, { immediate: true })
   </div>
 
   <div v-else>
-    <div class="flex">
-      <div class="w-1/3">
+    <div class="sm:flex">
+      <div class="sm:w-1/3 m-4 sm:m-0">
         <Image
           :src="album.images[0].url ?? ''"
           alt="Album Cover"
@@ -117,7 +117,7 @@ watch(() => route.params, fetch_data, { immediate: true })
           preview
           />
       </div>
-      <div class="w-2/3 pl-4 sm:px-4 sm:pt-4">
+      <div class="sm:w-2/3 sm:pl-4 sm:pl-4 sm:pt-4">
         <AlbumInfo
           :album="album"
         />

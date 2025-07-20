@@ -182,7 +182,7 @@ onMounted(() => {
     </template>
 
     <template #content>
-      <div class="bg-zinc-800 rounded-md p-4">
+      <div class="bg-darker rounded-md p-4">
         <div ref="root" id="chatBox" class="overflow-auto h-96 scroll-snap-y-container">
           <div ref="loadingMessagesDiv" class="flex h-5 w-full justify-center">No more messages</div>
             

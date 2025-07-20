@@ -48,13 +48,13 @@ const nav_items = ref([
         router.push({name: 'posts'});
       }
   },
-  {
-      label: 'Chat',
-      icon: 'pi pi-envelope',
-      command: () => {
-        router.push({name: 'chat'});
-      }
-  },
+  // {
+  //     label: 'Chat',
+  //     icon: 'pi pi-envelope',
+  //     command: () => {
+  //       router.push({name: 'chat'});
+  //     }
+  // },
 ]);
 const admin_nav_items = ref([
   {
@@ -140,7 +140,7 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
                       panelClass="sm:w-96 w-full"
         >
           <template #header>
-            <div class="rounded-md" style="background-color: #09090b;">
+            <div class="rounded-md">
               <SelectButton v-model="search_type"
                             :options="search_options"
                             @change="suggest_search"

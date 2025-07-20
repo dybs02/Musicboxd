@@ -26,16 +26,24 @@ const props = defineProps<{
 <template>
   <Card>
     <template #content>
-      <Accordion unstyled>
-        <AccordionPanel value="0" unstyled>
-          <AccordionHeader unstyled toggleicon="null" class="pb-1">
+      <Accordion >
+        <AccordionPanel value="0" >
+          <AccordionHeader>
             Track List 
           </AccordionHeader>
-          <AccordionContent unstyled class="bg-neutral-800 rounded-md p-2">
-            <div v-for="track in props.track_list" class="m-0">
-              <a @click="navigateToTrack(router, track.id)" class="cursor-pointer">
-                {{ track.name }}
-              </a>
+          <AccordionContent class="bg-darker">
+            <div v-for="(track, index) in props.track_list" :key="track.id">
+              <div @click="navigateToTrack(router, track.id)" class="cursor-pointer mb-2">
+                <span class="font-bold">
+                  {{ index + 1 }}. 
+                </span>
+                <span>
+                  {{ track.name }} - 
+                </span>
+                <span class="text-sm text-neutral-600">
+                  {{ Math.floor(track.duration_ms / 60000) }}:{{ Math.floor((track.duration_ms % 60000) / 1000).toString().padStart(2, '0') }}
+                </span>
+              </div>
             </div>
           </AccordionContent>
         </AccordionPanel>

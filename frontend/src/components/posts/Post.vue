@@ -199,14 +199,14 @@ emitter?.on('replyToComment', async (e: any) => {
       </div>
 
       <div class="mt-4" v-if="showAddComment" id="repply-form">
-        <Form class="md:flex">
+        <Form class="sm:flex">
           <FloatLabel variant="on" class="w-full">
             <Textarea v-model="newComment.text" id="over_label" rows="4" class="w-full" />
             <label for="on_label">Your comment</label>
           </FloatLabel>
-          <div class="md:ml-2">
-            <Button type="submit" severity="secondary" label="Add comment" class="my-2 md:my-0 w-full whitespace-nowrap" @click="submitComment"/>
-            <Button severity="secondary" label="Cancel" class="w-full md:mt-3 whitespace-nowrap" @click="showAddComment = false"/>
+          <div class="sm:ml-2">
+            <Button type="submit" severity="secondary" label="Add comment" class="my-2 sm:my-0 w-full whitespace-nowrap" @click="submitComment"/>
+            <Button severity="secondary" label="Cancel" class="w-full sm:mt-3 whitespace-nowrap" @click="showAddComment = false"/>
           </div>
         </Form>
       </div>

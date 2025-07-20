@@ -129,45 +129,49 @@ watch(() => route.params, fetch_data, { immediate: true })
     
   <Card class="relative z-10 -mt-4"> 
     <template #header>
-      <div class="flex items-center gap-2 px-8 pt-8">
-        <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
-        <div class="flex flex-col">
-          <div class="flex items-center gap-2">
-            <span class="text-3xl font-bold">{{ user.displayName }}</span>
-            <div class="">
-              <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>Follow</Button>
-              <Button 
-                v-if="user.isFollowing" 
-                @click="unfollowUser" 
-                :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
-                outlined
-                @mouseenter="unfollowButtonText = 'Unfollow'"
-                @mouseleave="unfollowButtonText = 'Following'"
-              >
-                {{ unfollowButtonText }}
-              </Button>
+      <div class="sm:flex items-center gap-2 px-8 pt-8">
+        <div class="flex items-center">
+          <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
+          <div class="flex flex-col pl-4">
+            <div class="flex items-center gap-2">
+              <span class="text-3xl font-bold">{{ user.displayName }}</span>
 
-              <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="ml-2">
-                Chat
-                <i class="pi pi-external-link ml-1 cursor-pointer"></i>
-              </Button>
             </div>
+            <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
           </div>
-          <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
+          <div class="pl-4">
+            <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>Follow</Button>
+            <Button 
+              v-else
+              @click="unfollowUser" 
+              :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
+              outlined
+              @mouseenter="unfollowButtonText = 'Unfollow'"
+              @mouseleave="unfollowButtonText = 'Following'"
+            >
+              {{ unfollowButtonText }}
+            </Button>
+
+            <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="sm:ml-2 mt-2 sm:mt-0">
+              Chat
+              <i class="pi pi-external-link ml-1 cursor-pointer"></i>
+            </Button>
+          </div>
         </div>
+
 
         <div class="mx-auto">
         </div>
 
-        <div class="flex flex-col items-center">
-          <div class="text-xl">
-            <span class="text-2xl"> {{ user.albumReviewsNumber }} </span> 
+        <div class="flex sm:flex-col items-center">
+          <div class="sm:text-xl">
+            <span class=""> {{ user.albumReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
               album {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
             </span> 
           </div>
-          <div class="text-xl">
-            <span class="text-2xl"> {{ user.trackReviewsNumber }} </span> 
+          <div class="sm:text-xl">
+            <span class=""> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
               track {{ user.trackReviewsNumber === 1 ? 'review' : 'reviews' }}
             </span> 

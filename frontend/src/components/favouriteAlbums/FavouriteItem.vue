@@ -85,9 +85,9 @@ const isLoggedUserProfile = () => {
       <div v-if="album.album">
         <img :src="album.album.images[0].url as string" alt="Album Cover" />
       </div>
-      <div v-else class="bg-gray-800 aspect-square justify-center items-center flex flex-col">
+      <div v-else class="bg-darker aspect-square justify-center items-center flex flex-col">
       </div>
-      <div class="opacity-0 hover:opacity-100 duration-100 absolute inset-0 z-10 flex justify-center items-center text-6xl text-white font-semibold">
+      <div class="opacity-0 hover:opacity-100 duration-100 absolute inset-0 z-10 flex justify-center items-center text-9xl text-neutral-100 font-semibold">
         <i v-if="isLoggedUserProfile()" class="pi pi-plus overlay-icon" @click="visible = true"></i>
         <!-- TODO maybe navigate to review if exists ? -->
         <i v-else class="pi pi-link overlay-icon" @click="navigateToAlbum(router, album.album.albumId)"></i>
@@ -123,7 +123,7 @@ const isLoggedUserProfile = () => {
 <style scoped>
 
 .overlay-icon {
-  font-size: 2rem;
+  font-size: 4rem;
   color: white; /* TOOD fix color */
 }
 
