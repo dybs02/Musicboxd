@@ -5,12 +5,14 @@ const LOCAL_STORAGE_KEY_ID = 'userId'
 const LOCAL_STORAGE_KEY_JWT = 'jwt'
 const LOCAL_STORAGE_KEY_ROLE = 'role'
 const LOCAL_STORAGE_KEY_AVATAR = 'avatarUrl'
+const LOCAL_STORAGE_KEY_THEME = 'light'
 
 export const useAuthStore = defineStore('auth', () => {
   const id = ref<string | null>(null)
   const jwt = ref<string | null>(null)
   const role = ref<string | null>(null)
   const avatarUrl = ref<string | null>(null)
+  const theme = ref<string | null>(null)
 
   const setId = (newValue: string) => {
     id.value = newValue
@@ -67,6 +69,15 @@ export const useAuthStore = defineStore('auth', () => {
     return avatarUrl.value
   }
 
+  const setTheme = (newValue: string) => {
+    theme.value = newValue
+    localStorage.setItem(LOCAL_STORAGE_KEY_THEME, newValue)
+  }
+
+  const getTheme = () => {
+    return theme.value
+  }
+
   // Persist the token across page refreshes
   const idFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_ID)
   if (idFromLocalStorage) {
@@ -88,6 +99,11 @@ export const useAuthStore = defineStore('auth', () => {
     avatarUrl.value = avatarFromLocalStorage
   }
 
+  const themeFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_THEME)
+  if (themeFromLocalStorage) {
+    theme.value = themeFromLocalStorage
+  }
+
   return {
     setId,
     getId,
@@ -101,5 +117,7 @@ export const useAuthStore = defineStore('auth', () => {
     isModerator,
     setAvatarUrl,
     getAvatarUrl,
+    setTheme,
+    getTheme,
   }
 })

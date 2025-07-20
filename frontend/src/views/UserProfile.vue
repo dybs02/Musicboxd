@@ -209,7 +209,7 @@ watch(() => route.params, fetch_data, { immediate: true })
   left: 0;
   width: 100px;
   height: 100%;
-  background: linear-gradient(to right, var(--color-midnight-dark-background), transparent);
+  background: linear-gradient(to right, var(--p-darker), transparent);
   z-index: -5; /* Above the image but below other content */
 }
 
@@ -219,7 +219,7 @@ watch(() => route.params, fetch_data, { immediate: true })
   right: 0;
   width: 100px;
   height: 100%;
-  background: linear-gradient(to left, var(--color-midnight-dark-background), transparent);
+  background: linear-gradient(to left, var(--p-darker), transparent);
   z-index: -5; /* Above the image but below other content */
 }
 </style>

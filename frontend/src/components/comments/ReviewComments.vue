@@ -216,9 +216,11 @@ watch(() => route.params, fetch_data, { immediate: true })
                   />
                 </div>
                 <Comment
+                  class="mt-2"
                   :comment="replyingToComment"
                   :showReportButton="false"
                   :showLikes="false"
+                  :nestedLevel="1"
                 />
                 <Divider />
               </div>
@@ -248,7 +250,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 <style scoped>
 
 .bg-comment {
-  background: var(--color-primary-light);
+  background: var(--p-darker);
 }
 
 </style>

@@ -46,7 +46,7 @@ const responsiveOptions = ref([
     <template #content>
       <Carousel :value="props.reviews" :numVisible="4" :numScroll="2" :responsiveOptions="responsiveOptions">
         <template #item="slotProps">
-          <div class="bg-primary-light 0 rounded-lg mx-auto m-2 p-4 w-[200px] h-[320px]">
+          <div class="bg-darker rounded-lg mx-auto m-2 p-4 w-[200px] h-[320px]">
             <div class="cursor-pointer" @click="navigateToReview(router, slotProps.data._id)">
               <div class="mb-4">
                 <div class="relative mx-auto">

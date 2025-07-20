@@ -193,7 +193,7 @@ const fetchReplies = () => {
 <style scoped>
 
 .custom-card  {
-  background: var(--color-primary-light);
+  background: var(--p-darker);
 }
 
 </style>

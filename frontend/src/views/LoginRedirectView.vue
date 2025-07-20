@@ -37,6 +37,8 @@ const fetch_user_avatar = async () => {
     if (newUser) {
       store.setAvatarUrl(newUser.images[0]?.url ?? "");
     }
+
+    router.push({ name: 'home' });
   });
 };
 
@@ -52,8 +54,6 @@ onMounted(async () => {
   }
   
   await fetch_user_avatar();
-
-  router.push({ name: 'home' });
 });
 
 </script>

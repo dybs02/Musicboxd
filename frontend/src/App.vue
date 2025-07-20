@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import Navbar from './components/Navbar.vue'
+import { useTheme } from '@/primevue/theme';
 import Toast from 'primevue/toast';
+import { RouterView } from 'vue-router';
+import Navbar from './components/Navbar.vue';
+
+const { setTheme } = useTheme();
+setTheme()
+
 </script>
 
 <template>

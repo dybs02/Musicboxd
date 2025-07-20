@@ -30,7 +30,7 @@ const emit = defineEmits<{
 
 <template>
 
-  <Card class="mt-4" style="background: var(--color-primary-light);">
+  <Card class="mt-4" style="background: var(--p-darker);">
     <template #header>
       <div class="flex items-center ml-4 mt-4">
         <i class="pi pi-bookmark mr-2"></i>

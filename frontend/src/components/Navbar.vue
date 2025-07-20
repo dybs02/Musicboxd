@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import { useTheme } from '@/primevue/theme';
 import { useAuthStore } from "@/services/authStore";
 import { SEARCH } from "@/services/queries";
 import { handleGqlError } from "@/utils/error";
 import { navigateToAlbum, navigateToTrack } from "@/utils/navigate";
 import { extractSearchResults } from "@/utils/searchResults";
-import { gql } from "@apollo/client/core";
 import { useQuery } from '@vue/apollo-composable';
 import Cookies from "js-cookie";
 import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autocomplete';
@@ -15,6 +15,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 
+const { isDark, toggleTheme } = useTheme()
 const store = useAuthStore();
 const router = useRouter();
 const search_value = ref('');
@@ -115,12 +116,19 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
 <template>
   <Menubar :model="store.isModerator() ? nav_items.concat(admin_nav_items) : nav_items">
     <template #start>
-      <div class="w-10 h-10">
+      <div class="w-10 h-10 cursor-pointer" @click="() => router.push({name: 'user', params: {id: store.getId()}})">
         <img :src="store.getAvatarUrl() as string" class="rounded-full"/>
       </div>
     </template>
     <template #end>
       <div class="flex items-center gap-2">
+        <div>
+          <Button 
+            @click="toggleTheme" 
+            :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
+            class="p-button-rounded p-button-text"
+          />
+        </div>
         <AutoComplete placeholder="Search"
                       v-model="search_value"
                       :suggestions="suggest_items"
