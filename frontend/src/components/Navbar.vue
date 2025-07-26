@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useTheme } from '@/primevue/theme';
-import { useAuthStore } from "@/services/authStore";
+import { LOCAL_STORAGE_KEY_LOCALE, useAuthStore } from "@/services/authStore";
 import { SEARCH } from "@/services/queries";
 import { handleGqlError } from "@/utils/error";
 import { navigateToAlbum, navigateToTrack } from "@/utils/navigate";
@@ -12,37 +12,40 @@ import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
 import SelectButton from 'primevue/selectbutton';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { computed } from 'vue';
 
 
+const { locale, t } = useI18n()
 const { isDark, toggleTheme } = useTheme()
 const store = useAuthStore();
 const router = useRouter();
 const search_value = ref('');
-const nav_items = ref([
+const nav_items = computed(() => [
   {
-      label: 'Home',
+      label: t('home'),
       icon: 'pi pi-home',
       command: () => {
         router.push({name: 'home'});
       }
   },
   {
-      label: 'Profile',
+      label: t('profile'),
       icon: 'pi pi-star',
       command: () => {
         router.push({name: 'user', params: {id: store.getId()}});
       }
   },
   {
-      label: 'Diary',
+      label: t('diary'),
       icon: 'pi pi-book',
       command: () => {
         router.push({name: 'diary', params: {userId: store.getId()}});
       }
   },
   {
-      label: 'Posts',
+      label: t('posts'),
       icon: 'pi pi-send',
       command: () => {
         router.push({name: 'posts'});
@@ -56,7 +59,7 @@ const nav_items = ref([
   //     }
   // },
 ]);
-const admin_nav_items = ref([
+const admin_nav_items = computed(() => [
   {
       label: 'Admin',
       icon: 'pi pi-pen-to-square',
@@ -111,6 +114,11 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
   search_value.value = ''
 }
 
+const toggleLanguage = () => {
+  locale.value = locale.value === 'en' ? 'pl' : 'en'
+  localStorage.setItem(LOCAL_STORAGE_KEY_LOCALE, locale.value)
+}
+
 </script>
 
 <template>
@@ -128,8 +136,13 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
             :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
             class="p-button-rounded p-button-text"
           />
+          <Button 
+            @click="toggleLanguage" 
+            :icon="locale === 'en' ? 'pi pi-globe' : 'pi pi-globe'"
+            class="p-button-rounded p-button-text"
+          />
         </div>
-        <AutoComplete placeholder="Search"
+        <AutoComplete :placeholder="$t('search')"
                       v-model="search_value"
                       :suggestions="suggest_items"
                       @complete="suggest_search"
@@ -160,7 +173,7 @@ const select_track = (event: AutoCompleteOptionSelectEvent) => {
             </div>
           </template>
         </AutoComplete>
-        <Button label="Login" severity="secondary" @click="login" />
+        <Button :label="$t('login')" severity="secondary" @click="login" />
       </div>
     </template>
   </Menubar>

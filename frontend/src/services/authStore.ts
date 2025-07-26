@@ -1,11 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 
-const LOCAL_STORAGE_KEY_ID = 'userId'
-const LOCAL_STORAGE_KEY_JWT = 'jwt'
-const LOCAL_STORAGE_KEY_ROLE = 'role'
-const LOCAL_STORAGE_KEY_AVATAR = 'avatarUrl'
-const LOCAL_STORAGE_KEY_THEME = 'light'
+export const LOCAL_STORAGE_KEY_ID = 'userId'
+export const LOCAL_STORAGE_KEY_JWT = 'jwt'
+export const LOCAL_STORAGE_KEY_ROLE = 'role'
+export const LOCAL_STORAGE_KEY_AVATAR = 'avatarUrl'
+export const LOCAL_STORAGE_KEY_THEME = 'light'
+export const LOCAL_STORAGE_KEY_LOCALE = 'locale'
 
 export const useAuthStore = defineStore('auth', () => {
   const id = ref<string | null>(null)
