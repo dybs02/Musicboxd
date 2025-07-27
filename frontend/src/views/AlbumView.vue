@@ -117,7 +117,7 @@ watch(() => route.params, fetch_data, { immediate: true })
           preview
           />
       </div>
-      <div class="sm:w-2/3 sm:pl-4 sm:pl-4 sm:pt-4">
+      <div class="sm:w-2/3 sm:pl-4 sm:pt-4">
         <AlbumInfo
           :album="album"
         />

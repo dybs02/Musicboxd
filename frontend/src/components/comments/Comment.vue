@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
 import { GET_COMMENT_REPLIES, REPORT_COMMENT } from '@/services/queries';
-import { emptyComment, type CommentType } from '@/types/comments';
+import { type CommentType } from '@/types/comments';
 import { handleGqlError } from '@/utils/error';
 import { navigateToUser } from '@/utils/navigate';
 import { useMutation, useQuery } from '@vue/apollo-composable';
@@ -12,7 +12,8 @@ import Card from 'primevue/card';
 import ConfirmPopup from 'primevue/confirmpopup';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
-import { defineEmits, inject, ref } from 'vue';
+import { inject, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 
@@ -38,6 +39,7 @@ const props = defineProps({
   }
 });
 
+const { t } = useI18n()
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
@@ -50,15 +52,15 @@ let replies = ref<CommentType[]>([]);
 const confirmReport = (event: any, commentID: string) => {
   confirm.require({
     target: event.currentTarget,
-    message: 'Are you sure you want report this comment?',
+    message: t('reportCommentConfirm'),
     icon: 'pi pi-exclamation-triangle',
     rejectProps: {
-      label: 'Cancel',
+      label: t('cancel'),
       severity: 'secondary',
       outlined: true
     },
     acceptProps: {
-      label: 'Report'
+      label: t('report')
     },
     accept: () => {
       // TODO confirm report with a reason
@@ -76,7 +78,7 @@ const confirmReport = (event: any, commentID: string) => {
       });
 
       reportComment()
-      toast.add({ severity: 'info', summary: 'Comment reported', life: 2000 });
+      toast.add({ severity: 'info', summary: t('commentReported'), life: 2000 });
     }
   });
 };
@@ -136,7 +138,7 @@ const fetchReplies = () => {
           <Button
             class="mr-2"
             @click="reply()"
-            v-tooltip.bottom="`Reply to comment`" 
+            v-tooltip.bottom="$t('replyToComment')" 
             icon="pi pi-reply"
             aria-label="Save"
             severity="secondary"
@@ -144,7 +146,7 @@ const fetchReplies = () => {
           />
           <Button
             @click="confirmReport($event, props.comment._id)"
-            v-tooltip.bottom="`Report comment`" 
+            v-tooltip.bottom="$t('reportComment')" 
             icon="pi pi-flag-fill"
             aria-label="Save"
             severity="secondary"
@@ -167,14 +169,14 @@ const fetchReplies = () => {
           :fontRemSize="0.7"
         />
         <div class="text-xs text-neutral-500 ml-4">
-          {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? 'reply' : 'replies' }}
+          {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? $t('reply') : $t('replies') }}
         </div>
       </div>
     </template>
     <template #footer>
       <div v-if="props.comment.repliesCount > 0 && replies.length == 0" class="mt-2">
         <span class="text-neutral-500 cursor-pointer" @click="fetchReplies">
-          View {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? 'reply' : 'replies' }}
+          {{ $t('view') }} {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? $t('reply') : $t('replies') }}
         </span>
       </div>
       <div v-if="replies.length > 0" class="mt-2">

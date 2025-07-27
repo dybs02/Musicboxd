@@ -60,7 +60,7 @@ onMounted(async () => {
 
 <template>
   <div class="flex">
-    <h1 class="mx-auto pt-10 text-5xl">Logged in succesfully</h1>
+    <h1 class="mx-auto pt-10 text-5xl">{{ $t('loggedInSuccessfully') }}</h1>
   </div>
 </template>
 

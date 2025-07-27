@@ -61,7 +61,7 @@ const nav_items = computed(() => [
 ]);
 const admin_nav_items = computed(() => [
   {
-      label: 'Admin',
+      label: t('admin'),
       icon: 'pi pi-pen-to-square',
       command: () => {
           router.push({name: 'reported'});
@@ -69,8 +69,8 @@ const admin_nav_items = computed(() => [
   }
 ])
 const suggest_items = ref([]);
-const search_type = ref('Track');
-const search_options = ref(['Track', 'Album']);
+const search_type = ref(t('track'));
+const search_options = ref([t('track'), t('album')]);
 
 const suggest_search = async () => {
   // TODO query more fields and pass selected item to View so as not to make another query?

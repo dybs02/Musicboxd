@@ -95,7 +95,7 @@ const isLoggedUserProfile = () => {
     </div>
   </div>
 
-  <Dialog v-model:visible="visible" modal header="Search for album" :style="{ width: '25rem' }">
+  <Dialog v-model:visible="visible" modal :header="$t('searchForAlbum')" :style="{ width: '25rem' }">
     <SearchItem
       @select-new-favourite-album="select_option"
     />
@@ -111,8 +111,8 @@ const isLoggedUserProfile = () => {
       </div>
     </div>
     <div class="flex justify-end gap-2 pt-4">
-      <Button type="button" label="Cancel" severity="secondary" @click="visible = false"></Button>
-      <Button type="button" label="Save" @click="saveFavouriteAlbum"></Button>
+      <Button type="button" :label="$t('cancel')" severity="secondary" @click="visible = false"></Button>
+      <Button type="button" :label="$t('save')" @click="saveFavouriteAlbum"></Button>
     </div>
 </Dialog>
 

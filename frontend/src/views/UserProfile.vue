@@ -140,20 +140,20 @@ watch(() => route.params, fetch_data, { immediate: true })
             <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
           </div>
           <div class="pl-4">
-            <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>Follow</Button>
+            <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>{{ $t('follow') }}</Button>
             <Button 
               v-else
               @click="unfollowUser" 
               :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
               outlined
-              @mouseenter="unfollowButtonText = 'Unfollow'"
-              @mouseleave="unfollowButtonText = 'Following'"
+              @mouseenter="unfollowButtonText = $t('unfollow')"
+              @mouseleave="unfollowButtonText = $t('following')"
             >
               {{ unfollowButtonText }}
             </Button>
 
             <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="sm:ml-2 mt-2 sm:mt-0">
-              Chat
+              {{ $t('chat') }}
               <i class="pi pi-external-link ml-1 cursor-pointer"></i>
             </Button>
           </div>
@@ -167,18 +167,18 @@ watch(() => route.params, fetch_data, { immediate: true })
           <div class="sm:text-xl">
             <span class=""> {{ user.albumReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              album {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
+              {{ user.albumReviewsNumber === 1 ? $t('albumReviewSingular') : $t('albumReviewPlural') }}
             </span> 
           </div>
           <div class="sm:text-xl">
             <span class=""> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              track {{ user.trackReviewsNumber === 1 ? 'review' : 'reviews' }}
+              {{ user.trackReviewsNumber === 1 ? $t('trackReviewSingular') : $t('trackReviewPlural') }}
             </span> 
           </div>
           <div class="pt-2">
             <Button severity="secondary" @click="() => router.push(`/diary/${user._id}`)">
-              {{ user.displayName }}'s diary
+              {{ user.displayName }}{{ $t('sDiary') }}
               <i class="pi pi-external-link ml-1 cursor-pointer"></i>
             </Button>
           </div>
@@ -186,7 +186,7 @@ watch(() => route.params, fetch_data, { immediate: true })
       </div>
     </template>
     <template #content>
-      <h2 class="text-2xl font-bold mb-4">Favourite Albums</h2>
+      <h2 class="text-2xl font-bold mb-4">{{ $t('favouriteAlbums') }}</h2>
       <Divider />
       <FavouriteAlbums
         :favourite-albums="user.favouriteAlbums"

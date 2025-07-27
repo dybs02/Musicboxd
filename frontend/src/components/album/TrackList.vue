@@ -29,7 +29,7 @@ const props = defineProps<{
       <Accordion >
         <AccordionPanel value="0" >
           <AccordionHeader>
-            Track List 
+            {{ $t('trackList') }} 
           </AccordionHeader>
           <AccordionContent class="bg-darker">
             <div v-for="(track, index) in props.track_list" :key="track.id">
