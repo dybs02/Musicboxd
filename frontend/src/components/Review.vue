@@ -111,7 +111,7 @@ const toggleEdit = () => {
       <template #title>
         <div class="flex justify-between">
           <span class="text-sm text-neutral-500"> 
-            Review by 
+            {{ $t('reviewBy') }} 
             <a @click="navigateToUser(router, props.review.user._id)" class="cursor-pointer">
               {{ props.review.user.displayName }}
             </a>
@@ -119,7 +119,7 @@ const toggleEdit = () => {
           <div>
             <Button
               @click="copyReviewLink"
-              v-tooltip.bottom="`Copy review link`" 
+              v-tooltip.bottom="$t('copyReviewLink')" 
               icon="pi pi-link"
               aria-label="Save"
               severity="secondary"
@@ -129,7 +129,7 @@ const toggleEdit = () => {
             <!-- TODO -->
             <Button
               @click="shareReviewLinkInPost"
-              v-tooltip.bottom="`Share review`" 
+              v-tooltip.bottom="$t('shareReview')" 
               icon="pi pi-share-alt"
               aria-label="share"
               severity="secondary"
@@ -172,7 +172,7 @@ const toggleEdit = () => {
             :dislikesCount="props.review.dislikesCount"
             :fontRemSize="1.3"
           />
-          <Button type="button" severity="secondary" label="Edit" @click="toggleEdit"/>
+          <Button type="button" severity="secondary" :label="$t('edit')" @click="toggleEdit"/>
         </div>
       </template>
     </Card>
@@ -184,16 +184,16 @@ const toggleEdit = () => {
         <Form>
           <FloatLabel variant="on">
             <Textarea v-model="review.title" id="over_label" rows="1" class="w-full" />
-            <label for="on_label">Rewiew title</label>
+            <label for="on_label">{{ $t('reviewTitle') }}</label>
           </FloatLabel>
           <Rating v-model="review.value" :stars="5" class="mt-3"></Rating>
           <FloatLabel variant="on" class="mt-4">
             <Textarea v-model="review.description" id="over_label" rows="5" class="w-full" />
-            <label for="on_label">Rewiew description</label>
+            <label for="on_label">{{ $t('reviewDescription') }}</label>
           </FloatLabel>
           <div class="flex mt-2">
-            <Button type="button" severity="secondary" label="Cancel" class="ml-auto" @click="toggleEdit"/>
-            <Button type="submit" severity="secondary" label="Submit" class="ml-2" @click="submitReview"/>
+            <Button type="button" severity="secondary" :label="$t('cancel')" class="ml-auto" @click="toggleEdit"/>
+            <Button type="submit" severity="secondary" :label="$t('submit')" class="ml-2" @click="submitReview"/>
           </div>
         </Form>
       </template>

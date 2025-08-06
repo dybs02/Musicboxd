@@ -16,9 +16,12 @@ import ProgressSpinner from 'primevue/progressspinner';
 import SelectButton from 'primevue/selectbutton';
 import Textarea from 'primevue/textarea';
 import { useToast } from 'primevue/usetoast';
-import { ref, shallowRef, useTemplateRef, watch } from 'vue';
+import { computed, ref, shallowRef, useTemplateRef, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+
+const { t } = useI18n()
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
@@ -27,11 +30,11 @@ const toast = useToast();
 
 let page = 1;
 const pageSize = 10;
-const filter = ref({ name: 'All', value: '' });
-const filterOptions = ref([
-  { name: 'All',       value: '' },
-  { name: 'Following', value: 'following' },
-  { name: 'User',      value: 'user' },
+const filter = ref({ name: t('filterAll'), value: '' });
+const filterOptions = computed(() => [
+  { name: t('filterAll'),       value: '' },
+  { name: t('filterFollowing'), value: 'following' },
+  { name: t('filterUser'),      value: 'user' },
 ]);
 
 const root = useTemplateRef<HTMLElement>('root')
@@ -228,14 +231,14 @@ watch(filter, (newFilter) => {
     <Card>
       <template #header>
         <div class="px-6 pt-4">
-          <h2 class="text-2xl">Write your post!</h2>
+          <h2 class="text-2xl">{{ $t('writeYourPost') }}</h2>
         </div>
       </template>
       <template #content>
         <Form class="">
           <FloatLabel variant="on" class="w-full">
             <Textarea v-model="newPostContent" id="over_label" rows="4" class="w-full" />
-            <label for="on_label">Your post</label>
+            <label for="on_label">{{ $t('yourPost') }}</label>
           </FloatLabel>
         </Form>
         <div v-if="showLinkedReview && linkedReview._id !== ''">
@@ -246,7 +249,7 @@ watch(filter, (newFilter) => {
           />
         </div>
         <div class="flex justify-end mt-4">
-          <Button type="submit" severity="secondary" label="Add Post" class="ml-2" @click="submitPost"/>
+          <Button type="submit" severity="secondary" :label="$t('addPost')" class="ml-2" @click="submitPost"/>
         </div>
       </template>
     </Card>
@@ -258,7 +261,7 @@ watch(filter, (newFilter) => {
     </div>
 
     <div ref="target" class="mt-4 text-center">
-      <p>Loading more posts...</p>
+      <p>{{ $t('loadingMorePosts') }}</p>
     </div>
     <div ref="scrollTrigger" class="h-4"></div>
   

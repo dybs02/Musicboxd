@@ -3,8 +3,6 @@ type Chat {
   name: String
   participantsIds: [ID!]!
   participants: [UserResponse!]!
-  participantId: ID!
-  participant: UserResponse!
   messages: [Message!]!
   createdAt: Time!
 }
@@ -28,6 +26,7 @@ type MessagesPage {
 
 extend type Query {
   chat(participantId: ID!): Chat!
+  chatById(chatId: ID!): Chat!
   messagesPage(chatId: ID!, pageSize: Int, page: Int!): MessagesPage!
 }
 

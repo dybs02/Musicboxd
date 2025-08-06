@@ -1,0 +1,30 @@
+type Notification {
+  _id: ID!
+  message: String!
+  type: String!
+  notifyingUserId: ID!
+  notifiedUserId: ID!
+  isRead: Boolean!
+  createdAt: Time!
+}
+
+type NotificationsPage {
+  totalNotifications: Int!
+  totalPages: Int!
+  hasPreviousPage: Boolean!
+  hasNextPage: Boolean!
+  notifications: [Notification!]!
+}
+
+extend type Query {
+  notificationsPage(pageSize: Int, page: Int!): NotificationsPage!
+}
+
+extend type Mutation {
+  markNotificationAsRead(notificationId: ID!): Notification!
+  markAllNotificationsAsRead: Boolean!
+}
+
+# extend type Subscription {
+#   notificationAdded: Notification!
+# }

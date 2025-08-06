@@ -178,14 +178,14 @@ emitter?.on('replyToComment', async (e: any) => {
             <i class="pi pi-comment"></i>
             <span class="ml-2" @click="toggle_comments">
               {{ props.post.commentsNumber }} 
-              {{ props.post.commentsNumber === 1 ? 'Comment' : 'Comments' }}
+              {{ props.post.commentsNumber === 1 ? $t('commentSingular') : $t('commentPlural') }}
             </span>
           </div>
         </div>
         <div>
           <div class="flex align-items-center cursor-pointer" @click="showAddComment = true">
             <i class="pi pi-pen-to-square"></i>
-            <span class="ml-2">Add comment</span>
+            <span class="ml-2">{{ $t('addCommentButton') }}</span>
           </div>
         </div>
       </div>
@@ -199,14 +199,14 @@ emitter?.on('replyToComment', async (e: any) => {
       </div>
 
       <div class="mt-4" v-if="showAddComment" id="repply-form">
-        <Form class="md:flex">
+        <Form class="sm:flex">
           <FloatLabel variant="on" class="w-full">
             <Textarea v-model="newComment.text" id="over_label" rows="4" class="w-full" />
-            <label for="on_label">Your comment</label>
+            <label for="on_label">{{ $t('yourComment') }}</label>
           </FloatLabel>
-          <div class="md:ml-2">
-            <Button type="submit" severity="secondary" label="Add comment" class="my-2 md:my-0 w-full whitespace-nowrap" @click="submitComment"/>
-            <Button severity="secondary" label="Cancel" class="w-full md:mt-3 whitespace-nowrap" @click="showAddComment = false"/>
+          <div class="sm:ml-2">
+            <Button type="submit" severity="secondary" :label="$t('addComment')" class="my-2 sm:my-0 w-full whitespace-nowrap" @click="submitComment"/>
+            <Button severity="secondary" :label="$t('cancelButton')" class="w-full sm:mt-3 whitespace-nowrap" @click="showAddComment = false"/>
           </div>
         </Form>
       </div>

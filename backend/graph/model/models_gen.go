@@ -40,8 +40,6 @@ type Chat struct {
 	Name            *string         `json:"name,omitempty" bson:"name,omitempty"`
 	ParticipantsIds []string        `json:"participantsIds" bson:"participantsIds"`
 	Participants    []*UserResponse `json:"participants" bson:"participants"`
-	ParticipantID   string          `json:"participantId" bson:"participantId"`
-	Participant     *UserResponse   `json:"participant" bson:"participant"`
 	Messages        []*Message      `json:"messages" bson:"messages"`
 	CreatedAt       time.Time       `json:"createdAt" bson:"createdAt"`
 }
@@ -120,6 +118,24 @@ type MessagesPage struct {
 }
 
 type Mutation struct {
+}
+
+type Notification struct {
+	ID              string    `json:"_id" bson:"_id"`
+	Message         string    `json:"message" bson:"message"`
+	Type            string    `json:"type" bson:"type"`
+	NotifyingUserID string    `json:"notifyingUserId" bson:"notifyingUserId"`
+	NotifiedUserID  string    `json:"notifiedUserId" bson:"notifiedUserId"`
+	IsRead          bool      `json:"isRead" bson:"isRead"`
+	CreatedAt       time.Time `json:"createdAt" bson:"createdAt"`
+}
+
+type NotificationsPage struct {
+	TotalNotifications int             `json:"totalNotifications" bson:"totalNotifications"`
+	TotalPages         int             `json:"totalPages" bson:"totalPages"`
+	HasPreviousPage    bool            `json:"hasPreviousPage" bson:"hasPreviousPage"`
+	HasNextPage        bool            `json:"hasNextPage" bson:"hasNextPage"`
+	Notifications      []*Notification `json:"notifications" bson:"notifications"`
 }
 
 type Post struct {

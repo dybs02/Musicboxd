@@ -7,8 +7,6 @@ type ChatType = {
   name: string
   participantsIds: string[]
   participants: UserType[]
-  participantId: string
-  participant: UserType
   messages: MessageType[]
   createdAt: string
 }
@@ -18,8 +16,6 @@ const emptyChat: ChatType = {
   name: '',
   participantsIds: [],
   participants: [],
-  participantId: '',
-  participant: emptyUser,
   messages: [],
   createdAt: ''
 }

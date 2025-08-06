@@ -48,7 +48,7 @@ const avgRatingFormated = props.track.averageRating.toFixed(2);
         </div>
         <div class="sm:w-1/3 sm:text-center flex flex-col items-center pt-2">
           <span class="text-slate-500">
-            Average user rating:
+            {{ $t('averageUserRating') }}
           </span>
           <div class="pt-2">
             <Rating v-tooltip.bottom="`Average rating: ${avgRatingFormated}`" v-model="avgRating" :stars="5" readonly></Rating>
@@ -57,10 +57,10 @@ const avgRatingFormated = props.track.averageRating.toFixed(2);
             {{ avgRatingFormated }}
           </span>
           <span class="text-slate-500 pt-2">
-            Rated by:
+            {{ $t('ratedBy') }}
           </span>
           <span class="text-xl">
-            {{ props.track.ratingCount }} users
+            {{ props.track.ratingCount }} {{ $t('users') }}
           </span>
         </div>
       </div>

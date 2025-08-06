@@ -8,23 +8,25 @@ import { useQuery } from '@vue/apollo-composable';
 import Card from 'primevue/card';
 import Paginator, { type PageState } from 'primevue/paginator';
 import ProgressSpinner from 'primevue/progressspinner';
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import SelectButton from 'primevue/selectbutton';
+import { useI18n } from 'vue-i18n';
 
 
 
+const { t } = useI18n()
 const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 
 
 const pageSize = 10;
-const filter = ref({ name: 'All', value: '' });
-const filterOptions = ref([
-  { name: 'All',    value: '' },
-  { name: 'Albums', value: 'album' },
-  { name: 'Tracks', value: 'track' },
+const filter = ref({ name: t('filterAll'), value: '' });
+const filterOptions = computed(() => [
+  { name: t('filterAll'), value: '' },
+  { name: t('filterAlbums'), value: 'album' },
+  { name: t('filterTracks'), value: 'track' },
 ]);
 
 let userReviews = ref<RecentUserReviewsType>(emptyRecentUserReviews);
@@ -105,7 +107,7 @@ watch(filter, (newValue) => {fetch_user_reviews();}, { immediate: true });
     <Card>
       <template #header>
         <div class="flex flex-wrap items-center justify-between mx-6 mt-6">
-          <span class="text-xl font-bold">Your reviews</span>
+          <span class="text-xl font-bold">{{ $t('yourReviews') }}</span>
           <SelectButton
             v-model="filter"
             :options="filterOptions"

@@ -13,12 +13,12 @@ const cause = route.params.cause;
 
 <template>
   <div class="flex flex-col items-center h-screen">
-    <h1 class="mx-auto pt-10 text-5xl">❗Error❗</h1>
+    <h1 class="mx-auto pt-10 text-5xl">❗{{ $t('error') }}❗</h1>
     <div class="mx-auto pt-10 text-2xl">
-      <p class="text-center">Message: {{ message }}</p>
-      <p class="text-center">Cause: {{ cause }}</p>
+      <p class="text-center">{{ $t('message') }}: {{ message }}</p>
+      <p class="text-center">{{ $t('cause') }}: {{ cause }}</p>
       <br />
-      <p class="text-center">Please try again later.</p>
+      <p class="text-center">{{ $t('tryAgainLater') }}</p>
     </div>
   </div>
 </template>

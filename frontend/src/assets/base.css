@@ -1,19 +1,5 @@
 :root {
-  --color-midnight-light: #221D34;
-  --color-midnight: #191627;
-  --color-midnight-dark: #110F1A;
-  --color-midnight-dark-background: #0c0b13;
-
-  --color-snow-light: #F8FBFE;
-  --color-snow: #F2F8FE;
-  --color-snow-dark: #EDF5FD;
-
-
-  --color-green-light: #4BE782;
-  --color-green: #1ED760;
-  --color-green-dark: #16A247;
-
-  --color-primary-light: #1F1F22;
+  background-color: var(--p-darker);
 }
 
 *,
@@ -27,8 +13,6 @@
 
 body {
   min-height: 100vh;
-  color: var(--color-snow);
-  background: var(--color-midnight-dark-background);
   /* transition:
     color 0.5s,
     background-color 0.5s;

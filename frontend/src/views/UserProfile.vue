@@ -129,52 +129,56 @@ watch(() => route.params, fetch_data, { immediate: true })
     
   <Card class="relative z-10 -mt-4"> 
     <template #header>
-      <div class="flex items-center gap-2 px-8 pt-8">
-        <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
-        <div class="flex flex-col">
-          <div class="flex items-center gap-2">
-            <span class="text-3xl font-bold">{{ user.displayName }}</span>
-            <div class="">
-              <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>Follow</Button>
-              <Button 
-                v-if="user.isFollowing" 
-                @click="unfollowUser" 
-                :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
-                outlined
-                @mouseenter="unfollowButtonText = 'Unfollow'"
-                @mouseleave="unfollowButtonText = 'Following'"
-              >
-                {{ unfollowButtonText }}
-              </Button>
+      <div class="sm:flex items-center gap-2 px-8 pt-8">
+        <div class="flex items-center">
+          <Avatar :image="user.images[0].url" size="xlarge" shape="circle" />
+          <div class="flex flex-col pl-4">
+            <div class="flex items-center gap-2">
+              <span class="text-3xl font-bold">{{ user.displayName }}</span>
 
-              <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="ml-2">
-                Chat
-                <i class="pi pi-external-link ml-1 cursor-pointer"></i>
-              </Button>
             </div>
+            <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
           </div>
-          <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
+          <div class="pl-4">
+            <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>{{ $t('follow') }}</Button>
+            <Button 
+              v-else
+              @click="unfollowUser" 
+              :severity="unfollowButtonText === 'Unfollow' ? 'danger' : 'primary'" 
+              outlined
+              @mouseenter="unfollowButtonText = $t('unfollow')"
+              @mouseleave="unfollowButtonText = $t('following')"
+            >
+              {{ unfollowButtonText }}
+            </Button>
+
+            <Button @click="() => navigateToChat(router, user._id)" severity="primary" class="sm:ml-2 mt-2 sm:mt-0">
+              {{ $t('chat') }}
+              <i class="pi pi-external-link ml-1 cursor-pointer"></i>
+            </Button>
+          </div>
         </div>
+
 
         <div class="mx-auto">
         </div>
 
-        <div class="flex flex-col items-center">
-          <div class="text-xl">
-            <span class="text-2xl"> {{ user.albumReviewsNumber }} </span> 
+        <div class="flex sm:flex-col items-center">
+          <div class="sm:text-xl">
+            <span class=""> {{ user.albumReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              album {{ user.albumReviewsNumber === 1 ? 'review' : 'reviews' }}
+              {{ user.albumReviewsNumber === 1 ? $t('albumReviewSingular') : $t('albumReviewPlural') }}
             </span> 
           </div>
-          <div class="text-xl">
-            <span class="text-2xl"> {{ user.trackReviewsNumber }} </span> 
+          <div class="sm:text-xl">
+            <span class=""> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
-              track {{ user.trackReviewsNumber === 1 ? 'review' : 'reviews' }}
+              {{ user.trackReviewsNumber === 1 ? $t('trackReviewSingular') : $t('trackReviewPlural') }}
             </span> 
           </div>
           <div class="pt-2">
             <Button severity="secondary" @click="() => router.push(`/diary/${user._id}`)">
-              {{ user.displayName }}'s diary
+              {{ user.displayName }}{{ $t('sDiary') }}
               <i class="pi pi-external-link ml-1 cursor-pointer"></i>
             </Button>
           </div>
@@ -182,7 +186,7 @@ watch(() => route.params, fetch_data, { immediate: true })
       </div>
     </template>
     <template #content>
-      <h2 class="text-2xl font-bold mb-4">Favourite Albums</h2>
+      <h2 class="text-2xl font-bold mb-4">{{ $t('favouriteAlbums') }}</h2>
       <Divider />
       <FavouriteAlbums
         :favourite-albums="user.favouriteAlbums"
@@ -209,7 +213,7 @@ watch(() => route.params, fetch_data, { immediate: true })
   left: 0;
   width: 100px;
   height: 100%;
-  background: linear-gradient(to right, var(--color-midnight-dark-background), transparent);
+  background: linear-gradient(to right, var(--p-darker), transparent);
   z-index: -5; /* Above the image but below other content */
 }
 
@@ -219,7 +223,7 @@ watch(() => route.params, fetch_data, { immediate: true })
   right: 0;
   width: 100px;
   height: 100%;
-  background: linear-gradient(to left, var(--color-midnight-dark-background), transparent);
+  background: linear-gradient(to left, var(--p-darker), transparent);
   z-index: -5; /* Above the image but below other content */
 }
 </style>

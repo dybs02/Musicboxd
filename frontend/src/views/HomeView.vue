@@ -96,11 +96,11 @@ watch(() => route.params, fetch_data, { immediate: true })
     <div v-else>
     <ReviewPanel
       :reviews="recentAlbumReviews"
-      title="Recently added album reviews"
+      :title="$t('recentlyAddedAlbumReviews')"
     />
     <ReviewPanel
       :reviews="recentTrackReviews"
-      title="Recently added track reviews"
+      :title="$t('recentlyAddedTrackReviews')"
       class="mt-4"
     />
   </div>

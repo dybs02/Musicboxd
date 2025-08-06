@@ -46,7 +46,7 @@ const select_option = async (event: any) => {
 
 <template>
 
-  <AutoComplete placeholder="Search"
+  <AutoComplete :placeholder="$t('search')"
                 v-model="search_value"
                 :suggestions="suggest_items"
                 @complete="suggest_search"

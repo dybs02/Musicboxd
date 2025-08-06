@@ -21,7 +21,7 @@ const props = defineProps({
 const router = useRouter();
 
 
-const isMdScreen = useMediaQuery('(max-width: 767px)') // Tailwind md breakpoint
+const isMdScreen = useMediaQuery('(max-width: 550px)') // Tailwind md breakpoint
 
 const getSeverity = (itemType: string) => {
   switch (itemType) {
@@ -44,7 +44,7 @@ const getSeverity = (itemType: string) => {
   <DataTable :value="reviews">
     <template #header>
     </template>
-    <Column header="Date" class="w-24">
+    <Column :header="$t('date')" class="w-24">
       <template #body="slotProps">
         <div class="flex flex-col">
           <span class="text-xs text-neutral-500 mx-auto">
@@ -61,24 +61,24 @@ const getSeverity = (itemType: string) => {
         </div>
       </template>
     </Column>
-    <Column header="Cover" class="w-24 h-24">
+    <Column :header="$t('cover')" class="w-24 h-24">
       <template #body="slotProps">
         <img :src="slotProps.data.album.images[0].url" class="rounded" />
       </template>
     </Column>
-    <Column v-if="!isMdScreen" header="Type" class="w-2">
+    <Column v-if="!isMdScreen" :header="$t('type')" class="w-2">
       <template #body="slotProps">
-        <Tag :value="slotProps.data.itemType" :severity="getSeverity(slotProps.data.itemType)" />
+        <Tag :value="$t(slotProps.data.itemType)" :severity="getSeverity(slotProps.data.itemType)" />
       </template>
     </Column>
-    <Column v-if="!isMdScreen" header="Album name" class="">
+    <Column v-if="!isMdScreen" :header="$t('albumName')" class="">
       <template #body="slotProps">
         <span>
           {{ slotProps.data.album.name }}
         </span>
       </template>
     </Column>
-    <Column v-if="!isMdScreen" field="rating" header="Reviews" class="w-2">
+    <Column v-if="!isMdScreen" field="rating" :header="$t('reviews')" class="w-2">
       <template #body="slotProps">
         <div class="flex" @click="navigateToReview(router, slotProps.data._id)">
           <Rating :modelValue="slotProps.data.value" readonly/>
@@ -86,7 +86,7 @@ const getSeverity = (itemType: string) => {
         </div>
       </template>
     </Column>
-    <Column v-if="isMdScreen" header="Review" class="">
+    <Column v-if="isMdScreen" :header="$t('review')" class="">
       <template #body="slotProps">
         <div class="flex flex-col" @click="navigateToReview(router, slotProps.data._id)">
           <div class="mx-auto">
@@ -102,7 +102,7 @@ const getSeverity = (itemType: string) => {
       </template>
     </Column>
 
-    <template #footer> Showing {{ reviews.length }} records </template>
+    <template #footer> {{ $t('showingRecords', { count: reviews.length }) }} </template>
   </DataTable>
 
 </template>

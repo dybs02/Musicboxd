@@ -84,7 +84,7 @@ const sendMessage = () => {
 }
 
 const change_page = async () => {
-  if (page > messagesPage.value.totalPages && !messagesPageLoading.value) {
+  if (page > messagesPage.value.totalPages && messagesPage.value.totalPages !== 0) {
     return;
   }
 
@@ -156,7 +156,6 @@ const { isActive, pause, resume } = useIntersectionObserver(
 )
 
 const onLoad = async () => {
-  await change_page();
   await nextTick(() => {
     scrollToBottom();
   });
@@ -178,14 +177,17 @@ onMounted(() => {
   <Card>
     <template #header>
       <div class="pl-6 pt-4">
-        <h2 class="text-lg font-semibold">Chat with {{ props.chat.participant.displayName }}</h2>
+        <h2 class="text-lg font-semibold">{{ $t('chatWith', {
+            username1: props.chat.participants[0].displayName,
+            username2: props.chat.participants[1] ? props.chat.participants[1].displayName : props.chat.participants[0].displayName
+          }) }}</h2>
       </div>
     </template>
 
     <template #content>
-      <div class="bg-zinc-800 rounded-md p-4">
+      <div class="bg-darker rounded-md p-4">
         <div ref="root" id="chatBox" class="overflow-auto h-96 scroll-snap-y-container">
-          <div ref="loadingMessagesDiv" class="flex h-5 w-full justify-center">No more messages</div>
+          <div ref="loadingMessagesDiv" class="flex h-5 w-full justify-center">{{ $t('noMoreMessages') }}</div>
             
           <div v-for="message in messages" :key="message._id" class="flex items-center justify-between p-2">
             <div class="flex w-full" :class="message.senderId === store.getId() ? 'justify-end' : 'justify-start'">
@@ -209,7 +211,7 @@ onMounted(() => {
             <Textarea v-model="newMessage" id="over_label" rows="2" class="w-full" @keydown.enter.prevent="sendMessage" />
           </FloatLabel>
           <div class="">
-            <Button type="submit" severity="secondary" label="Send" class="ml-2 h-full" @click="sendMessage"/>
+            <Button type="submit" severity="secondary" :label="$t('send')" class="ml-2 h-full" @click="sendMessage"/>
           </div>
         </Form>
       </div>

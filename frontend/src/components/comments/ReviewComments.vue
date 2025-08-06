@@ -173,7 +173,7 @@ watch(() => route.params, fetch_data, { immediate: true })
     <Card>
       <template #title>
         <div class="pb-2">
-          Comments
+          {{ $t('comments') }}
         </div>
       </template>
       <template #content>
@@ -203,12 +203,12 @@ watch(() => route.params, fetch_data, { immediate: true })
               <div v-if="replyingToCommentId !== ''" class="px-4 pt-4">
                 <div class="flex">
                   <div class="text-slate-500 ml-2">
-                    Replying to:
+                    {{ $t('replyingTo') }}
                   </div>
                   <Button
                     class="ml-auto"
                     @click="closeReply"
-                    v-tooltip.bottom="`Close reply`" 
+                    v-tooltip.bottom="$t('closeReply')" 
                     icon="pi pi-times"
                     aria-label="Save"
                     severity="secondary"
@@ -216,9 +216,11 @@ watch(() => route.params, fetch_data, { immediate: true })
                   />
                 </div>
                 <Comment
+                  class="mt-2"
                   :comment="replyingToComment"
                   :showReportButton="false"
                   :showLikes="false"
+                  :nestedLevel="1"
                 />
                 <Divider />
               </div>
@@ -227,10 +229,10 @@ watch(() => route.params, fetch_data, { immediate: true })
               <Form class="flex">
                 <FloatLabel variant="on" class="w-full">
                   <Textarea v-model="newComment.text" id="over_label" rows="2" class="w-full" />
-                  <label for="on_label">Your comment</label>
+                  <label for="on_label">{{ $t('yourComment') }}</label>
                 </FloatLabel>
                 <div class="">
-                  <Button type="submit" severity="secondary" label="Add comment" class="ml-2" @click="submitComment"/>
+                  <Button type="submit" severity="secondary" :label="$t('addComment')" class="ml-2" @click="submitComment"/>
                 </div>
               </Form>
             </template>
@@ -248,7 +250,7 @@ watch(() => route.params, fetch_data, { immediate: true })
 <style scoped>
 
 .bg-comment {
-  background: var(--color-primary-light);
+  background: var(--p-darker);
 }
 
 </style>
