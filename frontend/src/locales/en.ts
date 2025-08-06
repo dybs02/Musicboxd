@@ -95,4 +95,7 @@ export default {
   filterTracks: "Tracks",
   filterFollowing: "Following",
   filterUser: "User",
+  showOriginalComment: "Show original comment",
+  translateComment: "Translate comment",
+  translationError: "Could not translate comment",
 }

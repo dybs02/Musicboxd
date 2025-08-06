@@ -91,4 +91,7 @@ export default {
   filterTracks: "Utwory",
   filterFollowing: "Obserwowane",
   filterUser: "Użytkownik",
+  showOriginalComment: "Pokaż oryginalny komentarz",
+  translateComment: "Przetłumacz komentarz",
+  translationError: "Nie udało się przetłumaczyć komentarza",
 }

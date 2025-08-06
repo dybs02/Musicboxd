@@ -46,6 +46,50 @@ const toast = useToast();
 const emitter = inject<ReturnType<typeof mitt>>('emitter')
 
 let replies = ref<CommentType[]>([]);
+const commentText = ref(props.comment.text);
+const isTranslated = ref(false);
+
+const translateComment = async () => {
+  if (isTranslated.value) {
+    commentText.value = props.comment.text;
+    isTranslated.value = false;
+    return;
+  }
+
+  try {
+    const targetLanguage = navigator.language.split('-')[0];
+    // @ts-ignore 
+    const apiKey = import.meta.env.VITE_TRANSLATE_API_KEY;
+    // @ts-ignore 
+    const location = import.meta.env.VITE_TRANSLATE_API_LOCATION;
+    const endpoint = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&to=' + targetLanguage;
+
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Ocp-Apim-Subscription-Key': apiKey,
+        'Ocp-Apim-Subscription-Region': location,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify([{ 'Text': props.comment.text }]),
+    });
+
+    if (!response.ok) {
+      throw new Error('Translation failed');
+    }
+
+    const data = await response.json();
+    if (data && data[0] && data[0].translations && data[0].translations[0] && data[0].translations[0].text) {
+      commentText.value = data[0].translations[0].text;
+      isTranslated.value = true;
+    } else {
+      throw new Error('Translation failed');
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: t('error'), detail: t('translationError'), life: 3000 });
+    console.error(error);
+  }
+};
 
 
 
@@ -137,6 +181,15 @@ const fetchReplies = () => {
           <ConfirmPopup></ConfirmPopup>
           <Button
             class="mr-2"
+            @click="translateComment()"
+            v-tooltip.bottom="isTranslated ? $t('showOriginalComment') : $t('translateComment')" 
+            icon="pi pi-language"
+            aria-label="Translate"
+            severity="secondary"
+            size="small"
+          />
+          <Button
+            class="mr-2"
             @click="reply()"
             v-tooltip.bottom="$t('replyToComment')" 
             icon="pi pi-reply"
@@ -157,7 +210,7 @@ const fetchReplies = () => {
     </template>
     <template #content>
       <div class="flex-1 break-words">
-        {{ props.comment.text }}
+        {{ commentText }}
       </div>
       <div v-if="props.showLikes" class="flex justify-content-between pt-4">
         <LikesDislikes
