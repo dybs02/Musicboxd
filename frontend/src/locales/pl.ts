@@ -1,7 +1,7 @@
 export default {
   login: "Zaloguj się",
   search: "Szukaj",
-  home: "Strona główna",
+  home: "Główna",
   profile: "Profil",
   diary: "Dziennik",
   posts: "Posty",
@@ -94,4 +94,6 @@ export default {
   showOriginalComment: "Pokaż oryginalny komentarz",
   translateComment: "Przetłumacz komentarz",
   translationError: "Nie udało się przetłumaczyć komentarza",
+  newChatMessageInChat: "Nowa wiadomość czatu w czacie: ",
+  noNotifications: "Brak powiadomień",
 }

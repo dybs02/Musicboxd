@@ -574,6 +574,24 @@ const CHAT_BY_PARTICIPANT = gql`
 `;
 
 
+const CHAT_BY_ID = gql`
+  query Chat($chatId: ID!) {
+    chat(chatId: $chatId) {
+      _id
+      name
+      createdAt
+      participants {
+        _id
+        displayName
+        images {
+          url
+        }
+      }
+    }
+  }
+`;
+
+
 const CHAT_SUBSCRIPTION = gql`
   subscription MessageAdded($chatId: ID!) {
     messageAdded(chatId: $chatId) {
@@ -612,6 +630,34 @@ const GET_MESSAGES_BY_CHAT_ID_PAGE = gql`
 `
 
 
+const NOTIFICATIONS_PAGE = gql`
+  query NotificationsPage($pageSize: Int, $page: Int!) {
+    notificationsPage(pageSize: $pageSize, page: $page) {
+      totalNotifications
+      totalPages
+      hasPreviousPage
+      hasNextPage
+      notifications {
+        _id
+        message
+        notifyingUserId
+        notifiedUserId
+        isRead
+        createdAt
+      }
+    }
+  }
+`;
+
+
+const MARK_NOTIFICATION_AS_READ = gql`
+  mutation MarkNotificationAsRead($notificationId: ID!) {
+    markNotificationAsRead(notificationId: $notificationId) {
+      _id
+    }
+  }
+`;
+
 
 export { 
   GET_ALBUM_BY_ID,
@@ -642,4 +688,6 @@ export {
   CHAT_BY_PARTICIPANT,
   CHAT_SUBSCRIPTION,
   GET_MESSAGES_BY_CHAT_ID_PAGE,
+  NOTIFICATIONS_PAGE,
+  MARK_NOTIFICATION_AS_READ,
 };

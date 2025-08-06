@@ -98,4 +98,6 @@ export default {
   showOriginalComment: "Show original comment",
   translateComment: "Translate comment",
   translationError: "Could not translate comment",
+  newChatMessageInChat: "New chat message in chat: ",
+  noNotifications: "No notifications",
 }

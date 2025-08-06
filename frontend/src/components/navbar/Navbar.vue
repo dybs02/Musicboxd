@@ -15,6 +15,7 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
+import Notifications from '@/components/navbar/Notifications.vue';
 
 
 const { locale, t } = useI18n()
@@ -141,6 +142,7 @@ const toggleLanguage = () => {
             :icon="locale === 'en' ? 'pi pi-globe' : 'pi pi-globe'"
             class="p-button-rounded p-button-text"
           />
+          <Notifications />
         </div>
         <AutoComplete :placeholder="$t('search')"
                       v-model="search_value"

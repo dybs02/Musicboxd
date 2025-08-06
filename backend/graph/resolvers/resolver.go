@@ -44,6 +44,13 @@ type MessagesAggregationResult struct {
 	MessagesCount int64            `json:"messagesCount"`
 }
 
+type NotificationsAggregationResult struct {
+	Metadata []struct {
+		TotalNotifications int `bson:"totalNotifications"`
+	} `bson:"metadata"`
+	Data []*model.Notification `bson:"data"`
+}
+
 func ValidateJWTString(token string) (*jwt.CustomClaims, error) {
 	cc, err := jwt.ValidateJWT(token)
 	if err != nil {

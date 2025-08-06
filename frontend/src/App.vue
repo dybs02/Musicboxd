@@ -2,7 +2,7 @@
 import { useTheme } from '@/primevue/theme';
 import Toast from 'primevue/toast';
 import { RouterView } from 'vue-router';
-import Navbar from './components/Navbar.vue';
+import Navbar from './components/navbar/Navbar.vue';
 
 const { setTheme } = useTheme();
 setTheme()

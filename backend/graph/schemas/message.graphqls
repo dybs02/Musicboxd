@@ -26,6 +26,7 @@ type MessagesPage {
 
 extend type Query {
   chat(participantId: ID!): Chat!
+  chatById(chatId: ID!): Chat!
   messagesPage(chatId: ID!, pageSize: Int, page: Int!): MessagesPage!
 }
 

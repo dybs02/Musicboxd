@@ -91,7 +91,7 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 		bson.M{
 			"_id": chatId,
 		},
-		options.FindOne().SetProjection(database.GetChatProjection(cc.UserID)),
+		options.FindOne().SetProjection(database.GetChatProjection()),
 	)
 
 	if chat.Err() != nil {
@@ -119,6 +119,55 @@ func (r *queryResolver) Chat(ctx context.Context, participantID string) (*model.
 			return nil, fmt.Errorf("failed to retrieve user: %w", err)
 		}
 
+		res.Participants = users
+	}
+
+	return res, nil
+}
+
+func (r *queryResolver) ChatByID(ctx context.Context, chatID string) (*model.Chat, error) {
+	_, err := ValidateJWT(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	convertedChatID, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		return nil, fmt.Errorf("invalid chat ID: %w", err)
+	}
+
+	coll := database.GetDB().GetCollection("chats")
+	chat := coll.FindOne(
+		ctx,
+		bson.M{
+			"_id": convertedChatID,
+		},
+		options.FindOne().SetProjection(database.GetChatProjection()),
+	)
+
+	if chat.Err() != nil {
+		return nil, fmt.Errorf("failed to retrieve chat: %w", chat.Err())
+	}
+
+	res := &model.Chat{}
+	err = chat.Decode(res)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode chat: %w", err)
+	}
+
+	if isFieldRequested(ctx, "participants") {
+		objectIDs := make([]primitive.ObjectID, len(res.ParticipantsIds))
+		for i, id := range res.ParticipantsIds {
+			objectID, err := primitive.ObjectIDFromHex(id)
+			if err != nil {
+				return nil, fmt.Errorf("invalid participant ID: %w", err)
+			}
+			objectIDs[i] = objectID
+		}
+		users, err := database.GetUsersByIDs(ctx, &objectIDs)
+		if err != nil {
+			return nil, fmt.Errorf("failed to retrieve users: %w", err)
+		}
 		res.Participants = users
 	}
 
@@ -200,7 +249,7 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, chatID string) 
 	connParams := transport.GetInitPayload(ctx)
 	jwt := connParams["Authorization"].(string)
 
-	_, err := ValidateJWTString(jwt)
+	cc, err := ValidateJWTString(jwt)
 	if err != nil {
 		return nil, err
 	}
@@ -248,6 +297,25 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, chatID string) 
 			if err != nil {
 				fmt.Printf("Error extracting message from updated fields: %v\n", err)
 				continue
+			}
+
+			chat, err := database.GetChat(ctx, chatID)
+			if err != nil {
+				fmt.Printf("Error retrieving chat: %v\n", err)
+				continue
+			}
+
+			for _, id := range chat.ParticipantsIds {
+				if id == cc.UserID.Hex() {
+					continue
+				}
+
+				database.AddNotification(
+					ctx,
+					fmt.Sprintf(`{"chatId": "%s", "chatName": "%s", "chatWith": "%s"}`, chatID, *chat.Name, cc.UserID.Hex()),
+					"chat",
+					id,
+				)
 			}
 
 			select {

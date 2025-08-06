@@ -146,7 +146,7 @@ func GetUserProjection(userID primitive.ObjectID) *bson.M {
 	}
 }
 
-func GetChatProjection(userID primitive.ObjectID) *bson.M {
+func GetChatProjection() *bson.M {
 	return &bson.M{
 		// Calculate fields
 		"messagesNumber": bson.M{"$size": bson.M{"$ifNull": bson.A{"$messages", bson.A{}}}},
