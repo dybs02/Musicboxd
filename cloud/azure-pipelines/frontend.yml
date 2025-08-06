@@ -39,8 +39,10 @@ stages:
       workingDirectory: $(projectRoot)
       env:
         VITE_GRAPHQL_API_URL: $(VITE_GRAPHQL_API_URL)
-        VITE_BACKEND_URL: $(VITE_BACKEND_URL)
         VITE_GRAPHQL_API_URL_WS: $(VITE_GRAPHQL_API_URL_WS)
+        VITE_BACKEND_URL: $(VITE_BACKEND_URL)
+        VITE_TRANSLATE_API_KEY: $(VITE_TRANSLATE_API_KEY)
+        VITE_TRANSLATE_API_LOCATION: $(VITE_TRANSLATE_API_LOCATION)
     
     - task: ArchiveFiles@2
       inputs:
@@ -77,5 +79,5 @@ stages:
               appName: 'webapp-musicboxd-746263'
               package: '$(Pipeline.Workspace)/frontend/$(Build.BuildId).zip'
               deploymentMethod: auto
-              appSettings: -VITE_GRAPHQL_API_URL "$(VITE_GRAPHQL_API_URL)" -VITE_BACKEND_URL "$(VITE_BACKEND_URL)"
+              appSettings: -VITE_GRAPHQL_API_URL "$(VITE_GRAPHQL_API_URL)" -VITE_GRAPHQL_API_URL_WS "$VITE_GRAPHQL_API_URL_WS" -VITE_BACKEND_URL "$(VITE_BACKEND_URL)" -VITE_TRANSLATE_API_KEY "$(VITE_TRANSLATE_API_KEY)" -VITE_TRANSLATE_API_LOCATION "$(VITE_TRANSLATE_API_LOCATION)"
             displayName: 'Deploy to AzureWebApp'
