@@ -55,7 +55,7 @@ stages:
           - task: AzureRmWebAppDeployment@4
             inputs:
               ConnectionType: 'AzureRM'
-              azureSubscription: 'Azure for Students(a01e0481-f64f-4175-bb08-5fb645938877)'
+              azureSubscription: 'Azure-Resource-Manager-New'
               appType: 'webAppContainer'
               WebAppName: 'backend-musicboxd-746263'
               DockerNamespace: '$(DOCKER_REGISTRY_SERVER_URL)'
