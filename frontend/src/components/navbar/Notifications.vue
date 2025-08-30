@@ -34,7 +34,8 @@ const fetchNotifications = () => {
   );
 
   onError((err) => {
-    handleGqlError(router, err);
+    console.error('Error fetching notifications:', err);
+    // handleGqlError(router, err);
   });
   
   onResult((res: any) => {

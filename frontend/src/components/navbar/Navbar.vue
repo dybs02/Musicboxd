@@ -150,9 +150,9 @@ const toggleLanguage = () => {
                       @complete="suggest_search"
                       @focus="suggest_search"
                       @option-select="select_track"
-                      class="sm:w-96 block"
+                      class="sm:w-74 block"
                       fluid
-                      panelClass="sm:w-96 w-full"
+                      panelClass="sm:w-74 w-full"
         >
           <template #header>
             <div class="rounded-md">
@@ -175,7 +175,10 @@ const toggleLanguage = () => {
             </div>
           </template>
         </AutoComplete>
-        <Button :label="$t('login')" severity="secondary" @click="login" />
+        <!-- <Button :label="$t('login')" severity="secondary" @click="login" /> -->
+
+        <Button v-if="!store.isLoggedIn()" :label="$t('login')" severity="secondary" @click="login" />
+        <Button v-else :label="$t('logout')" severity="secondary" @click="store.logout()" />
       </div>
     </template>
   </Menubar>

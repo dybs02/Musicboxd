@@ -79,6 +79,16 @@ export const useAuthStore = defineStore('auth', () => {
     return theme.value
   }
 
+  const logout = () => {
+    removeId()
+    removeJWT()
+    removeRole()
+  }
+
+  const isLoggedIn = () => {
+    return !!id.value && !!jwt.value && !!role.value
+  }
+
   // Persist the token across page refreshes
   const idFromLocalStorage = localStorage.getItem(LOCAL_STORAGE_KEY_ID)
   if (idFromLocalStorage) {
@@ -120,5 +130,7 @@ export const useAuthStore = defineStore('auth', () => {
     getAvatarUrl,
     setTheme,
     getTheme,
+    logout,
+    isLoggedIn,
   }
 })
