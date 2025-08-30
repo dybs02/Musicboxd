@@ -107,7 +107,7 @@ watch(filter, (newValue) => {fetch_user_reviews();}, { immediate: true });
     <Card>
       <template #header>
         <div class="flex flex-wrap items-center justify-between mx-6 mt-6">
-          <span class="text-xl font-bold">{{ $t('yourReviews') }}</span>
+          <span class="text-xl font-bold">{{ userReviews.userName }}{{ $t('sDiary') }}</span>
           <SelectButton
             v-model="filter"
             :options="filterOptions"
