@@ -140,7 +140,7 @@ watch(() => route.params, fetch_data, { immediate: true })
             <span class="text-sm text-neutral-500">{{ getCountryName(user.country) }}</span>
           </div>
           <div class="pl-4">
-            <Button v-if="!user.isFollowing" @click="followUser" severity="primary" outlined>{{ $t('follow') }}</Button>
+            <Button v-if="!user.isFollower" @click="followUser" severity="primary" outlined>{{ $t('follow') }}</Button>
             <Button 
               v-else
               @click="unfollowUser" 
