@@ -63,6 +63,11 @@ const fetch_track = async () => {
 };
 
 const fetch_rewiew = async () => {
+  if (route.fullPath.includes('review')) {
+    // Already in a review, do not redirect
+    return;
+  }
+
   const { onError, onResult } = useQuery(
     GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
     {
@@ -121,7 +126,7 @@ watch(() => route.params.id, fetch_data, { immediate: true })
           preview
           />
       </div>
-      <div class="sm:w-2/3 sm:pl-4 sm:pl-4 sm:pt-4">
+      <div class="sm:w-2/3 sm:pl-4 sm:pt-4">
         <TrackInfo
           :track="track"
         />
