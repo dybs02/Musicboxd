@@ -1,5 +1,6 @@
 export default {
   login: "Login",
+  logout: "Logout",
   search: "Search",
   home: "Home",
   profile: "Profile",
@@ -100,4 +101,5 @@ export default {
   translationError: "Could not translate comment",
   newChatMessageInChat: "New chat message in chat: ",
   noNotifications: "No notifications",
+  sessionExpiredMessage: "Your session has expired. Please log in again.",
 }

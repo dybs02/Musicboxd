@@ -174,6 +174,7 @@ type RecentUserReviews struct {
 	HasPreviousPage bool      `json:"hasPreviousPage" bson:"hasPreviousPage"`
 	HasNextPage     bool      `json:"hasNextPage" bson:"hasNextPage"`
 	Reviews         []*Review `json:"reviews" bson:"reviews"`
+	UserName        string    `json:"userName" bson:"userName"`
 }
 
 type ReportedComment struct {

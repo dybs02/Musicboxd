@@ -32,7 +32,6 @@ const fetch_user_avatar = async () => {
   });
 
   watch(result, (newresult) => {
-    console.log("User avatar result: ", newresult);
     const newUser = newresult?.userById;
     if (newUser) {
       store.setAvatarUrl(newUser.images[0]?.url ?? "");
@@ -42,7 +41,7 @@ const fetch_user_avatar = async () => {
   });
 };
 
-onMounted(async () => {
+onMounted(() => {
   const jwt = route.query.jwt;
   const userId = route.query.userId;
   const userRole = route.query.role;
@@ -53,7 +52,7 @@ onMounted(async () => {
     store.setRole(userRole as string);
   }
   
-  await fetch_user_avatar();
+  fetch_user_avatar();
 });
 
 </script>

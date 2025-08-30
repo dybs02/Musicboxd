@@ -45,6 +45,7 @@ type RecentUserReviewsType = {
   hasPreviousPage: boolean;
   hasNextPage: boolean;
   reviews: ReviewType[];
+  userName: string;
 }
 
 const emptyRecentUserReviews: RecentUserReviewsType = {
@@ -53,6 +54,7 @@ const emptyRecentUserReviews: RecentUserReviewsType = {
   hasPreviousPage: false,
   hasNextPage: false,
   reviews: [],
+  userName: "",
 }
 
 export type {

@@ -41,6 +41,7 @@ type RecentUserReviews {
   hasPreviousPage: Boolean!
   hasNextPage: Boolean!
   reviews: [Review!]!
+  userName: String!
 }
 
 extend type Query {

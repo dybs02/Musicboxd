@@ -1,5 +1,6 @@
 export default {
   login: "Zaloguj się",
+  logout: "Wyloguj się",
   search: "Szukaj",
   home: "Główna",
   profile: "Profil",
@@ -96,4 +97,5 @@ export default {
   translationError: "Nie udało się przetłumaczyć komentarza",
   newChatMessageInChat: "Nowa wiadomość czatu w czacie: ",
   noNotifications: "Brak powiadomień",
+  sessionExpiredMessage: "Twoja sesja wygasła. Zaloguj się ponownie.",
 }

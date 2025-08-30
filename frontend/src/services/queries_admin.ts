@@ -6,7 +6,7 @@ const GET_REPORTED_COMMENTS = gql`
     reportedComments(number: $number) {
       _id
       comment {
-        reviewId,
+        itemId,
         user {
           _id
           displayName

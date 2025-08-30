@@ -247,6 +247,7 @@ type ComplexityRoot struct {
 		Reviews         func(childComplexity int) int
 		TotalPages      func(childComplexity int) int
 		TotalReviews    func(childComplexity int) int
+		UserName        func(childComplexity int) int
 	}
 
 	ReportedComment struct {
@@ -1622,6 +1623,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.RecentUserReviews.TotalReviews(childComplexity), true
+
+	case "RecentUserReviews.userName":
+		if e.complexity.RecentUserReviews.UserName == nil {
+			break
+		}
+
+		return e.complexity.RecentUserReviews.UserName(childComplexity), true
 
 	case "ReportedComment.comment":
 		if e.complexity.ReportedComment.Comment == nil {
@@ -10837,6 +10845,8 @@ func (ec *executionContext) fieldContext_Query_recentUserReviews(ctx context.Con
 				return ec.fieldContext_RecentUserReviews_hasNextPage(ctx, field)
 			case "reviews":
 				return ec.fieldContext_RecentUserReviews_reviews(ctx, field)
+			case "userName":
+				return ec.fieldContext_RecentUserReviews_userName(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type RecentUserReviews", field.Name)
 		},
@@ -12019,6 +12029,50 @@ func (ec *executionContext) fieldContext_RecentUserReviews_reviews(_ context.Con
 				return ec.fieldContext_Review_userReaction(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _RecentUserReviews_userName(ctx context.Context, field graphql.CollectedField, obj *model.RecentUserReviews) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_RecentUserReviews_userName(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserName, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_RecentUserReviews_userName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RecentUserReviews",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -20910,6 +20964,11 @@ func (ec *executionContext) _RecentUserReviews(ctx context.Context, sel ast.Sele
 			}
 		case "reviews":
 			out.Values[i] = ec._RecentUserReviews_reviews(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userName":
+			out.Values[i] = ec._RecentUserReviews_userName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

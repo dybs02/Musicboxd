@@ -366,5 +366,16 @@ func (r *queryResolver) RecentUserReviews(ctx context.Context, pageSize *int, pa
 	res.HasNextPage = currentPage < res.TotalPages
 	res.HasPreviousPage = currentPage > 1
 
+	if isFieldRequested(ctx, "userName") {
+		if userID != "" {
+			u, err := database.GetUserByID(ctx, userID)
+			if err != nil {
+				return nil, err
+			}
+
+			res.UserName = u.DisplayName
+		}
+	}
+
 	return res, nil
 }

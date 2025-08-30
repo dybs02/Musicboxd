@@ -303,6 +303,7 @@ const GET_RECENT_USER_REVIEWS_PAGINATION = gql`
           }
         }
       }
+      userName
     }
   }
 `

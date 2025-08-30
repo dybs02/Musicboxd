@@ -60,6 +60,11 @@ const fetch_album = async () => {
 };
 
 const fetch_rewiew = async () => {
+  if (route.fullPath.includes('review')) {
+    // Already in a review, do not redirect
+    return;
+  }
+
   const { onError, onResult } = useQuery(
     GET_REWIEW_ID_BY_ITEM_ID_USER_ID,
     {

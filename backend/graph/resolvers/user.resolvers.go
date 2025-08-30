@@ -95,10 +95,23 @@ func (r *mutationResolver) FollowUser(ctx context.Context, userID string) (*mode
 	}
 
 	coll := database.GetDB().GetCollection("users")
-	user := coll.FindOneAndUpdate(
+	ccUser := coll.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": cc.UserID, "followingUsers": bson.M{"$ne": followingID}},
 		bson.M{"$addToSet": bson.M{"followingUsers": followingID}},
+		options.
+			FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(database.GetUserProjection(cc.UserID)),
+	)
+	if ccUser.Err() != nil {
+		return nil, ccUser.Err()
+	}
+
+	user := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": followingID, "followerUsers": bson.M{"$ne": cc.UserID}},
+		bson.M{"$addToSet": bson.M{"followerUsers": cc.UserID}},
 		options.
 			FindOneAndUpdate().
 			SetReturnDocument(options.After).
@@ -131,10 +144,23 @@ func (r *mutationResolver) UnfollowUser(ctx context.Context, userID string) (*mo
 	}
 
 	coll := database.GetDB().GetCollection("users")
-	user := coll.FindOneAndUpdate(
+	ccUser := coll.FindOneAndUpdate(
 		ctx,
 		bson.M{"_id": cc.UserID, "followingUsers": bson.M{"$eq": followingID}},
 		bson.M{"$pull": bson.M{"followingUsers": followingID}},
+		options.
+			FindOneAndUpdate().
+			SetReturnDocument(options.After).
+			SetProjection(database.GetUserProjection(cc.UserID)),
+	)
+	if ccUser.Err() != nil {
+		return nil, ccUser.Err()
+	}
+
+	user := coll.FindOneAndUpdate(
+		ctx,
+		bson.M{"_id": followingID, "followerUsers": bson.M{"$eq": cc.UserID}},
+		bson.M{"$pull": bson.M{"followerUsers": cc.UserID}},
 		options.
 			FindOneAndUpdate().
 			SetReturnDocument(options.After).
