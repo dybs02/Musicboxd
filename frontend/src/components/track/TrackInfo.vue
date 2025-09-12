@@ -5,6 +5,7 @@ import Divider from 'primevue/divider';
 import { navigateToAlbum } from "@/utils/navigate";
 import Rating from 'primevue/rating';
 import { useRouter } from 'vue-router';
+import SpotifyEmbededPlayer from '../SpotifyEmbededPlayer.vue';
 
 
 const router = useRouter();
@@ -44,6 +45,9 @@ const avgRatingFormated = props.track.averageRating.toFixed(2);
             <a class="text-slate-500">
               ({{ track.album.release_date.split("-")[0] }})
             </a>
+          </div>
+          <div class="pt-4">
+            <SpotifyEmbededPlayer :track-id="track.id" class="h-[95px] sm:h-[152px]"/>
           </div>
         </div>
         <div class="sm:w-1/3 sm:text-center flex flex-col items-center pt-2">
