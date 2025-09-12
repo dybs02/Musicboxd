@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import SpotifyLogo from '@/assets/icons/SpotifyLogo.vue';
 import type { AlbumType, TrackType } from '@/types/spotify';
 import Card from 'primevue/card';
 import Divider from 'primevue/divider';
-import { navigateToAlbum } from "@/utils/navigate";
+import { navigateToAlbum, navigateToTrack } from "@/utils/navigate";
 import Rating from 'primevue/rating';
 import { useRouter } from 'vue-router';
 import SpotifyEmbededPlayer from '../SpotifyEmbededPlayer.vue';
@@ -25,26 +26,29 @@ const avgRatingFormated = props.track.averageRating.toFixed(2);
 
   <Card>
     <template #content>
-      <div class="text-3xl sm:text-5xl font-bold">
-        <a :href="track.external_urls.spotify" target="_blank">
+      <div class="text-3xl sm:text-5xl font-bold" @click="navigateToTrack(router, track.id)">
+        <div class="cursor-pointer w-fit">
           {{ track.name }}
-        </a>
+          <i class="pi pi-external-link text-gray-400"></i>
+        </div>
       </div>
       <Divider />
       <div class="flex flex-col sm:flex-row">
         <div class="sm:w-2/3">
-          <div class="sm:text-2xl pb-1">
-            <a :href="track.artists[0].external_urls.spotify" target="_blank">
-              {{ track.artists[0].name }}
-            </a>
+          <div v-for="(artist, index) in props.track.artists" class="flex">
+            <div :href="artist.external_urls.spotify" target="_blank" class="cursor-pointer flex pt-1">
+              <SpotifyLogo class="h-5 pr-2 my-auto text-gray-400"/>
+              {{ artist.name }}{{ index < props.track.artists.length - 1 ? ',  ' : '' }}
+            </div>
           </div>
-          <div class="text-sm sm:text-xl">
-            <a @click="navigateToAlbum(router, track.album.id)" class="cursor-pointer">
+          <div class="text-sm sm:text-xl pt-2">
+            <div @click="navigateToAlbum(router, track.album.id)" class="cursor-pointer">
               {{ track.album.name }}
-            </a>
-            <a class="text-slate-500">
-              ({{ track.album.release_date.split("-")[0] }})
-            </a>
+              <span class="text-slate-500">
+                ({{ track.album.release_date.split("-")[0] }})
+              </span>
+              <i class="pi pi-external-link text-gray-400 pl-1"></i>
+            </div>
           </div>
           <div class="pt-4">
             <SpotifyEmbededPlayer :track-id="track.id" class="h-[95px] sm:h-[152px]"/>

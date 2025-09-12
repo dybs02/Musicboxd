@@ -4,6 +4,7 @@ import { gql } from "@apollo/client/core";
 const GET_ALBUM_BY_ID = gql`
   query Album($id: String!) {
     album(id: $id) {
+      id
       total_tracks
       name
       release_date
