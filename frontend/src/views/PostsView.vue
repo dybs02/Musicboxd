@@ -43,6 +43,7 @@ const targetIsVisible = shallowRef(false)
 
 let posts = ref<RecentPostsType>(emptyRecentPosts);
 const fetchedPosts = ref<PostType[]>([]);
+const submittedPosts = ref<PostType[]>([]);
 let postsLoading = ref(true);
 
 const newPostContent = ref<string>('');
@@ -114,6 +115,8 @@ const submitPost = async () => {
     }
 
     toast.add({ severity: 'success', summary: `Added new post`, life: 2000 });
+    submittedPosts.value = [result.data.createPost, ...submittedPosts.value];
+    console.log(result.data.createPost);
 
     // TODO have a secondary posts component before the public ones?
   });
@@ -254,6 +257,12 @@ watch(filter, (newFilter) => {
       </template>
     </Card>
   
+
+    <div v-for="post in submittedPosts" :key="post._id" class="mt-4">
+      <Post
+        :post="post"
+      />
+    </div>
     <div v-for="post in fetchedPosts" :key="post._id" class="mt-4">
       <Post
         :post="post"

@@ -38,6 +38,8 @@ let replyingToComment = ref<CommentType>(emptyComment);
 const pageSize = 15;
 let commentsPage = ref<CommentsPageType>(emptyCommentsPage);
 
+const postCommentsNumber = ref(props.post.commentsNumber);
+
 // Basically duplicated code from ReviewComments.vue
 const submitComment = async () => {
   if (newComment.value.text == '') {
@@ -65,6 +67,8 @@ const submitComment = async () => {
     replyingToCommentId.value = '';
     replyingToComment.value = emptyComment;
     showAddComment.value = false
+    postCommentsNumber.value += 1;
+    emitter?.emit('submitReplyToComment', { reply: result.data.addComment });
   });
 
   addComment();
@@ -177,8 +181,8 @@ emitter?.on('replyToComment', async (e: any) => {
           <div class="flex align-items-center cursor-pointer">
             <i class="pi pi-comment"></i>
             <span class="ml-2" @click="toggle_comments">
-              {{ props.post.commentsNumber }} 
-              {{ props.post.commentsNumber === 1 ? $t('commentSingular') : $t('commentPlural') }}
+              {{ postCommentsNumber }} 
+              {{ postCommentsNumber === 1 ? $t('commentSingular') : $t('commentPlural') }}
             </span>
           </div>
         </div>
