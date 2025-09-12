@@ -170,13 +170,13 @@ watch(() => route.params, fetch_data, { immediate: true })
               {{ user.albumReviewsNumber === 1 ? $t('albumReviewSingular') : $t('albumReviewPlural') }}
             </span> 
           </div>
-          <div class="sm:text-xl">
+          <div class="sm:text-xl pl-2">
             <span class=""> {{ user.trackReviewsNumber }} </span> 
             <span class="text-neutral-500 pl-2">
               {{ user.trackReviewsNumber === 1 ? $t('trackReviewSingular') : $t('trackReviewPlural') }}
             </span> 
           </div>
-          <div class="pt-2">
+          <div class="pt-2 pl-2">
             <Button severity="secondary" @click="() => router.push(`/diary/${user._id}`)">
               {{ user.displayName }}{{ $t('sDiary') }}
               <i class="pi pi-external-link ml-1 cursor-pointer"></i>
