@@ -15,8 +15,10 @@ import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import LikesDislikes from '@/components/likes-dislikes/LikesDislikes.vue';
 import { useToast } from 'primevue/usetoast';
+import { useAuthStore } from '@/services/authStore';
 
 
+const store = useAuthStore();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
@@ -172,7 +174,7 @@ const toggleEdit = () => {
             :dislikesCount="props.review.dislikesCount"
             :fontRemSize="1.3"
           />
-          <Button type="button" severity="secondary" :label="$t('edit')" @click="toggleEdit"/>
+          <Button v-if="props.review.user._id == store.getId()" type="button" severity="secondary" :label="$t('edit')" @click="toggleEdit"/>
         </div>
       </template>
     </Card>
