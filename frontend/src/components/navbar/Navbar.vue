@@ -11,7 +11,7 @@ import AutoComplete, { type AutoCompleteOptionSelectEvent } from 'primevue/autoc
 import Button from 'primevue/button';
 import Menubar from 'primevue/menubar';
 import SelectButton from 'primevue/selectbutton';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { computed } from 'vue';
@@ -52,23 +52,37 @@ const nav_items = computed(() => [
         router.push({name: 'posts'});
       }
   },
-  // {
-  //     label: 'Chat',
-  //     icon: 'pi pi-envelope',
-  //     command: () => {
-  //       router.push({name: 'chat'});
-  //     }
-  // },
-]);
-const admin_nav_items = computed(() => [
   {
-      label: t('admin'),
-      icon: 'pi pi-pen-to-square',
-      command: () => {
-          router.push({name: 'reported'});
-      }
-  }
-])
+    icon: 'pi pi-cog',
+    items: [
+      {
+        label: t('changeTheme'),
+        icon: 'pi pi-sun',
+        command: () => {
+          toggleTheme();
+        }
+      },
+      {
+        label: t('changeLanguage'),
+        icon: 'pi pi-globe',
+        command: () => {
+          toggleLanguage();
+        }
+      },
+      ...(store.isModerator()
+        ? [
+            {
+              label: t('admin'),
+              icon: 'pi pi-pen-to-square',
+              command: () => {
+                router.push({ name: 'reported' });
+              }
+            }
+          ]
+        : [])
+    ]
+  },
+]);
 const suggest_items = ref([]);
 const search_type = ref(t('track'));
 const search_options = ref([t('track'), t('album')]);
@@ -123,7 +137,7 @@ const toggleLanguage = () => {
 </script>
 
 <template>
-  <Menubar :model="store.isModerator() ? nav_items.concat(admin_nav_items) : nav_items">
+  <Menubar :model="nav_items">
     <template #start>
       <div class="w-10 h-10 cursor-pointer" @click="() => router.push({name: 'user', params: {id: store.getId()}})">
         <img :src="store.getAvatarUrl() as string" class="rounded-full"/>
@@ -132,16 +146,6 @@ const toggleLanguage = () => {
     <template #end>
       <div class="flex items-center gap-2">
         <div>
-          <Button 
-            @click="toggleTheme" 
-            :icon="isDark ? 'pi pi-sun' : 'pi pi-moon'"
-            class="p-button-rounded p-button-text"
-          />
-          <Button 
-            @click="toggleLanguage" 
-            :icon="locale === 'en' ? 'pi pi-globe' : 'pi pi-globe'"
-            class="p-button-rounded p-button-text"
-          />
           <Notifications />
         </div>
         <AutoComplete :placeholder="$t('search')"

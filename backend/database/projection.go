@@ -63,12 +63,13 @@ func GetCommentProjection(userID primitive.ObjectID) *bson.M {
 			},
 		},
 		// Include most fields
-		"_id":       1,
-		"itemId":    1,
-		"userId":    1,
-		"text":      1,
-		"createdAt": 1,
-		"updatedAt": 1,
+		"_id":          1,
+		"itemId":       1,
+		"userId":       1,
+		"text":         1,
+		"createdAt":    1,
+		"updatedAt":    1,
+		"replyingToId": 1,
 		// Exclude likes and dislikes
 		"likes":    bson.M{"$cond": bson.A{true, bson.A{}, "$likes"}},    // Empty array
 		"dislikes": bson.M{"$cond": bson.A{true, bson.A{}, "$dislikes"}}, // Empty array

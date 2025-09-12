@@ -4,6 +4,7 @@ import { gql } from "@apollo/client/core";
 const GET_ALBUM_BY_ID = gql`
   query Album($id: String!) {
     album(id: $id) {
+      id
       total_tracks
       name
       release_date
@@ -98,6 +99,7 @@ const ADD_COMMENT = gql`
       text
       createdAt
       updatedAt
+      replyingToId
       user {
         _id
         displayName
@@ -469,9 +471,29 @@ const ADD_POST = gql`
           url
         }
       }
+      commentsNumber
       likesCount
       dislikesCount
       userReaction
+      linkedReview {
+        _id
+        value
+        title
+        itemType
+        description
+        user {
+          _id
+          displayName
+          images {
+            url
+          }
+        }
+        album {
+          images {
+            url
+          }
+        }
+      }
     }
   }
 `;

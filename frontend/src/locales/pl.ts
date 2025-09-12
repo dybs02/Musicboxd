@@ -98,4 +98,6 @@ export default {
   newChatMessageInChat: "Nowa wiadomość czatu w czacie: ",
   noNotifications: "Brak powiadomień",
   sessionExpiredMessage: "Twoja sesja wygasła. Zaloguj się ponownie.",
+  changeTheme: "Zmień motyw",
+  changeLanguage: "Zmień język",
 }

@@ -48,6 +48,7 @@ const emitter = inject<ReturnType<typeof mitt>>('emitter')
 let replies = ref<CommentType[]>([]);
 const commentText = ref(props.comment.text);
 const isTranslated = ref(false);
+const repliesCount = ref(props.comment.repliesCount);
 
 const translateComment = async () => {
   if (isTranslated.value) {
@@ -152,6 +153,15 @@ const fetchReplies = () => {
   })
 };
 
+
+emitter?.on('submitReplyToComment', async (e: any) => {
+  const reply = e.reply;
+  
+  if (reply && props.comment._id == reply.replyingToId) {
+    repliesCount.value += 1;
+  }
+})
+
 </script>
 
 <template>
@@ -222,14 +232,14 @@ const fetchReplies = () => {
           :fontRemSize="0.7"
         />
         <div class="text-xs text-neutral-500 ml-4">
-          {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? $t('reply') : $t('replies') }}
+          {{ repliesCount }} {{ repliesCount === 1 ? $t('reply') : $t('replies') }}
         </div>
       </div>
     </template>
     <template #footer>
-      <div v-if="props.comment.repliesCount > 0 && replies.length == 0" class="mt-2">
+      <div v-if="repliesCount > 0 && replies.length == 0" class="mt-2">
         <span class="text-neutral-500 cursor-pointer" @click="fetchReplies">
-          {{ $t('view') }} {{ props.comment.repliesCount }} {{ props.comment.repliesCount === 1 ? $t('reply') : $t('replies') }}
+          {{ $t('view') }} {{ repliesCount }} {{ repliesCount === 1 ? $t('reply') : $t('replies') }}
         </span>
       </div>
       <div v-if="replies.length > 0" class="mt-2">

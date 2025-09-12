@@ -102,4 +102,6 @@ export default {
   newChatMessageInChat: "New chat message in chat: ",
   noNotifications: "No notifications",
   sessionExpiredMessage: "Your session has expired. Please log in again.",
+  changeTheme: "Change Theme",
+  changeLanguage: "Change Language",
 }
